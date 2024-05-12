@@ -27,7 +27,7 @@ UNSW College must resort to giving into the limited attention span of students a
 
 However, instead of licensing well-built and tested software, UNSW College is hoping to use the pool of extremely talented and interesting DPST1093 students to create their own version to distribute around campus for free. The chosen game to "take inspiration from" is **<a href="https://kahoot.com/">Kahoot</a>**.
 
-The 24T1 cohort of DPST1093 students will build the **backend Javascript server** for a new quiz game platform, **Toohak**. We plan to task future COMP6080 students to build the frontend for Toohak, something you won't have to worry about.
+The 24T2 cohort of DPST1093 students will build the **backend Javascript server** for a new quiz game platform, **Toohak**. We plan to task future COMP6080 students to build the frontend for Toohak, something you won't have to worry about.
 
 **Toohak** is the questionably-named quiz tool that allows admins to create quiz games, and players to join (without signing up) to participate and compete.
 
@@ -346,10 +346,10 @@ Coming Soon
 
 | Iteration | Due date                            | Demonstration to tutor(s)      | Assessment weighting (%) |
 | --------- | ----------------------------------- | ------------------------------ | ------------------------ |
-| 0         | 10pm Monday 29th Jan (**week  3**)  | No demonstration               | 5% of project mark ( 3% overall)  |
-| 1         | 10pm Friday  9th Feb (**week  4**)  | In YOUR **week  5** laboratory | 30% of project mark (18% overall)  |
-| 2         | 10pm Friday  1st Mar (**week  7**)  | In YOUR **week  8** laboratory | 35% of project mark (21% overall)  |
-| 3         | 10pm Friday 29th Mar (**week 10**)  | In YOUR **week 12** laboratory | 30% of project mark (18% overall)  |
+| 0         | 10pm Friday 17th May (**week  2**)  | No demonstration               | 5% of project mark ( 3% overall)  |
+| 1         | 10pm Friday 31st May (**week  4**)  | In YOUR **week  5** laboratory | 30% of project mark (18% overall)  |
+| 2         | 10pm Friday 28th Jun (**week  8**)  | In YOUR **week  9** laboratory | 35% of project mark (21% overall)  |
+| 3         | 10pm Friday 19th Jul (**week 11**)  | In YOUR **week 12** laboratory | 30% of project mark (18% overall)  |
 
 ### 🌸 6.1. Submission & Late Penalties
 
@@ -377,7 +377,7 @@ If you want to have your automarking re-run:
 
 ### 🌸 6.2. Demonstration
 
-The demonstrations in weeks 5,8 and 12 will take place during your lab sessions. All team members **must** attend these lab sessions. Team members who do not attend a demonstration may receive a mark of 0 for that iteration. If you are unable to attend a demonstration due to circumstances beyond your control, you must apply for special consideration.
+The demonstrations in weeks 5,9 and 12 will take place during your lab sessions. All team members **must** attend these lab sessions. Team members who do not attend a demonstration may receive a mark of 0 for that iteration. If you are unable to attend a demonstration due to circumstances beyond your control, you must apply for special consideration.
 
 Demonstrations consist of a 15-20 minute Question and Answer session in front of your tutor and potentially some other students in your tutorial.
 
