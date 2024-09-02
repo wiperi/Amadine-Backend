@@ -27,7 +27,7 @@ UNSW College must resort to giving into the limited attention span of students a
 
 However, instead of licensing well-built and tested software, UNSW College is hoping to use the pool of extremely talented and interesting DPST1093 students to create their own version to distribute around campus for free. The chosen game to "take inspiration from" is **<a href="https://kahoot.com/">Kahoot</a>**.
 
-The 24T2 cohort of DPST1093 students will build the **backend Javascript server** for a new quiz game platform, **Toohak**. We plan to task future COMP6080 students to build the frontend for Toohak, something you won't have to worry about.
+The 24T3 cohort of DPST1093 students will build the **backend Javascript server** for a new quiz game platform, **Toohak**. We plan to task future COMP6080 students to build the frontend for Toohak, something you won't have to worry about.
 
 **Toohak** is the questionably-named quiz tool that allows admins to create quiz games, and players to join (without signing up) to participate and compete.
 
@@ -43,7 +43,7 @@ We highly recommend **creating and playing** a Kahoot game to better understand 
 
 ## 🐭 2. Iteration 0: Getting Started
 
-[You can watch the iteration 0 introductory video here from a previous term.](https://youtu.be/K2pSKB-xQok) This video is not required watching (the specification is clear by itself) though many students find it useful as a starting point.
+[You can watch the iteration 0 introductory video here from a COMP1531 previous term.](https://youtu.be/81r1oUQHRNA) This video is not required watching (the specification is clear by itself) though many students find it useful as a starting point.
 
 ### 🐭 2.1. Task
 
@@ -80,11 +80,11 @@ function adminAuthLogin(email, password) {
   email: 'thisisntmyemail@gmail.com',
 }
 ```
-
-2. Follow best practices for git and teamwork as discussed in lectures.
-    * You are expected to have **at least 1 meeting** with your group, and document the meeting(s) in meeting minutes which should be stored at a timestamped location in your repo (e.g. uploading a word doc/pdf or writing in the GitLab repo Wiki after each meeting).
+1. Follow best practices for git and teamwork as discussed in lectures.
+    * Create a group contract by completing `contract.md` - you may add/edit this template as you see fit.
+    * You are expected to have **at least 1 meeting** with your group, and document the meeting(s) in meeting minutes which should be stored at a timestamped location in your repo (e.g. uploading a word doc/pdf or writing in the GitLab repo Wiki after each meeting). We have provided you with a `minutes-template.md` which you may use if you choose.
     * For this iteration each team member will need to make a minimum of **1 merge request per person** in your group into the `master` branch.
-    * **1 merge request per function** must be made (9 in total).
+    * **1 merge request per function** must be made (11 in total).
     * Check out the lab on Git from week 1 to get familiar with using Git.
 
 ### 🐭 2.2. Functions to stub
@@ -156,6 +156,34 @@ In terms of file structure:
     numFailedPasswordsSinceLastLogin: 1,
   }
 }</code>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>adminUserDetailsUpdate</code>
+      <br /><br />
+      Given an admin user's authUserId and a set of properties, update the properties of this logged in admin user.
+    </td>
+    <td>
+      <b>Parameters:</b><br />
+      <code>( authUserId, email, nameFirst, nameLast )</code>
+      <br /><br />
+      <b>Return object:</b><br />
+      <code>{ }</code> empty object
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>adminUserPasswordUpdate</code>
+      <br /><br />
+      Given details relating to a password change, update the password of a logged in user.
+    </td>
+    <td>
+      <b>Parameters:</b><br />
+      <code>( authUserId, oldPassword, newPassword )</code>
+      <br /><br />
+      <b>Return object:</b><br />
+      <code>{ }</code> empty object
     </td>
   </tr>
   <tr>
@@ -283,7 +311,7 @@ In terms of file structure:
   </tr>
   <tr>
     <td>Automarking (Implementation)</td>
-    <td>40%</td>
+    <td>20%</td>
     <td><ul>
       <li>Correct implementation of specified stubs</li>
     </ul></td>
@@ -302,28 +330,29 @@ In terms of file structure:
     <td><ul>
       <li>Meaningful and informative git commit messages being used (see <a href="https://initialcommit.com/blog/git-commit-messages-best-practices#:~:text=commit%20message%20style.-,General%20Commit%20Message%20Guidelines,-As%20a%20general">examples</a>)</li>
       <li>Effective use of merge requests (from branches being made) across the team (as covered in lectures)</li>
-      <li>At least 1 merge request per person and 1 merge request per function (9 in total) made into the <code>master</code> branch</li>
+      <li>At least 1 merge request per person and 1 merge request per function (11 in total) made into the <code>master</code> branch</li>
     </ul></td>
   </tr>
   <tr>
     <td>Project Management & Teamwork</td>
-    <td>10%</td>
+    <td>30%</td>
     <td><ul>
-      <li>A generally equal contribution between team members</li>
-      <li>Effective use of course-provided MS Teams for communication, demonstrating an ability to competently manage teamwork online</li>
-      <li>Had a meeting together that involves planning and managing tasks, and taken notes from said meeting (and stored in a logical place in the repo e.g. Wiki section)</li>
+      <li>Completed group contract.</li>>
+      <li>A generally equal contribution between team members.</li>
+      <li>Effective use of course-provided MS Teams for communication, demonstrating an ability to competently manage teamwork online.</li>
+      <li>Had a meeting together that involves planning and managing tasks, and taken notes from said meeting (and stored in a logical place in the repo e.g. Wiki section).</li>
     </ul></td>
   </tr>
 </table>
 
 ### 🐭 2.4. Dryrun
 
-We have provided a dryrun for iteration 0 consisting of one test for each function. Passing these tests means you have a correct implementation for your stubs, and have earned the marks for the automarking component iteration 0.
+We have provided a dryrun for iteration 0 consisting of one test for each function. Passing these tests means you have a correct implementation for your stubs, and have earned the marks for the automarking component iteration 0.**NOTE** This will only be applicable to Iteration 0 - from Iteration 1 onwards the dryrun will not guarantee the automarking marks, just a sanity check for the presence of all the required functions.
 
 To run the dryrun, you should on a CSE machine (i.e. using `VLAB` or `ssh`'ed into CSE) be in the root directory of your project (e.g. `/project-backend`) and use the command:
 
 ```bash
-1531 dryrun 0
+~dp1093/bin/dryrun 0
 ```
 
 ### 🐭 2.5. Submission
@@ -346,10 +375,10 @@ Coming Soon
 
 | Iteration | Due date                            | Demonstration to tutor(s)      | Assessment weighting (%) |
 | --------- | ----------------------------------- | ------------------------------ | ------------------------ |
-| 0         | 10pm Friday 17th May (**week  2**)  | No demonstration               | 5% of project mark ( 3% overall)  |
-| 1         | 10pm Friday 31st May (**week  4**)  | In YOUR **week  5** laboratory | 30% of project mark (18% overall)  |
-| 2         | 10pm Friday 28th Jun (**week  8**)  | In YOUR **week  9** laboratory | 35% of project mark (21% overall)  |
-| 3         | 10pm Friday 19th Jul (**week 11**)  | In YOUR **week 12** laboratory | 30% of project mark (18% overall)  |
+| 0         | 9am Friday 6th Sep (**week  2**)  | No demonstration               | 5% of project mark ( 3% overall)  |
+| 1         | 9am Friday 20th Sep (**week  4**)  | In YOUR **week  5** tutorial or lab | 30% of project mark (18% overall)  |
+| 2         | 9am Friday 18th Oct (**week  8**)  | In YOUR **week  9** tutorial or lab | 35% of project mark (21% overall)  |
+| 3         | 9am Friday 8th Nov (**week 11**)  | In YOUR **week 12** tutorial | 30% of project mark (18% overall)  |
 
 ### 🌸 6.1. Submission & Late Penalties
 
@@ -365,15 +394,32 @@ We will not mark commits pushed to master after the final submission time for a 
 
 If the deadline is approaching and you have features that are either untested or failing their tests, **DO NOT MERGE IN THOSE MERGE REQUESTS**. In some rare cases, your tutor will look at unmerged branches and may allocate some reduced marks for incomplete functionality, but `master` should only contain working code.
 
-Minor isolated fixes after the due date are allowed but carry a penalty to the automark, if the automark after re-running the autotests is greater than your initial automark. This penalty can be up to 30% of the automarking component for that iteration, depending on the number and nature of your fixes. Note that if the re-run automark after penalty is lower than your initial mark, we will keep your initial mark, meaning your automark cannot decrease after a re-run. E.g. imagine that your initial automark is 50%, on re-run you get a raw automark of 70%, and your fixes attract a 30% penalty: since the 30% penalty will reduce the mark of 70% to 49%, your final automark will still be 50% (i.e. your initial mark).
+Minor isolated fixes after the due date are allowed but may carry a penalty to the automark. If the isolated fixes result in a higher automark result (minus the penalty), then we will update your mark. E.g. imagine that your initial automark is 20%, on re-run you get a raw automark of 86%, and your fixes attract a 30% penalty: since the 30% penalty will reduce the mark of 86% to 60%, your final **automark** will be 60%.
 
-**Groups are limited to making 1 automark re-run request per week.**
+If the re-run automark after penalty is lower than your initial mark, we will keep your initial mark. E.g. imagine that your initial automark is 50%, on re-run you get a raw automark of 70%, and your fixes attract a 30% penalty: since the 30% penalty will reduce the mark of 70% to 49%, your final **automark** will still be 50% (i.e. your initial mark).Minor isolated fixes after the due date are allowed but carry a penalty to the automark, if the automark after re-running the autotests is greater than your initial automark. This penalty can be up to 30% of the automarking component for that iteration, depending on the number and nature of your fixes. Note that if the re-run automark after penalty is lower than your initial mark, we will keep your initial mark, meaning your automark cannot decrease after a re-run. E.g. imagine that your initial automark is 50%, on re-run you get a raw automark of 70%, and your fixes attract a 30% penalty: since the 30% penalty will reduce the mark of 70% to 49%, your final automark will still be 50% (i.e. your initial mark).
 
-If you want to have your automarking re-run:  
-* Create a branch, e.g. `iter[X]-fix`, based off the submission commit  
-* Make the minimal number of necessary changes (i.e. only fix the trivial bugs that cost you many automarks)  
-* Push the changes to GitLab on a new branch
-* Create a merge request (but do not merge) and share that merge request with your tutor.
+#### How to request a re-run
+
+* Create a branch, e.g. `iter[X]-fix`, based off the submission commit.
+* Make the minimal number of necessary changes (i.e. only fix the trivial bugs that cost you many automarks).
+* Create a merge request for this branch, and take note of merge request ID in the URL
+  * It is the number at the end of the URL
+  * "https://nw-syd-gitlab.cseunsw.tech/DPST1093/24T3/groups/T15A_DESSERT/project-backend/-/merge_requests/**67**"
+* Request a re-run on the 're-run request' channel of MS-TEAMS for this course
+* Once you request it, it may take up to 72 hours for you to receive the results of the rerun.
+  
+
+Please note: The current limit on reruns is **once each week per group**.
+
+##### What constitutes a "trivial fix”?
+* Fixing spelling/capitalisation/naming issues with values specified in spec documentation
+* Swapping a variable type e.g. token from 'number' to 'string'
+* Changing the return value type e.g. returning {} rather than null, to match spec documentation
+* Changing route versions e.g. v1 to v2 to match spec documentation
+* Fixing import values
+* Fixing a regex/logical equality check e.g. num === 0 to num === 1
+* Fixing constant variable values e.g. loginAttempts = 1 to loginAttempts = 0
+* As a general rule, any change that is < 3 lines of code
 
 ### 🌸 6.2. Demonstration
 
