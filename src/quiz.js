@@ -1,4 +1,11 @@
-// Update the description of the relevant quiz.
+/**
+ * Update the description of the relevant quiz.
+ *
+ * @param {number} authUserId - The ID of the authenticated user.
+ * @param {number} quizId - The ID of quiz.
+ * @param {string} description - The description of the quiz.
+ * @returns {Object} - An empty object.
+ */
 function adminQuizDescriptionUpdate (authUserId, quizId, description) {
   return {};
 }
