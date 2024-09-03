@@ -1,13 +1,13 @@
 function adminAuthRegister ( email, password, nameFirst, nameLast ) {
-    return {
-        authUserId: 1,
-    };
+  return {
+    authUserId: 1,
+  };
 }
 
 function adminAuthLogin ( email, password ) {
-    return {
-        authUserId: 1,
-    };
+  return {
+    authUserId: 1,
+  };
 }
 
 /**
@@ -21,4 +21,17 @@ function adminAuthLogin ( email, password ) {
  */
 function adminUserDetailsUpdate(authUserId, email, nameFirst, nameLast) {
   return {}
+}
+
+function adminUserDetails ( authUserId ) {
+  return {
+    user:
+    {
+      userId: 1,
+      name: 'Jar Jar Brinks',
+      email: 'mesasosorry@naboo.com.au',
+      numSuccessfulLogins: 3,
+      numFailedPasswordsSinceLastLogin: 1,
+    }
+  };
 }
