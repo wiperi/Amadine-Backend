@@ -35,3 +35,15 @@ function adminUserDetails ( authUserId ) {
     }
   };
 }
+
+/**
+ * Updates the password for an admin user.
+ *
+ * @param {number} authUserId - The ID of the authenticated user.
+ * @param {string} oldPassword - The old password of the admin user.
+ * @param {string} newPassword - The new password for the admin user.
+ * @returns {Object} - An empty object.
+ */
+function adminUserPasswordUpdate(authUserId, oldPassword, newPassword) {
+  return {}
+}
