@@ -55,6 +55,19 @@ function adminQuizCreate (authUserId, name, description) {
 }
 
 /**
+ * Retrieves the quiz list for an admin user.
+ * 
+ * @param {number} authUserId - The ID of the authenticated user.
+ * @property {Array} quizzes - The array of quizzes.
+ * @property {number} quizzes.quizId - The ID of the quiz.
+ * @property {string} quizzes.name - The name of the quiz.
+ * @returns {Object} - An object containing the list of quizzes.
+ */
+function adminQuizList(authUserId) {
+  return { quizzes: [{ quizId: 1, name: 'My Quiz', }] }
+}
+
+/**
  * 
  * @param {number} authUserId - The ID of the authenticated user.
  * @param {number} quizId - The ID of quiz.
