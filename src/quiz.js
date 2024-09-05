@@ -53,3 +53,13 @@ function adminQuizCreate (authUserId, name, description) {
     quizId: 2,
   };
 }
+
+/**
+ * 
+ * @param {number} authUserId - The ID of the authenticated user.
+ * @param {srting} quizId - The ID of quiz.
+ * @returns 
+ */
+function adminQuizRemove(authUserId, quizId) {
+  return {};
+}
