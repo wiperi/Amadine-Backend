@@ -39,3 +39,17 @@ function adminQuizInfo(authUserId, quizId){
 function adminQuizNameUpdate(authUserId, quizId, name){
   return{};
 }
+
+
+/**
+ * 
+ * @param {number} authUserId - The ID of the authenticated user.
+ * @param {string} name - name of Quiz which should be updated.
+ * @param {string} description - The ID of the authenticated user.
+ * @returns 
+ */
+function adminQuizCreate (authUserId, name, description) {
+  return {
+    quizId: 2,
+  };
+}
