@@ -40,6 +40,7 @@ function adminQuizNameUpdate(authUserId, quizId, name){
   return{};
 }
 
+
 /**
  * 
  * @param {number} authUserId - The ID of the authenticated user.
@@ -64,4 +65,14 @@ function adminQuizCreate (authUserId, name, description) {
  */
 function adminQuizList(authUserId) {
   return { quizzes: [{ quizId: 1, name: 'My Quiz', }] }
+}
+
+/**
+ * 
+ * @param {number} authUserId - The ID of the authenticated user.
+ * @param {number} quizId - The ID of quiz.
+ * @returns 
+ */
+function adminQuizRemove(authUserId, quizId) {
+  return {};
 }
