@@ -40,7 +40,7 @@ export function invalidUserName(userName) {
     return { isValid: true, message: ERROR_MESSAGES.NAME_LAST_FORMAT };
   }
 
-  return false;
+  return { isValid: false };
 
 }
 
