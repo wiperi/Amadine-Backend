@@ -6,8 +6,8 @@ import isEmail from 'validator/lib/isEmail.js';
 export function getNewID() {
   return 42;
 }
-
 export function invalidPassword(password) {
+
   return false
 }
 
