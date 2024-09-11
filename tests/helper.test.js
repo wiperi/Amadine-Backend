@@ -17,83 +17,61 @@ import { ERROR_MESSAGES } from "../src/errors.js";
 
 /////////////////////////////////////////////////////////////////////
 // Test Cases
-describe('invalidUserName', () => {
-  test('should return false for a valid user name_1', () => {
-    const result = helper.invalidUserName('John Wick');
-    expect(result.isValid).toBe(false);
+describe('isvalidUserName', () => {
+  test('should return true for a valid user name_1', () => {
+    expect(helper.isvalidUserName('John Wick')).toBe(true);
   });
 
-  test('should return false for a valid user name_2', () => {
-    const result = helper.invalidUserName('Altolia Pandragoong');
-    expect(result.isValid).toBe(false);
+  test('should return true for a valid user name_2', () => {
+    expect(helper.isvalidUserName('Altolia Pandragoong')).toBe(true);
   });
 
-  test('should return true for NameFirst shorter than 2 characters', () => {
-    const result = helper.invalidUserName('J Wick');
-    expect(result.isValid).toBe(true);
-    expect(result.message).toBe(ERROR_MESSAGES.NAME_FIRST_LENGTH);
+  test('should return false for NameFirst shorter than 2 characters', () => {
+    expect(helper.isvalidUserName('J Wick')).toBe(false);
   });
 
-  test('should return true for NameFirst longer than 20 characters', () => {
-    const result = helper.invalidUserName('Johnvvvvvvvvvvvvvvvvv Wick');
-    expect(result.isValid).toBe(true);
-    expect(result.message).toBe(ERROR_MESSAGES.NAME_FIRST_LENGTH);
+  test('should return false for NameFirst longer than 20 characters', () => {
+    expect(helper.isvalidUserName('Johnvvvvvvvvvvvvvvvvv Wick')).toBe(false);
   });
 
-  test('should return true for NameFirst containing invalid characters', () => {
-    const result = helper.invalidUserName('John! Wick');
-    expect(result.isValid).toBe(true);
-    expect(result.message).toBe(ERROR_MESSAGES.NAME_FIRST_FORMAT);
+  test('should return false for NameFirst containing invalid characters', () => {
+    expect(helper.isvalidUserName('John! Wick')).toBe(false);
   });
 
-  test('should return true for NameLast containing invalid characters', () => {
-    const result = helper.invalidUserName('John Wick!');
-    expect(result.isValid).toBe(true);
-    expect(result.message).toBe(ERROR_MESSAGES.NAME_LAST_FORMAT);
+  test('should return false for NameLast containing invalid characters', () => {
+    expect(helper.isvalidUserName('John Wick!')).toBe(false);
   });
 
-  test('should return true for NameLast shorter than 2 characters', () => {
-    const result = helper.invalidUserName('John W');
-    expect(result.isValid).toBe(true);
-    expect(result.message).toBe(ERROR_MESSAGES.NAME_LAST_LENGTH);
+  test('should return false for NameLast shorter than 2 characters', () => {
+    expect(helper.isvalidUserName('John W')).toBe(false);
   });
 
-  test('should return true for NameLast longer than 20 characters', () => {
-    const result = helper.invalidUserName('John Wickkkkkkkkkkkkkkkkkk');
-    expect(result.isValid).toBe(true);
-    expect(result.message).toBe(ERROR_MESSAGES.NAME_LAST_LENGTH);
+  test('should return false for NameLast longer than 20 characters', () => {
+    expect(helper.isvalidUserName('John Wickkkkkkkkkkkkkkkkkk')).toBe(false);
   });
 
-  test('should return true for empty string', () => {
-    const result = helper.invalidUserName('');
-    expect(result.isValid).toBe(true);
-    expect(result.message).toBe(ERROR_MESSAGES.NAME_FIRST_LENGTH);
+  test('should return false for empty string', () => {
+    expect(helper.isvalidUserName('')).toBe(false);
   });
 
-  test('should return true for string with only spaces', () => {
-    const result = helper.invalidUserName('   ');
-    expect(result.isValid).toBe(true);
-    expect(result.message).toBe(ERROR_MESSAGES.NAME_FIRST_LENGTH);
+  test('should return false for string with only spaces', () => {
+    expect(helper.isvalidUserName('   ')).toBe(false);
   });
 
-  test('should return false for NameFirst with exactly 2 characters', () => {
-    const result = helper.invalidUserName('Jo Wick');
-    expect(result.isValid).toBe(false);
+  test('should return true for NameFirst with exactly 2 characters', () => {
+    expect(helper.isvalidUserName('Jo Wick')).toBe(true);
   });
 
-  test('should return false for NameFirst with exactly 20 characters', () => {
-    const result = helper.invalidUserName('Johnvvvvvvvvvvvvvvv Wick');
-    expect(result.isValid).toBe(false);
+  test('should return true for NameFirst with exactly 20 characters', () => {
+    expect(helper.isvalidUserName('Johnvvvvvvvvvvvvvvvv Wick')).toBe(true);
   });
 
-  test('should return false for NameLast with exactly 2 characters', () => {
-    const result = helper.invalidUserName('John Wi');
-    expect(result.isValid).toBe(false);
+  test('should return true for NameLast with exactly 2 characters', () => {
+    expect(helper.isvalidUserName('John Wi')).toBe(true);
   });
 
-  test('should return false for NameLast with exactly 20 characters', () => {
-    const result = helper.invalidUserName('John Wickkkkkkkkkkkkkkkk');
-    expect(result.isValid).toBe(false);
+  test('should return true for NameLast with exactly 20 characters', () => {
+    expect(helper.isvalidUserName('John Wickkkkkkkkkkkkkkkkk')).toBe(true);
   });
 });
 /////////////////////////////////////////////////////////////////////
