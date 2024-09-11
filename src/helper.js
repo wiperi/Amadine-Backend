@@ -6,9 +6,21 @@ import isEmail from 'validator/lib/isEmail.js';
 export function getNewID() {
   return 42;
 }
-export function invalidPassword(password) {
 
-  return false
+/**
+ * validate password, password must be at least 8 characters long
+ * and contain at least one number and one letter
+ * @param {string} password
+ * @returns {boolean}
+ */
+
+export function invalidPassword(password) {
+  if(password.length < 8){
+    return true;
+  }
+  const numberRequirement = /[0-9]/.test(password);
+  const letterRequirement = /[a-zA-Z]/.test(password);
+  return !(numberRequirement && letterRequirement);
 }
 
 export function invalidEmail(email) {

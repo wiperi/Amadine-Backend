@@ -13,5 +13,8 @@ describe('helper', () => {
     test('password is valid', () => {
       expect(helper.invalidPassword('aaaaAAAA1')).toBe(false);
     });
+    test('password is valid', () => {
+      expect(helper.invalidPassword('aaaaAAAA1')).toBe(false);
+    });
   });
 }); 
