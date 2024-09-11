@@ -3,6 +3,6 @@
  *
  * @returns {Object} - An empty object.
  */
-function clear () {
+export function clear () {
   return {};
 }
