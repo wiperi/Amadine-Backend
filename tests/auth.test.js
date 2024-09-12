@@ -34,7 +34,7 @@ const invalidNames = [
 
 const validNames = [
   'Tommy', 'Tommy-Junior', 'Tommy\'Junior', 'Tommy Junior',
-  'Tommy' + ' '.repeat(10) + 'Junior', 'aa', 'a'.repeat(20), '---', '\'\'\'', '   '
+  'Tommy' + ' '.repeat(10) + 'J', 'aa', 'a'.repeat(20), '---', '\'\'\'', '   '
 ];
 
 const invalidPasswords = [
