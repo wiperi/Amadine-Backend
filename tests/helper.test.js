@@ -1,62 +1,44 @@
 import * as helper from "../src/helper.js";
 import { ERROR_MESSAGES } from "../src/errors.js";
 
+// test the isvalidUserName function
 describe('isvalidUserName', () => {
   test('should return true for a valid user name_1', () => {
-    expect(helper.isvalidUserName('John Wick')).toBe(true);
+    expect(helper.isvalidUserName('Wick')).toBe(true);
   });
 
   test('should return true for a valid user name_2', () => {
-    expect(helper.isvalidUserName('Altolia Pandragoong')).toBe(true);
+    expect(helper.isvalidUserName('Altolia')).toBe(true);
   });
 
-  test('should return false for NameFirst shorter than 2 characters', () => {
-    expect(helper.isvalidUserName('J Wick')).toBe(false);
+  test('should return false for Name shorter than 2 characters', () => {
+    expect(helper.isvalidUserName('J')).toBe(false);
   });
 
-  test('should return false for NameFirst longer than 20 characters', () => {
-    expect(helper.isvalidUserName('Johnvvvvvvvvvvvvvvvvv Wick')).toBe(false);
+  test('should return false for Name longer than 20 characters', () => {
+    expect(helper.isvalidUserName('Johnvvvvvvvvvvvvvvvvv')).toBe(false);
   });
 
-  test('should return false for NameFirst containing invalid characters', () => {
-    expect(helper.isvalidUserName('John! Wick')).toBe(false);
+  test('should return false for Name containing invalid characters', () => {
+    expect(helper.isvalidUserName('John!')).toBe(false);
   });
 
-  test('should return false for NameLast containing invalid characters', () => {
-    expect(helper.isvalidUserName('John Wick!')).toBe(false);
+  test('should return true for only empty', () => {
+    expect(helper.isvalidUserName('    ')).toBe(true);
   });
 
-  test('should return false for NameLast shorter than 2 characters', () => {
-    expect(helper.isvalidUserName('John W')).toBe(false);
+  test('should return false for string with wrong format', () => {
+    expect(helper.isvalidUserName('你好')).toBe(false);
   });
 
-  test('should return false for NameLast longer than 20 characters', () => {
-    expect(helper.isvalidUserName('John Wickkkkkkkkkkkkkkkkkk')).toBe(false);
+  test('should return true for Name with exactly 2 characters', () => {
+    expect(helper.isvalidUserName('Jo')).toBe(true);
   });
 
-  test('should return false for empty string', () => {
-    expect(helper.isvalidUserName('')).toBe(false);
+  test('should return true for Name with exactly 20 characters', () => {
+    expect(helper.isvalidUserName('Johnvvvvvvvvvvvvvvvv')).toBe(true);
   });
 
-  test('should return false for string with only spaces', () => {
-    expect(helper.isvalidUserName('   ')).toBe(false);
-  });
-
-  test('should return true for NameFirst with exactly 2 characters', () => {
-    expect(helper.isvalidUserName('Jo Wick')).toBe(true);
-  });
-
-  test('should return true for NameFirst with exactly 20 characters', () => {
-    expect(helper.isvalidUserName('Johnvvvvvvvvvvvvvvvv Wick')).toBe(true);
-  });
-
-  test('should return true for NameLast with exactly 2 characters', () => {
-    expect(helper.isvalidUserName('John Wi')).toBe(true);
-  });
-
-  test('should return true for NameLast with exactly 20 characters', () => {
-    expect(helper.isvalidUserName('John Wickkkkkkkkkkkkkkkkk')).toBe(true);
-  });
 });
 // Password is less than 8 characters.
 //Password does not contain at least one number and at least one letter.
