@@ -7,8 +7,18 @@ export function getNewID() {
   return 42;
 }
 
-export function invalidPassword(password) {
-  return false
+/**
+ * validate password, password must be at least 8 characters long
+ * and contain at least one number and one letter
+ * @param {string} password
+ * @returns {boolean}
+ */
+
+export function isvalidPassword(password) {
+  const numberRequirement = /[0-9]/.test(password);
+  const letterRequirement = /[a-zA-Z]/.test(password);
+
+  return (password.length >= 8 && numberRequirement && letterRequirement);  
 }
 
 export function invalidEmail(email) {
