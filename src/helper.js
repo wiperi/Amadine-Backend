@@ -14,13 +14,10 @@ export function getNewID() {
  * @returns {boolean}
  */
 
-export function invalidPassword(password) {
-  if(password.length < 8){
-    return true;
-  }
+export function isvalidPassword(password) {
   const numberRequirement = /[0-9]/.test(password);
   const letterRequirement = /[a-zA-Z]/.test(password);
-  return !(numberRequirement && letterRequirement);
+  return (password.length >= 8 && numberRequirement && letterRequirement);  
 }
 
 export function invalidEmail(email) {
