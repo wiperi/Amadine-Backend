@@ -1,22 +1,6 @@
 import * as helper from "../src/helper.js";
 import { ERROR_MESSAGES } from "../src/errors.js";
-/////////////////////////////////////////////////////////////////////
-// Example
-/////////////////////////////////////////////////////////////////////
 
-// describe('{FUNCTION_NAME} ie.adminUserLogin', () => {
-//   test('should return an object', () => {});
-//   test('...', () => {});
-//   test('...', () => {});
-
-//   describe('invalid input', () => {
-//     test('...', () => {});
-//     test('...', () => {});
-//   });
-// });
-
-/////////////////////////////////////////////////////////////////////
-// Test Cases
 describe('isvalidUserName', () => {
   test('should return true for a valid user name_1', () => {
     expect(helper.isvalidUserName('John Wick')).toBe(true);
@@ -74,4 +58,26 @@ describe('isvalidUserName', () => {
     expect(helper.isvalidUserName('John Wickkkkkkkkkkkkkkkkk')).toBe(true);
   });
 });
-/////////////////////////////////////////////////////////////////////
+// Password is less than 8 characters.
+//Password does not contain at least one number and at least one letter.
+describe('isvalidPassword', () => {
+  describe('Valid Password', () => {
+    test('a password contain letters and number and longer than 8 is valid', () => {
+      expect(helper.isValidPassword('aA1aaaaa')).toBe(true);
+    });
+    test('a password contain letters and number and longer than 8 is valid', () => {
+      expect(helper.isValidPassword('John12345678')).toBe(true);
+    });
+  });
+  describe('Invalid Password', () => {
+    test('empty password is invalid', () => {
+      expect(helper.isValidPassword('')).toBe(false);
+    });
+    test('Password does not contain at least one number and at least one letter.', () => {
+      expect(helper.isValidPassword('aaaa')).toBe(false);
+    });
+    test('Password is less than 8 characters.', () => {
+      expect(helper.isValidPassword('aA1')).toBe(false);
+    });
+  });
+})
