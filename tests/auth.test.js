@@ -21,11 +21,11 @@ import { clear } from "../src/other.js";
 // Test Cases
 /////////////////////////////////////////////////////////////////////
 
-const ERROR = { error: expect.any(String) };
-
 beforeEach(() => {
   clear();
 });
+
+const ERROR = { error: expect.any(String) };
 
 const invalidNames = [
   'a', 'a'.repeat(21), 'Tommy1', 'Tommy!', 'Tommy@', 'Tommy#', 'Tommy$',
@@ -57,37 +57,26 @@ const validEmails = [
   'goodemail@gmail.com', 'user@example.com', 'test.user@domain.co'
 ];
 
-const validSample = {
-  testName: 'first user',
-  input: ['goodemail@gmail.com', 'GoodPassword123', 'Tommy', 'Smith'],
-  output: { authUserId: expect.any(Number) },
-};
-
+const validInputs = ['goodemail@gmail.com', 'GoodPassword123', 'Tommy', 'Smith'];
 
 describe.only('adminAuthRegister', () => {
-  
+
   const CORRECT = { authUserId: expect.any(Number) };
-  
+
   // Helper function for testing invalid input cases
   function runTestsForOneParam(testGroup, inputData, paramIndex, expectOutput) {
     describe(testGroup, () => {
       test.each(inputData)('%s', (data) => {
-        let inputs = [...validSample.input];
+        let inputs = [...validInputs];
         inputs[paramIndex] = data;
         expect(auth.adminAuthRegister(...inputs)).toStrictEqual(expectOutput);
       });
     });
   }
 
-  describe('Valid input', () => {
-    test.each(validSample)('$testName', (sample) => {
-      expect(auth.adminAuthRegister(...sample.input)).toStrictEqual(sample.output);
-    });
-  });
-
-  test('Email is already used', () => {
-    auth.adminAuthRegister(...validSample.input);
-    expect(auth.adminAuthRegister(...validSample.input)).toStrictEqual(ERROR);
+  test('Email is used', () => {
+    expect(auth.adminAuthRegister(...validInputs)).toStrictEqual(CORRECT);
+    expect(auth.adminAuthRegister(...validInputs)).toStrictEqual(ERROR);
   });
 
   runTestsForOneParam('Invalid emails', invalidEmails, 0, ERROR);
