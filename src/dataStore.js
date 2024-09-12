@@ -2,7 +2,7 @@
 
 /**
  * @typedef {{
-*   authUserId: number,
+*   userId: number,
 *   email: string,
 *   password: string,
 *   nameFirst: string,
@@ -29,7 +29,7 @@
  * @type {{user: Array<User>, quiz: Array<Quiz>}}
  */
 let data = {
-  user:[
+  user: [
     {
       userId: 616425961674,
       email: 'cheongmail@gmail.com',
@@ -41,9 +41,9 @@ let data = {
       oldPasswords: ['MyOldPass1234'],
     }
   ],
-  quiz:[
+  quiz: [
     {
-      userId: 616425961674,
+      authUserId: 616425961674,
       quizId: 174712181430,
       name: '1093 class',
       description: 'I love sasa',
