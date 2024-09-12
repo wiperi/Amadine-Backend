@@ -32,7 +32,7 @@ export function isValidEmail(email) {
   return false;
 }
 
-export function isvalidUserName(userName) {
+export function isValidUserName(userName) {
   const name_devide = userName.split(' ');
   if (name_devide.length < 2) {
     return false;
