@@ -1,4 +1,3 @@
-import { run } from "jest";
 import * as auth from "../src/auth.js";
 import { clear } from "../src/other.js";
 

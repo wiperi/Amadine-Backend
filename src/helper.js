@@ -70,4 +70,26 @@ export function isValidQuizDescription(quizDescription) {
   return false;
 }
 
+/**
+ * Checks if the given user ID is valid by verifying its presence in the user list.
+ *
+ * @param {number} id - The user ID to validate.
+ * @returns {boolean} - Returns true if the user ID is found in the user list, otherwise false.
+ */
+export function isValidUserId(id) {
+  let userList = getData().user;
+  return userList.some((user) => user.userId === id);
+}
+
+/**
+ * Checks if the provided quizId is valid for the user.
+ *
+ * @param {string} quizId - The ID of the quiz to validate.
+ * @param {string} authUserId - The ID of the quiz author.
+ * @returns {boolean} - Returns true if the quizId refers to a valid quiz and owned by the users, otherwise false.
+ */
+export function isValidQuizId(quizId, authUserId) {
+  let quizList = getData().quiz;
+  return quizList.some((quiz) => quiz.quizId === quizId && quiz.authUserId === authUserId);
+}
 
