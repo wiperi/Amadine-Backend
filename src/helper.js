@@ -13,27 +13,26 @@ export function getNewID() {
  * @param {string} password
  * @returns {boolean}
  */
-
-export function isvalidPassword(password) {
+export function isValidPassword(password) {
   const numberRequirement = /[0-9]/.test(password);
   const letterRequirement = /[a-zA-Z]/.test(password);
 
   return (password.length >= 8 && numberRequirement && letterRequirement);  
 }
 
-export function invalidEmail(email) {
+export function isValidEmail(email) {
   return false;
 }
 
-export function invalidUserName(userName) {
+export function isValidUserName(userName) {
   return false;
 }
 
-export function invalidQuizName(quizName) {
+export function isValidQuizName(quizName) {
   return false;
 }
 
-export function invalidQuizDescription(quizDescription) {
+export function isValidQuizDescription(quizDescription) {
   return false;
 }
 
