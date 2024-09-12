@@ -34,28 +34,13 @@ export function isValidEmail(email) {
 }
 
 export function isvalidUserName(userName) {
-  const name_devide = userName.split(' ');
-  if (name_devide.length < 2) {
-    return false;
-  }
-
-  const NameFirst = name_devide[0];
-  const NameLast = name_devide.slice(1).join(' ');
   const nameRegex = /^[a-zA-Z\s'-]+$/;
 
-  if (NameFirst.length < 2 || NameFirst.length > 20) {
+  if (userName.length < 2 || userName.length > 20) {
     return false;
   }
 
-  if (!nameRegex.test(NameFirst)) {
-    return false;
-  }
-
-  if (NameLast.length < 2 || NameLast.length > 20) {
-    return false;
-  }
-
-  if (!nameRegex.test(NameLast)) {
+  if (!nameRegex.test(userName)) {
     return false;
   }
 
