@@ -9,7 +9,8 @@ import isEmail from 'validator/lib/isEmail.js';
  */
 export function getNewID() {
   let id =  Math.floor((Math.random() * (9 * Math.pow(10, 11))) + Math.pow(10, 11));
-  while (getData().UserMap.has(id) || getData().QuizMap.has(id)) {
+  const data = getData();
+  while (data.user.some(user => user.userId === id) || data.quiz.some(quiz => quiz.quizId === id)) {
     id =  Math.floor((Math.random() * (9 * Math.pow(10, 11))) + Math.pow(10, 11));
   }
   return id;
