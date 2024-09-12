@@ -1,42 +1,42 @@
 import * as helper from "../src/helper.js";
 import { ERROR_MESSAGES } from "../src/errors.js";
 
-// test the isvalidUserName function
-describe('isvalidUserName', () => {
+// test the isValidUserName function
+describe('isValidUserName', () => {
   test('should return true for a valid user name_1', () => {
-    expect(helper.isvalidUserName('Wick')).toBe(true);
+    expect(helper.isValidUserName('Wick')).toBe(true);
   });
 
   test('should return true for a valid user name_2', () => {
-    expect(helper.isvalidUserName('Altolia')).toBe(true);
+    expect(helper.isValidUserName('Altolia')).toBe(true);
   });
 
   test('should return false for Name shorter than 2 characters', () => {
-    expect(helper.isvalidUserName('J')).toBe(false);
+    expect(helper.isValidUserName('J')).toBe(false);
   });
 
   test('should return false for Name longer than 20 characters', () => {
-    expect(helper.isvalidUserName('Johnvvvvvvvvvvvvvvvvv')).toBe(false);
+    expect(helper.isValidUserName('Johnvvvvvvvvvvvvvvvvv')).toBe(false);
   });
 
   test('should return false for Name containing invalid characters', () => {
-    expect(helper.isvalidUserName('John!')).toBe(false);
+    expect(helper.isValidUserName('John!')).toBe(false);
   });
 
   test('should return true for only empty', () => {
-    expect(helper.isvalidUserName('    ')).toBe(true);
+    expect(helper.isValidUserName('    ')).toBe(true);
   });
 
   test('should return false for string with wrong format', () => {
-    expect(helper.isvalidUserName('你好')).toBe(false);
+    expect(helper.isValidUserName('你好')).toBe(false);
   });
 
   test('should return true for Name with exactly 2 characters', () => {
-    expect(helper.isvalidUserName('Jo')).toBe(true);
+    expect(helper.isValidUserName('Jo')).toBe(true);
   });
 
   test('should return true for Name with exactly 20 characters', () => {
-    expect(helper.isvalidUserName('Johnvvvvvvvvvvvvvvvv')).toBe(true);
+    expect(helper.isValidUserName('Johnvvvvvvvvvvvvvvvv')).toBe(true);
   });
 
 });
