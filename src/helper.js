@@ -33,34 +33,27 @@ export function isValidEmail(email) {
   return false;
 }
 
-export function isvalidUserName(userName) {
-  const name_devide = userName.split(' ');
-  if (name_devide.length < 2) {
-    return false;
-  }
-
-  const NameFirst = name_devide[0];
-  const NameLast = name_devide.slice(1).join(' ');
+/**
+ * check the format and length of the userName
+ * Name need more than 1 characters and less than 21 characters
+ * Name cannot contains characters other than lowercase letters, 
+ * uppercase letters, spaces, hyphens, or apostrophes
+ * 
+ * @param {string} userName - the name of user
+ * @returns {boolean} - return true if userName is correct
+ */
+export function isValidUserName(userName) {
   const nameRegex = /^[a-zA-Z\s'-]+$/;
 
-  if (NameFirst.length < 2 || NameFirst.length > 20) {
+  if (userName.length < 2 || userName.length > 20) {
     return false;
   }
 
-  if (!nameRegex.test(NameFirst)) {
-    return false;
-  }
-
-  if (NameLast.length < 2 || NameLast.length > 20) {
-    return false;
-  }
-
-  if (!nameRegex.test(NameLast)) {
+  if (!nameRegex.test(userName)) {
     return false;
   }
 
   return true;
-
 }
 
 export function isValidQuizName(quizName) {
