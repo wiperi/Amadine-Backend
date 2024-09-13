@@ -1,3 +1,4 @@
+
 import { getData, setData } from "./dataStore.js";
 import { ERROR_MESSAGES } from "../src/errors.js";
 import isEmail from 'validator/lib/isEmail.js';
@@ -29,8 +30,15 @@ export function isValidPassword(password) {
   return (password.length >= 8 && numberRequirement && letterRequirement);  
 }
 
+/**
+ * Check the email, the email must follow the format
+ * and one email can not use twice
+ * and the string of email can not be empty
+ * @param {string} email - The email of user
+ * @returns {boolean} - Return true if email is correct
+ */
 export function isValidEmail(email) {
-  return false;
+  return isEmail(email) && getData().user.every(user => user.email !== email);
 }
 
 /**
@@ -86,4 +94,3 @@ export function isValidQuizId(quizId, authUserId) {
   let quizList = getData().quiz;
   return quizList.some((quiz) => quiz.quizId === quizId && quiz.authUserId === authUserId);
 }
-

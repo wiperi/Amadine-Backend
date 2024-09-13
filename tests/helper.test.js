@@ -72,3 +72,4 @@ describe('getNewID()', () => {
     expect(helper.getNewID().toString().length).toBe(12);
   });
 });
+
