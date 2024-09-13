@@ -90,3 +90,60 @@ describe.only('adminAuthRegister', () => {
   runTestsForOneParam('Invalid last names', invalidNames, 3, ERROR);
   runTestsForOneParam('Valid last names', validNames, 3, CORRECT);
 });
+
+
+
+////////////////////////////////////////////////////////////////////
+// Test for adminAuthLogin
+////////////////////////////////////////////////////////////////////
+
+ describe('adminAuthLogin', () => {
+  // Error cases:
+  //  there are 2 error cases for adminAuthLogin
+  //    Email address does not exist
+  //    Password is not correct for the given email
+  describe('adminAuthLogin error cases', () => {
+    test('Email does not exist', () => {
+      const user1 = auth.adminAuthRegister('petter@example.com', 'PumpkinEater123', 'Petter', 'Griffin');
+      const user2 = auth.adminAuthRegister('quagmire@example.com', 'GiggityQuagmire123', 'Glenn', 'Quagmire');
+      const user3 = auth.adminAuthRegister('swason@example.com', 'JoeSwansonPassword123', 'Joe', 'Swanson');
+      const login = auth.adminAuthLogin('pumpkin@example.com', 'PumpkinEater123');
+      expect(login).toStrictEqual(ERROR);
+    });
+
+    test('Password is not correct for the given email', () => {
+      const user = auth.adminAuthRegister('petter@example.com', 'PumpkinEater123', 'Petter', 'Griffin');
+      const login = auth.adminAuthLogin('peter@example.com', 'IFogotMyPassword');
+      expect(login).toStrictEqual(ERROR);
+    });
+  });
+
+  // Valid cases:
+  //    Correct user with correct id
+  //    same email address, same password, return same id
+  //    different email address, different password, return different id
+  describe('adminAuthLogin valid cases', () => {
+    test('Correct id', () => {
+      const user = auth.adminAuthRegister('user@example.com', 'GoodPassword123', 'Tommy', 'Junior');
+      const login = auth.adminAuthLogin('user@example.com', 'GoodPassword123');
+      expect(login.authUserId).toStrictEqual(user.authUserId);
+    });
+
+    test('Same user return same id', () => {
+      const user = auth.adminAuthRegister('user@example.com', 'GoodPassword123', 'Mason', 'Jones');
+      const login1 = auth.adminAuthLogin('user@example.com', 'GoodPassword123');
+      const login2 = auth.adminAuthLogin('user@example.com', 'GoodPassword123');
+      expect(login1.authUserId).toStrictEqual(login2.authUserId);
+    });
+
+    test('Different user return different id', () => {
+      const user1 = auth.adminAuthRegister('anna@example.com', 'AnnaPassword345', 'Anna', 'Lean');
+      const user2 = auth.adminAuthRegister('kim@example.com', 'KimPassword345', 'Kim', 'Smith');
+      const login1 = auth.adminAuthLogin('anna@example.com', 'AnnaPassword345');
+      const login2 = auth.adminAuthLogin('kim@example.com', 'KimPassword345');
+      expect(login1.authUserId).toStrictEqual(user1.authUserId);
+      expect(login2.authUserId).toStrictEqual(user2.authUserId);
+      expect(login1.authUserId).not.toStrictEqual(login2.authUserId);
+    });
+  });
+ });
