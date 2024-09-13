@@ -24,6 +24,12 @@ beforeEach(() => {
   clear();
 });
 
+describe('clear()', () => {
+  it('should return empty object', () => {
+    expect(clear()).toStrictEqual({});
+  });
+});
+
 const ERROR = { error: expect.any(String) };
 
 const invalidNames = [
@@ -34,7 +40,7 @@ const invalidNames = [
 
 const validNames = [
   'Tommy', 'Tommy-Junior', 'Tommy\'Junior', 'Tommy Junior',
-  'Tommy' + ' '.repeat(10) + 'Junior', 'aa', 'a'.repeat(20), '---', '\'\'\'', '   '
+  'Tommy' + ' '.repeat(10) + 'J', 'aa', 'a'.repeat(20), '---', '\'\'\'', '   '
 ];
 
 const invalidPasswords = [
@@ -58,7 +64,7 @@ const validEmails = [
 
 const validInputs = ['goodemail@gmail.com', 'GoodPassword123', 'Tommy', 'Smith'];
 
-describe.only('adminAuthRegister', () => {
+describe('adminAuthRegister', () => {
 
   const CORRECT = { authUserId: expect.any(Number) };
 

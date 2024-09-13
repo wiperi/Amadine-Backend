@@ -1,3 +1,12 @@
+import { getData, setData } from './dataStore.js';
+import { ERROR_MESSAGES } from './errors.js';
+import {
+  getNewID,
+  isValidEmail,
+  isValidPassword,
+  isValidUserName,
+} from './helper.js';
+
 /**
  * Register a user with an email, password, and names, 
  * then returns their authUserId value.
@@ -8,10 +17,32 @@
  * @param {string} nameLast - The last name of a user
  * @returns {Object} - Object with authUserId value
  */
-export function adminAuthRegister ( email, password, nameFirst, nameLast ) {
-  return {
-    authUserId: 1,
-  };
+export function adminAuthRegister(email, password, nameFirst, nameLast) {
+
+  if (!isValidEmail(email)) {
+    return { error: ERROR_MESSAGES.INVALID_EMAIL };
+  }
+
+  if (!isValidUserName(nameFirst) || !isValidUserName(nameLast)) {
+    return { error: ERROR_MESSAGES.INVALID_NAME };
+  }
+
+  if (!isValidPassword(password)) {
+    return { error: ERROR_MESSAGES.INVALID_PASSWORD };
+  }
+
+  let data = getData();
+  let userId = getNewID();
+
+  data.user.push({
+    userId,
+    email,
+    password,
+    nameFirst,
+    nameLast,
+  });
+
+  return { authUserId: userId };
 }
 
 
@@ -23,7 +54,7 @@ export function adminAuthRegister ( email, password, nameFirst, nameLast ) {
  * @param {string} password - User's password
  * @returns {Object} - Object with authUserId value
  */
-export function adminAuthLogin ( email, password ) {
+export function adminAuthLogin(email, password) {
   return {
     authUserId: 1,
   };
@@ -51,7 +82,7 @@ export function adminUserDetailsUpdate(authUserId, email, nameFirst, nameLast) {
  * @returns {Object} - Object with userId, name, email, times of successful logins
  *                     times of failed passwords since last login
  */
-export function adminUserDetails ( authUserId ) {
+export function adminUserDetails(authUserId) {
   return {
     user:
     {
