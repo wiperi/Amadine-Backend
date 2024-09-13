@@ -74,7 +74,6 @@ export function adminAuthLogin ( email, password ) {
   return {
     authUserId: user.userId,
   };
-
 }
 
 /**
