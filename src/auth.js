@@ -42,8 +42,6 @@ export function adminAuthRegister(email, password, nameFirst, nameLast) {
     nameLast,
   });
 
-  setData(data);
-  
   return { authUserId: userId };
 }
 
