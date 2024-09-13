@@ -1,4 +1,4 @@
-import { getData, setData } from './dataStore.js';
+import { getData } from './dataStore.js';
 import { ERROR_MESSAGES } from './errors.js';
 import {
   getNewID,
@@ -31,8 +31,8 @@ export function adminAuthRegister(email, password, nameFirst, nameLast) {
     return { error: ERROR_MESSAGES.INVALID_PASSWORD };
   }
 
-  let data = getData();
-  let userId = getNewID();
+  const data = getData();
+  const userId = getNewID();
 
   data.user.push({
     userId,
@@ -62,13 +62,13 @@ export function adminAuthLogin ( email, password ) {
   // error case 1:
   //  email address does not exist
   if (!user) {
-    return { error: ERROR_MESSAGES.EMAIL_EXISTENCE };
+    return { error: ERROR_MESSAGES.EMAIL_NOT_EXIST };
   }
 
   // error case 2:
   //  password is not correct for the given email
   if (user.password !== password) {
-    return { error: ERROR_MESSAGES.PASSWORD_EXISTENCE};
+    return { error: ERROR_MESSAGES.WRONG_PASSWORD};
   }
   
   return {

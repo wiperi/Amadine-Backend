@@ -1,6 +1,5 @@
 
-import { getData, setData } from "./dataStore.js";
-import { ERROR_MESSAGES } from "../src/errors.js";
+import { getData } from "./dataStore.js";
 import isEmail from 'validator/lib/isEmail.js';
 
 /**
