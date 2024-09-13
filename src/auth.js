@@ -68,7 +68,7 @@ export function adminAuthLogin ( email, password ) {
   // error case 2:
   //  password is not correct for the given email
   if (user.password !== password) {
-    return { error: ERROR_MESSAGES.PASSWORD_EXITSTENCE};
+    return { error: ERROR_MESSAGES.PASSWORD_EXISTENCE};
   }
   
   return {
