@@ -55,9 +55,26 @@ export function adminAuthRegister(email, password, nameFirst, nameLast) {
  * @returns {Object} - Object with authUserId value
  */
 export function adminAuthLogin ( email, password ) {
+  const data = getData();
+
+  const user = data.user.find(user => user.email === email);
+
+  // error case 1:
+  //  email address does not exist
+  if (!user) {
+    return { error: ERROR_MESSAGES.EMAIL_EXISTENCE };
+  }
+
+  // error case 2:
+  //  password is not correct for the given email
+  if (user.password !== password) {
+    return { error: ERROR_MESSAGES.PASSWORD_EXITSTENCE};
+  }
+  
   return {
     authUserId: user.userId,
   };
+
 }
 
 /**
