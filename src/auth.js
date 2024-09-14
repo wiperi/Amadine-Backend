@@ -15,7 +15,7 @@ import {
  * @param {string} password - The password of a user
  * @param {string} nameFirst - The first name of a user
  * @param {string} nameLast - The last name of a user
- * @returns {Object} - Object with authUserId value
+ * @returns {{ authUserId }} - Object with authUserId value
  */
 export function adminAuthRegister(email, password, nameFirst, nameLast) {
 
@@ -52,9 +52,9 @@ export function adminAuthRegister(email, password, nameFirst, nameLast) {
  * 
  * @param {string} email - User's email
  * @param {string} password - User's password
- * @returns {Object} - Object with authUserId value
+ * @returns {{ authUserId }} - Object with authUserId value
  */
-export function adminAuthLogin ( email, password ) {
+export function adminAuthLogin(email, password) {
   const data = getData();
 
   const user = data.user.find(user => user.email === email);
@@ -68,12 +68,10 @@ export function adminAuthLogin ( email, password ) {
   // error case 2:
   //  password is not correct for the given email
   if (user.password !== password) {
-    return { error: ERROR_MESSAGES.WRONG_PASSWORD};
+    return { error: ERROR_MESSAGES.WRONG_PASSWORD };
   }
-  
-  return {
-    authUserId: user.userId,
-  };
+
+  return { authUserId: user.userId };
 }
 
 /**
