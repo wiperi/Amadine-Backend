@@ -93,9 +93,18 @@ export function isValidQuizName(quizName) {
   return true;
 }
 
+/**
+ * check if the provided quiz description is valid
+ * invalid cases:
+ *  1. quiz description is more than 100 characters in length
+ * 
+ * @param {string} quizDescription 
+ * @returns {boolean} - return whether quiz description is valid
+ */
 export function isValidQuizDescription(quizDescription) {
-  return false;
+  return quizDescription.length <= 100;
 }
+
 
 /**
  * Checks if the given user ID is valid by verifying its presence in the user list.
