@@ -1,9 +1,10 @@
-import { getData } from './dataStore.js';
+import { getData, Quiz, User } from './dataStore.js';
 import { ERROR_MESSAGES } from './errors.js';
 import {
   getNewID,
   isValidEmail,
   isValidPassword,
+  isValidUserId,
   isValidUserName,
 } from './helper.js';
 
@@ -19,6 +20,8 @@ import {
  */
 export function adminAuthRegister(email, password, nameFirst, nameLast) {
 
+  const data = getData();
+
   if (!isValidEmail(email)) {
     return { error: ERROR_MESSAGES.INVALID_EMAIL };
   }
@@ -31,16 +34,8 @@ export function adminAuthRegister(email, password, nameFirst, nameLast) {
     return { error: ERROR_MESSAGES.INVALID_PASSWORD };
   }
 
-  const data = getData();
   const userId = getNewID();
-
-  data.user.push({
-    userId,
-    email,
-    password,
-    nameFirst,
-    nameLast,
-  });
+  data.user.push(new User(userId, email, password, nameFirst, nameLast));
 
   return { authUserId: userId };
 }
@@ -68,8 +63,15 @@ export function adminAuthLogin(email, password) {
   // error case 2:
   //  password is not correct for the given email
   if (user.password !== password) {
+
+    user.numFailedPasswordsSinceLastLogin++;
+
     return { error: ERROR_MESSAGES.WRONG_PASSWORD };
   }
+
+  // successful login
+  user.numFailedPasswordsSinceLastLogin = 0;
+  user.numSuccessfulLogins++;
 
   return { authUserId: user.userId };
 }
@@ -117,6 +119,32 @@ export function adminUserDetails(authUserId) {
  * @param {string} newPassword - The new password for the admin user.
  * @returns {Object} - An empty object.
  */
-export function adminUserPasswordUpdate(authUserId, oldPassword, newPassword) {
-  return {}
-}
+// export function adminUserPasswordUpdate(authUserId, oldPassword, newPassword) {
+
+//   if (!isValidUserId(authUserId)) {
+//     return { error: ERROR_MESSAGES.INVALID_USER_ID };
+//   }
+
+//   const user = getData().user.find(user => user.userId === authUserId);
+
+//   if (oldPassword !== user.password) {
+//     return { error: ERROR_MESSAGES.WRONG_PASSWORD };
+//   }
+
+//   if (oldPassword === newPassword) {
+//     return { error: ERROR_MESSAGES.SAME_PASSWORD };
+//   }
+
+//   if (user.oldPasswords.includes(newPassword)) {
+//     return { error: ERROR_MESSAGES.PASSWORD_IN_HISTORY };
+//   }
+
+//   if (!isValidPassword(newPassword)) {
+//     return { error: ERROR_MESSAGES.INVALID_PASSWORD };
+//   }
+
+//   user.oldPasswords.push(oldPassword);
+//   user.password = new newPassword;
+
+//   return {}
+// }
