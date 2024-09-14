@@ -1,29 +1,51 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW ONLY
 
-/**
- * @typedef {{
-*   userId: number,
-*   email: string,
-*   password: string,
-*   nameFirst: string,
-*   nameLast: string,
-*   numSuccessfulLogins: number,
-*   numFailedPasswordsSinceLastLogin: number,
-*   oldPasswords: Array<string>,
- * }} User
- */
+export class User {
+  /**
+   * Creates an instance of a user.
+   * 
+   * @constructor
+   * @param {number} userId - The unique identifier for the user.
+   * @param {string} email - The email address of the user.
+   * @param {string} password - The password for the user.
+   * @param {string} nameFirst - The first name of the user.
+   * @param {string} nameLast - The last name of the user.
+   */
+  constructor(userId, email, password, nameFirst, nameLast) {
+    this.userId = userId;
+    this.email = email;
+    this.password = password;
+    this.nameFirst = nameFirst;
+    this.nameLast = nameLast;
+    this.numSuccessfulLogins = 0;
+    this.numFailedPasswordsSinceLastLogin = 0;
+    /**
+     * @type {Array<string>}
+     */
+    this.oldPasswords = [];
+  }
+}
 
-/**
- * @typedef {{
-*   authUserId: number,
-*   quizId: number,
-*   name: string,
-*   description: string,
-*   timeCreated: number,
-*   timeLastEdited: number,
-*   active: boolean
-* }} Quiz
-*/
+export class Quiz {
+  /**
+   * Creates an instance of Quiz.
+   * 
+   * @constructor
+   * @param {string} authUserId - The ID of the authenticated user.
+   * @param {string} quizId - The ID of the quiz.
+   * @param {string} name - The name of the data store.
+   * @param {string} description - The description of the data store.
+   */
+  constructor(authUserId, quizId, name, description) {
+    this.authUserId = authUserId;
+    this.quizId = quizId;
+    this.name = name;
+    this.description = description;
+    this.timeCreated = Date.now();
+    this.timeLastEdited = Date.now();
+    this.active = true;
+  }
+}
 
 /**
  * @type {{user: Array<User>, quiz: Array<Quiz>}}
