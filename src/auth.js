@@ -100,7 +100,7 @@ export function adminUserDetailsUpdate(authUserId, email, nameFirst, nameLast) {
  */
 export function adminUserDetails(authUserId) {
   const data = getData();
-  const user = data.user.find(user => user.userId === authUserId);
+  const user = data.users.find(user => user.userId === authUserId);
   if (!user) {
     return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }
