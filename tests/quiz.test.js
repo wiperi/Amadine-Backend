@@ -42,19 +42,10 @@ describe('adminQuizCreate()', () => {
   });
   describe('has a return type', () => {
     test('should return a number', () => {
-      expect(typeof quiz.adminQuizCreate(authUserId, 'Name', 'Description')).tobe('number');
+      expect(quiz.adminQuizCreate(authUser.authUserId, 'Name', 'Description')).toEqual({ quizId: expect.any(Number)});
     });
   });
   describe('valid input', () => {
-    test('should return a number', () => {
-      const data = getData();
-      expect(quiz.adminQuizCreate(authUserId, 'Name', 'Description')).toBe(any(Number));
-      expect(data.quizzes[0].name).toBe('Name');
-      expect(data.quizzes[0].description).toBe('Description');
-    });
-    //the best way to test the function is to use adminQuizInfo to check if the quiz was created
-    //because we can't assume how data is stored in the dataStore
     test.todo('Use adminQuizInfo to check if the quiz was created');
-  });
-
+  })
 });

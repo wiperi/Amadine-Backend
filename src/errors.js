@@ -4,6 +4,10 @@ const ERROR_MESSAGES = {
   EMAIL_NOT_EXIST: 'Email address does not exist.',
   // name
   INVALID_NAME: 'Invalid name format',
+  // quizname
+  INVALID_DESCRIPTION: 'Invalid description format',
+  //description
+  INVALID_DESCRIPTION: 'Invalid description format',
   // authUserId
   UID_NOT_EXIST: 'authUserId does not exist.',
   // password

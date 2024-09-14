@@ -17,7 +17,7 @@ export class User {
     this.password = password;
     this.nameFirst = nameFirst;
     this.nameLast = nameLast;
-    this.numSuccessfulLogins = 0;
+    this.numSuccessfulLogins = 1;
     this.numFailedPasswordsSinceLastLogin = 0;
     /**
      * @type {Array<string>}
