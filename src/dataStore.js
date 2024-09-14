@@ -48,10 +48,10 @@ export class Quiz {
 }
 
 /**
- * @type {{user: Array<User>, quiz: Array<Quiz>}}
+ * @type {{users: Array<User>, quizzes: Array<Quiz>}}
  */
 let data = {
-  user: [
+  users: [
     // {
     //   userId: 616425961674,
     //   email: 'cheongmail@gmail.com',
@@ -63,7 +63,7 @@ let data = {
     //   oldPasswords: ['MyOldPass1234'],
     // }
   ],
-  quiz: [
+  quizzes: [
     // {
     //   authUserId: 616425961674,
     //   quizId: 174712181430,

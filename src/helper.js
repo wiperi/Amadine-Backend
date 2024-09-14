@@ -10,7 +10,7 @@ import isEmail from 'validator/lib/isEmail.js';
 export function getNewID() {
   let id =  Math.floor((Math.random() * (9 * Math.pow(10, 11))) + Math.pow(10, 11));
   const data = getData();
-  while (data.user.some(user => user.userId === id) || data.quiz.some(quiz => quiz.quizId === id)) {
+  while (data.users.some(user => user.userId === id) || data.quizzes.some(quiz => quiz.quizId === id)) {
     id =  Math.floor((Math.random() * (9 * Math.pow(10, 11))) + Math.pow(10, 11));
   }
   return id;
@@ -37,7 +37,7 @@ export function isValidPassword(password) {
  * @returns {boolean} - Return true if email is correct
  */
 export function isValidEmail(email) {
-  return isEmail(email) && getData().user.every(user => user.email !== email);
+  return isEmail(email) && getData().users.every(user => user.email !== email);
 }
 
 /**
@@ -78,7 +78,7 @@ export function isValidQuizDescription(quizDescription) {
  * @returns {boolean} - Returns true if the user ID is found in the user list, otherwise false.
  */
 export function isValidUserId(id) {
-  let userList = getData().user;
+  let userList = getData().users;
   return userList.some((user) => user.userId === id);
 }
 
@@ -89,7 +89,7 @@ export function isValidUserId(id) {
  * @returns {boolean} - Returns true if the quizId refers to a active quiz, otherwise false.
  */
 export function isValidQuizId(quizId) {
-  let quizList = getData().quiz;
+  let quizList = getData().quizzes;
   return quizList.some((quiz) => quiz.quizId === quizId && quiz.active);
 }
 
@@ -102,6 +102,6 @@ export function isValidQuizId(quizId) {
  * @returns {boolean} - Returns true if the quiz is owned by the user and is active, otherwise false.
  */
 export function isQuizIdOwnedByUser(quizId, authUserId) {
-  let quizList = getData().quiz;
+  let quizList = getData().quizzes;
   return quizList.some((quiz) => quiz.quizId === quizId && quiz.authUserId === authUserId && quiz.active);
 }
