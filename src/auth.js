@@ -122,25 +122,25 @@ export function adminUserDetails(authUserId) {
 export function adminUserPasswordUpdate(authUserId, oldPassword, newPassword) {
 
   if (!isValidUserId(authUserId)) {
-    return { error: '' };
+    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }
 
   const user = getData().user.find(user => user.userId === authUserId);
 
   if (oldPassword !== user.password) {
-    return { error: '' };
+    return { error: ERROR_MESSAGES.WRONG_OLD_PASSWORD };
   }
 
   if (oldPassword === newPassword) {
-    return { error: '' };
+    return { error: ERROR_MESSAGES.NEW_PASSWORD_SAME_AS_OLD };
   }
 
   if (user.oldPasswords.includes(newPassword)) {
-    return { error: '' };
+    return { error: ERROR_MESSAGES.PASSWORD_ALREADY_USED };
   }
 
   if (!isValidPassword(newPassword)) {
-    return { error: '' };
+    return { error: ERROR_MESSAGES.INVALID_PASSWORD };
   }
 
   user.oldPasswords.push(oldPassword);
