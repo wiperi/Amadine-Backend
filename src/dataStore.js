@@ -52,27 +52,27 @@ export class Quiz {
  */
 let data = {
   user: [
-    {
-      userId: 616425961674,
-      email: 'cheongmail@gmail.com',
-      password: 'nicepassword',
-      nameFirst: 'Cheong',
-      nameLast: 'Zhang',
-      numSuccessfulLogins: 3,
-      numFailedPasswordsSinceLastLogin: 4,
-      oldPasswords: ['MyOldPass1234'],
-    }
+    // {
+    //   userId: 616425961674,
+    //   email: 'cheongmail@gmail.com',
+    //   password: 'nicepassword',
+    //   nameFirst: 'Cheong',
+    //   nameLast: 'Zhang',
+    //   numSuccessfulLogins: 3,
+    //   numFailedPasswordsSinceLastLogin: 4,
+    //   oldPasswords: ['MyOldPass1234'],
+    // }
   ],
   quiz: [
-    {
-      authUserId: 616425961674,
-      quizId: 174712181430,
-      name: '1093 class',
-      description: 'I love sasa',
-      timeCreated: 1627312,
-      timeLastEdited: 128372,
-      active: true,
-    }
+    // {
+    //   authUserId: 616425961674,
+    //   quizId: 174712181430,
+    //   name: '1093 class',
+    //   description: 'I love sasa',
+    //   timeCreated: 1627312,
+    //   timeLastEdited: 128372,
+    //   active: true,
+    // }
   ]
 };
 
