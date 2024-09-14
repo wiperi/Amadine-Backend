@@ -35,7 +35,7 @@ export function adminAuthRegister(email, password, nameFirst, nameLast) {
   }
 
   const userId = getNewID();
-  data.user.push(new User(userId, email, password, nameFirst, nameLast));
+  data.users.push(new User(userId, email, password, nameFirst, nameLast));
 
   return { authUserId: userId };
 }
@@ -52,7 +52,7 @@ export function adminAuthRegister(email, password, nameFirst, nameLast) {
 export function adminAuthLogin(email, password) {
   const data = getData();
 
-  const user = data.user.find(user => user.email === email);
+  const user = data.users.find(user => user.email === email);
 
   // error case 1:
   //  email address does not exist
@@ -125,7 +125,7 @@ export function adminUserPasswordUpdate(authUserId, oldPassword, newPassword) {
     return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }
 
-  const user = getData().user.find(user => user.userId === authUserId);
+  const user = getData().users.find(user => user.userId === authUserId);
 
   if (oldPassword !== user.password) {
     return { error: ERROR_MESSAGES.WRONG_OLD_PASSWORD };

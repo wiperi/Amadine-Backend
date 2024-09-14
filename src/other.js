@@ -6,7 +6,7 @@ import { getData } from "./dataStore";
  * @returns {Object} - An empty object.
  */
 export function clear () {
-  getData().user = [];
-  getData().quiz = [];
+  getData().users = [];
+  getData().quizzes = [];
   return {};
 }

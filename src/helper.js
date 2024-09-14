@@ -10,7 +10,7 @@ import isEmail from 'validator/lib/isEmail.js';
 export function getNewID() {
   let id =  Math.floor((Math.random() * (9 * Math.pow(10, 11))) + Math.pow(10, 11));
   const data = getData();
-  while (data.user.some(user => user.userId === id) || data.quiz.some(quiz => quiz.quizId === id)) {
+  while (data.users.some(user => user.userId === id) || data.quizzes.some(quiz => quiz.quizId === id)) {
     id =  Math.floor((Math.random() * (9 * Math.pow(10, 11))) + Math.pow(10, 11));
   }
   return id;
@@ -37,7 +37,7 @@ export function isValidPassword(password) {
  * @returns {boolean} - Return true if email is correct
  */
 export function isValidEmail(email) {
-  return isEmail(email) && getData().user.every(user => user.email !== email);
+  return isEmail(email) && getData().users.every(user => user.email !== email);
 }
 
 /**
@@ -112,18 +112,30 @@ export function isValidQuizDescription(quizDescription) {
  * @returns {boolean} - Returns true if the user ID is found in the user list, otherwise false.
  */
 export function isValidUserId(id) {
-  let userList = getData().user;
+  let userList = getData().users;
   return userList.some((user) => user.userId === id);
 }
 
 /**
- * Checks if the provided quizId is valid for the user.
+ * Checks if the provided quizId is valid.
  *
- * @param {string} quizId - The ID of the quiz to validate.
- * @param {string} authUserId - The ID of the quiz author.
- * @returns {boolean} - Returns true if the quizId refers to a valid quiz and owned by the users, otherwise false.
+ * @param {number} quizId - The ID of the quiz to validate.
+ * @returns {boolean} - Returns true if the quizId refers to a active quiz, otherwise false.
  */
-export function isValidQuizId(quizId, authUserId) {
-  let quizList = getData().quiz;
-  return quizList.some((quiz) => quiz.quizId === quizId && quiz.authUserId === authUserId);
+export function isValidQuizId(quizId) {
+  let quizList = getData().quizzes;
+  return quizList.some((quiz) => quiz.quizId === quizId && quiz.active);
+}
+
+
+/**
+ * Checks if a quiz with the given quizId is owned by the user with the given authUserId and is active.
+ *
+ * @param {string} quizId - The ID of the quiz to check.
+ * @param {string} authUserId - The ID of the user to check ownership against.
+ * @returns {boolean} - Returns true if the quiz is owned by the user and is active, otherwise false.
+ */
+export function isQuizIdOwnedByUser(quizId, authUserId) {
+  let quizList = getData().quizzes;
+  return quizList.some((quiz) => quiz.quizId === quizId && quiz.authUserId === authUserId && quiz.active);
 }
