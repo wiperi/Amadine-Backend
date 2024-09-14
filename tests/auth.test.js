@@ -62,15 +62,16 @@ const validEmails = [
   'goodemail@gmail.com', 'user@example.com', 'test.user@domain.co'
 ];
 
-const validInputs = ['goodemail@gmail.com', 'GoodPassword123', 'Tommy', 'Smith'];
 
-describe('adminAuthRegister', () => {
+describe('adminAuthRegister()', () => {
 
   const CORRECT = { authUserId: expect.any(Number) };
 
-  // Helper function for testing invalid input cases
-  function runTestsForOneParam(testGroup, inputData, paramIndex, expectOutput) {
-    describe(testGroup, () => {
+  const validInputs = ['goodemail@gmail.com', 'GoodPassword123', 'Tommy', 'Smith'];
+
+  // Helper function for testing different inputs on one parameter
+  function runTestsForOneParam(groupName, inputData, paramIndex, expectOutput) {
+    describe(groupName, () => {
       test.each(inputData)('%s', (data) => {
         let inputs = [...validInputs];
         inputs[paramIndex] = data;
@@ -103,7 +104,7 @@ describe('adminAuthRegister', () => {
 // Test for adminAuthLogin
 ////////////////////////////////////////////////////////////////////
 
- describe('adminAuthLogin', () => {
+describe('adminAuthLogin()', () => {
   // Error cases:
   //  there are 2 error cases for adminAuthLogin
   //    Email address does not exist
@@ -152,4 +153,61 @@ describe('adminAuthRegister', () => {
       expect(login1.authUserId).not.toStrictEqual(login2.authUserId);
     });
   });
- });
+});
+
+describe('adminUserPasswordUpdate()', () => {
+
+  let user;
+  beforeEach(() => {
+    user = auth.adminAuthRegister('Goodemail@gmail.com', 'GoodPassword123', 'Tommy', 'Smith');
+  });
+
+  test('normal case', () => {
+    const res = auth.adminUserPasswordUpdate(user.authUserId, 'GoodPassword123', 'NewPassword123');
+    expect(res).toStrictEqual({});
+    expect(auth.adminAuthLogin('Goodemail@gmail.com', 'GoodPassword123')).toStrictEqual(ERROR);
+    expect(auth.adminAuthLogin('Goodemail@gmail.com', 'NewPassword123')).toStrictEqual({ authUserId: user.authUserId });
+  });
+
+  test('authUserId does not exist', () => {
+    clear();
+    const res = auth.adminUserPasswordUpdate(42, 'GoodPassword123', 'NewPassword123');
+    expect(res).toStrictEqual(ERROR);
+  });
+
+  test('wrong old password', () => {
+    const res = auth.adminUserPasswordUpdate(user.authUserId, 'WrongOldPassword123', 'NewPassword123');
+    expect(res).toStrictEqual(ERROR);
+  });
+
+  test('new password and old password are the same', () => {
+    const res = auth.adminUserPasswordUpdate(user.authUserId, 'GoodPassword123', 'GoodPassword123');
+    expect(res).toStrictEqual(ERROR);
+  });
+
+  describe('New password is used', () => {
+    test('using first previous password', () => {
+      const res = auth.adminUserPasswordUpdate(user.authUserId, 'GoodPassword123', 'NewPassword123');
+      expect(res).toStrictEqual({});
+      const res2 = auth.adminUserPasswordUpdate(user.authUserId, 'NewPassword123', 'GoodPassword123');
+      expect(res2).toStrictEqual(ERROR);
+    });
+
+    test('using second previous password', () => {
+      const res = auth.adminUserPasswordUpdate(user.authUserId, 'GoodPassword123', 'NewPassword1');
+      expect(res).toStrictEqual({});
+      const res2 = auth.adminUserPasswordUpdate(user.authUserId, 'NewPassword1', 'NewPassword2');
+      expect(res2).toStrictEqual({});
+      const res3 = auth.adminUserPasswordUpdate(user.authUserId, 'NewPassword2', 'GoodPassword123');
+      expect(res3).toStrictEqual(ERROR);
+    });
+
+  });
+
+  describe('Invalid new password format', () => {
+    test.each(invalidPasswords)('%s', (password) => {
+      const res = auth.adminUserPasswordUpdate(user.authUserId, 'GoodPassword123', password);
+      expect(res).toStrictEqual(ERROR);
+    });
+  });
+});

@@ -1,9 +1,10 @@
-import { getData, setData } from './dataStore.js';
+import { getData, Quiz, User } from './dataStore.js';
 import { ERROR_MESSAGES } from './errors.js';
 import {
   getNewID,
   isValidEmail,
   isValidPassword,
+  isValidUserId,
   isValidUserName,
 } from './helper.js';
 
@@ -15,9 +16,11 @@ import {
  * @param {string} password - The password of a user
  * @param {string} nameFirst - The first name of a user
  * @param {string} nameLast - The last name of a user
- * @returns {Object} - Object with authUserId value
+ * @returns {{ authUserId }} - Object with authUserId value
  */
 export function adminAuthRegister(email, password, nameFirst, nameLast) {
+
+  const data = getData();
 
   if (!isValidEmail(email)) {
     return { error: ERROR_MESSAGES.INVALID_EMAIL };
@@ -31,16 +34,8 @@ export function adminAuthRegister(email, password, nameFirst, nameLast) {
     return { error: ERROR_MESSAGES.INVALID_PASSWORD };
   }
 
-  let data = getData();
-  let userId = getNewID();
-
-  data.user.push({
-    userId,
-    email,
-    password,
-    nameFirst,
-    nameLast,
-  });
+  const userId = getNewID();
+  data.user.push(new User(userId, email, password, nameFirst, nameLast));
 
   return { authUserId: userId };
 }
@@ -52,9 +47,9 @@ export function adminAuthRegister(email, password, nameFirst, nameLast) {
  * 
  * @param {string} email - User's email
  * @param {string} password - User's password
- * @returns {Object} - Object with authUserId value
+ * @returns {{ authUserId }} - Object with authUserId value
  */
-export function adminAuthLogin ( email, password ) {
+export function adminAuthLogin(email, password) {
   const data = getData();
 
   const user = data.user.find(user => user.email === email);
@@ -62,18 +57,23 @@ export function adminAuthLogin ( email, password ) {
   // error case 1:
   //  email address does not exist
   if (!user) {
-    return { error: ERROR_MESSAGES.EMAIL_EXISTENCE };
+    return { error: ERROR_MESSAGES.EMAIL_NOT_EXIST };
   }
 
   // error case 2:
   //  password is not correct for the given email
   if (user.password !== password) {
-    return { error: ERROR_MESSAGES.PASSWORD_EXISTENCE};
+
+    user.numFailedPasswordsSinceLastLogin++;
+
+    return { error: ERROR_MESSAGES.WRONG_PASSWORD };
   }
-  
-  return {
-    authUserId: user.userId,
-  };
+
+  // successful login
+  user.numFailedPasswordsSinceLastLogin = 0;
+  user.numSuccessfulLogins++;
+
+  return { authUserId: user.userId };
 }
 
 /**
@@ -120,5 +120,32 @@ export function adminUserDetails(authUserId) {
  * @returns {Object} - An empty object.
  */
 export function adminUserPasswordUpdate(authUserId, oldPassword, newPassword) {
+
+  if (!isValidUserId(authUserId)) {
+    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
+  }
+
+  const user = getData().user.find(user => user.userId === authUserId);
+
+  if (oldPassword !== user.password) {
+    return { error: ERROR_MESSAGES.WRONG_OLD_PASSWORD };
+  }
+
+  if (oldPassword === newPassword) {
+    return { error: ERROR_MESSAGES.NEW_PASSWORD_SAME_AS_OLD };
+  }
+
+  if (user.oldPasswords.includes(newPassword)) {
+    return { error: ERROR_MESSAGES.PASSWORD_ALREADY_USED };
+  }
+
+  if (!isValidPassword(newPassword)) {
+    return { error: ERROR_MESSAGES.INVALID_PASSWORD };
+  }
+
+  user.oldPasswords.push(oldPassword);
+  user.password = newPassword;
+
   return {}
 }
+
