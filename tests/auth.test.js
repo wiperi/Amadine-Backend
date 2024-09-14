@@ -155,7 +155,7 @@ describe('adminAuthLogin()', () => {
   });
 });
 
-describe.skip('adminUserPasswordUpdate()', () => {
+describe('adminUserPasswordUpdate()', () => {
 
   let user;
   beforeEach(() => {

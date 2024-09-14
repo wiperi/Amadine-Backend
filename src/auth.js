@@ -119,32 +119,33 @@ export function adminUserDetails(authUserId) {
  * @param {string} newPassword - The new password for the admin user.
  * @returns {Object} - An empty object.
  */
-// export function adminUserPasswordUpdate(authUserId, oldPassword, newPassword) {
+export function adminUserPasswordUpdate(authUserId, oldPassword, newPassword) {
 
-//   if (!isValidUserId(authUserId)) {
-//     return { error: ERROR_MESSAGES.INVALID_USER_ID };
-//   }
+  if (!isValidUserId(authUserId)) {
+    return { error: '' };
+  }
 
-//   const user = getData().user.find(user => user.userId === authUserId);
+  const user = getData().user.find(user => user.userId === authUserId);
 
-//   if (oldPassword !== user.password) {
-//     return { error: ERROR_MESSAGES.WRONG_PASSWORD };
-//   }
+  if (oldPassword !== user.password) {
+    return { error: '' };
+  }
 
-//   if (oldPassword === newPassword) {
-//     return { error: ERROR_MESSAGES.SAME_PASSWORD };
-//   }
+  if (oldPassword === newPassword) {
+    return { error: '' };
+  }
 
-//   if (user.oldPasswords.includes(newPassword)) {
-//     return { error: ERROR_MESSAGES.PASSWORD_IN_HISTORY };
-//   }
+  if (user.oldPasswords.includes(newPassword)) {
+    return { error: '' };
+  }
 
-//   if (!isValidPassword(newPassword)) {
-//     return { error: ERROR_MESSAGES.INVALID_PASSWORD };
-//   }
+  if (!isValidPassword(newPassword)) {
+    return { error: '' };
+  }
 
-//   user.oldPasswords.push(oldPassword);
-//   user.password = new newPassword;
+  user.oldPasswords.push(oldPassword);
+  user.password = newPassword;
 
-//   return {}
-// }
+  return {}
+}
+
