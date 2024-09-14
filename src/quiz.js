@@ -1,3 +1,14 @@
+import { getData, Quiz, User } from './dataStore.js';
+import { ERROR_MESSAGES } from './errors.js';
+import {
+  getNewID,
+  isValidEmail,
+  isValidPassword,
+  isValidUserId,
+  isValidUserName,
+} from './helper.js';
+import { isValidQuizName, isValidQuizDescription } from './helper.js';
+
 /**
  * Update the description of the relevant quiz.
  *
@@ -6,7 +17,7 @@
  * @param {string} description - The description of the quiz.
  * @returns {Object} - An empty object.
  */
-function adminQuizDescriptionUpdate (authUserId, quizId, description) {
+export function adminQuizDescriptionUpdate (authUserId, quizId, description) {
   return {};
 }
 
@@ -18,7 +29,7 @@ function adminQuizDescriptionUpdate (authUserId, quizId, description) {
  * @returns {Object} - Object with quizId, name, timeCreated,
  *                     timeLastEdited and description
  */
-function adminQuizInfo(authUserId, quizId){
+export function adminQuizInfo(authUserId, quizId){
   return{ 
     quizId: 1, 
     name: 'My Quiz', 
@@ -36,7 +47,7 @@ function adminQuizInfo(authUserId, quizId){
  * @param {string} name - name of Quiz which should be updated.
  * @returns {} - An empty object. 
  */
-function adminQuizNameUpdate(authUserId, quizId, name){
+export function adminQuizNameUpdate(authUserId, quizId, name){
   return{};
 }
 
@@ -48,9 +59,20 @@ function adminQuizNameUpdate(authUserId, quizId, name){
  * @param {string} description - The ID of the authenticated user.
  * @returns 
  */
-function adminQuizCreate (authUserId, name, description) {
+export function adminQuizCreate (authUserId, name, description) {
+  if(!isValidUserId(authUserId)){
+    return {error: ERROR_MESSAGES.UID_NOT_EXIST};
+  }
+  if(!isValidQuizName(name)){
+    return {error: ERROR_MESSAGES.INVALID_NAME};
+  }
+  if(!isValidQuizDescription(description)){
+    return {error: ERROR_MESSAGES.INVALID_DESCRIPTION};
+  }
+  const quizId = getNewID();
+  getData().quiz.push(new Quiz(authUserId, quizId, name, description));
   return {
-    quizId: 2,
+    quizId: quizId
   };
 }
 
@@ -63,7 +85,7 @@ function adminQuizCreate (authUserId, name, description) {
  * @property {string} quizzes.name - The name of the quiz.
  * @returns {Object} - An object containing the list of quizzes.
  */
-function adminQuizList(authUserId) {
+export function adminQuizList(authUserId) {
   return { quizzes: [{ quizId: 1, name: 'My Quiz', }] }
 }
 
@@ -73,6 +95,6 @@ function adminQuizList(authUserId) {
  * @param {number} quizId - The ID of quiz.
  * @returns 
  */
-function adminQuizRemove(authUserId, quizId) {
+export function adminQuizRemove(authUserId, quizId) {
   return {};
 }

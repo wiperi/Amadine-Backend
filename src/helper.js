@@ -116,6 +116,16 @@ export function isValidUserId(id) {
   return userList.some((user) => user.userId === id);
 }
 
+
+/**
+ * 
+ * @param {number} userId 
+ * @returns {object} - user object
+ */
+export function findUserById(userId) {
+  return getData().user.find(user => user.userId === userId);
+}
+
 /**
  * Checks if the provided quizId is valid.
  *
