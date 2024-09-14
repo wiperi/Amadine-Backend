@@ -70,7 +70,7 @@ export function adminQuizCreate (authUserId, name, description) {
     return {error: ERROR_MESSAGES.INVALID_DESCRIPTION};
   }
   const quizId = getNewID();
-  getData().quiz.push(new Quiz(authUserId, quizId, name, description));
+  getData().quizzes.push(new Quiz(authUserId, quizId, name, description));
   return {
     quizId: quizId
   };
