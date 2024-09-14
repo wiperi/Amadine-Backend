@@ -127,3 +127,12 @@ export function isValidQuizId(quizId, authUserId) {
   let quizList = getData().quiz;
   return quizList.some((quiz) => quiz.quizId === quizId && quiz.authUserId === authUserId);
 }
+
+/**
+ * 
+ * @param {number} userId 
+ * @returns {object} - user object
+ */
+export function findUserById(userId) {
+  return getData().user.find(user => user.userId === userId);
+}
