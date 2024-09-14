@@ -84,7 +84,7 @@ export function isValidQuizName(quizName) {
     return false;
   }
 
-  const quizList = getData().quiz;
+  const quizList = getData().quizzes;
   if (quizList.some((quiz) => quiz.name === quizName && quiz.active === true)){
     return false;
   }
@@ -123,7 +123,7 @@ export function isValidUserId(id) {
  * @returns {object} - user object
  */
 export function findUserById(userId) {
-  return getData().user.find(user => user.userId === userId);
+  return getData().users.find(user => user.userId === userId);
 }
 
 /**
