@@ -64,8 +64,33 @@ export function isValidUserName(userName) {
   return true;
 }
 
+/**
+ * check if the provided quiz name is in a valid format
+ * invalid cases:
+ *  1. contain not alphanumeric or spaces
+ *  2. < 3 or > 30 characters
+ *  3. already used by current logged in user for another quiz
+ * 
+ * @param {string} quizName 
+ * @returns {boolean} - return whether quiz name is valid
+ */
 export function isValidQuizName(quizName) {
-  return false;
+  // regex for alphanumeric and spaces
+  const regex = /^[a-z0-9\s]+$/i;
+  if (!regex.test(quizName)) {
+    return false;
+  }
+
+  if (quizName.length < 3 || quizName.length > 30) {
+    return false;
+  }
+
+  const quizList = getData().quiz;
+  if (quizList.some((quiz) => quiz.name === quizName && quiz.active === true)){
+    return false;
+  }
+
+  return true;
 }
 
 export function isValidQuizDescription(quizDescription) {
