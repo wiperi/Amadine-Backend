@@ -211,3 +211,73 @@ describe('adminUserPasswordUpdate()', () => {
     });
   });
 });
+
+// test for adminUserDetails
+describe('adminUserDetails', () => {
+  // Valid cases:
+  describe('adminUserDetails valid cases', () => {
+    test('numFailedPasswordsSinceLastLogin increments correctly', () => {
+      const user = auth.adminAuthRegister('wick@example.com', 'JohnWick123', 'John', 'Wick');
+      auth.adminAuthLogin('wick@example.com', 'JohnWick123');
+      auth.adminAuthLogin('wick@example.com', 'JohnWick12');
+      auth.adminAuthLogin('wick@example.com', 'JohnWick1234');
+      const details = auth.adminUserDetails(user.authUserId);
+      expect(details).toStrictEqual({
+          user:{
+          userId: user.authUserId,
+          name: 'John Wick',
+          email: 'wick@example.com',
+          numSuccessfulLogins: 2,
+          numFailedPasswordsSinceLastLogin: 2,
+        }
+      });
+    });
+    
+    test('reset numFailedPasswordsSinceLastLogin', () => {
+      const user = auth.adminAuthRegister('lucy@example.com', 'Lucy12356', 'Lucy', 'David');
+      auth.adminAuthLogin('lucy@example.com', 'Lucy1234567');
+      auth.adminAuthLogin('lucy@example.com', 'Lucy1234567');
+      auth.adminAuthLogin('lucy@example.com', 'Lucy12356');
+      const details = auth.adminUserDetails(user.authUserId);
+      expect(details).toStrictEqual({
+        user:{
+          userId: user.authUserId,
+          name: 'Lucy David',
+          email: 'lucy@example.com',
+          numSuccessfulLogins: 2,
+          numFailedPasswordsSinceLastLogin: 0,
+        }
+      });
+    });
+    
+    test('valid user details', () => {
+      const user = auth.adminAuthRegister('artoria@example.com', 'Artoria123', 'Artoria', 'Pendragon');
+      auth.adminAuthLogin('artoria@example.com', 'Artoria123');
+      const details = auth.adminUserDetails(user.authUserId);
+      expect(details).toStrictEqual({
+        user:{
+          userId: user.authUserId,
+          name: 'Artoria Pendragon',
+          email: 'artoria@example.com',
+          numSuccessfulLogins: 2,
+          numFailedPasswordsSinceLastLogin: 0,
+        }
+      });
+    });
+  });
+  // Error cases:
+  describe('adminUserDetails error cases', () => {
+    test('User ID does not exist', () => {
+      const user1 = auth.adminAuthRegister('wick@example.com', 'JohnWick123', 'John', 'Wick');
+      const user2 = auth.adminAuthRegister('lucy@example.com', 'Lucy123', 'Lucy', 'David');
+      const user3 = auth.adminAuthRegister('artoria@example.com', 'Artoria123', 'Artoria', 'Pendragon');
+      const details = auth.adminUserDetails(123);
+      expect(details).toStrictEqual(ERROR);
+    });
+
+    test('User ID is not a not a number', () => {
+      const details = auth.adminUserDetails(' ');
+      expect(details).toStrictEqual(ERROR);
+    });
+  });
+});
