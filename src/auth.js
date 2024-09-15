@@ -2,6 +2,7 @@ import { getData, Quiz, User } from './dataStore.js';
 import { ERROR_MESSAGES } from './errors.js';
 import {
   getNewID,
+  isUnusedEmail,
   isValidEmail,
   isValidPassword,
   isValidUserId,
@@ -23,7 +24,11 @@ export function adminAuthRegister(email, password, nameFirst, nameLast) {
   const data = getData();
 
   if (!isValidEmail(email)) {
-    return { error: ERROR_MESSAGES.INVALID_EMAIL };
+    return { error: ERROR_MESSAGES.INVALID_EMAIL_FORMAT };
+  }
+
+  if (!isUnusedEmail(email)) {
+    return { error: ERROR_MESSAGES.USED_EMAIL };
   }
 
   if (!isValidUserName(nameFirst) || !isValidUserName(nameLast)) {
@@ -86,7 +91,7 @@ export function adminAuthLogin(email, password) {
  * @returns {Object} - An empty object.
  */
 export function adminUserDetailsUpdate(authUserId, email, nameFirst, nameLast) {
-  return {}
+  return {};
 }
 
 /**
