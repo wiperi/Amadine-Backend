@@ -99,14 +99,20 @@ export function adminUserDetailsUpdate(authUserId, email, nameFirst, nameLast) {
  *                     times of failed passwords since last login
  */
 export function adminUserDetails(authUserId) {
+  const data = getData();
+  const user = data.users.find(user => user.userId === authUserId);
+  if (!user) {
+    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
+  }
+
   return {
     user:
     {
-      userId: 1,
-      name: 'Jar Jar Brinks',
-      email: 'mesasosorry@naboo.com.au',
-      numSuccessfulLogins: 3,
-      numFailedPasswordsSinceLastLogin: 1,
+      userId: user.userId,
+      name: `${user.nameFirst} ${user.nameLast}`,
+      email: user.email,
+      numSuccessfulLogins: user.numSuccessfulLogins,
+      numFailedPasswordsSinceLastLogin: user.numFailedPasswordsSinceLastLogin,
     }
   };
 }
