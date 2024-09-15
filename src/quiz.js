@@ -6,6 +6,9 @@ import {
   isValidPassword,
   isValidUserId,
   isValidUserName,
+  isQuizIdOwnedByUser,
+  isValidQuizId,
+  isUserQuiz,
 } from './helper.js';
 import { isValidQuizName, isValidQuizDescription } from './helper.js';
 
@@ -30,12 +33,22 @@ export function adminQuizDescriptionUpdate (authUserId, quizId, description) {
  *                     timeLastEdited and description
  */
 export function adminQuizInfo(authUserId, quizId){
-  return{ 
-    quizId: 1, 
-    name: 'My Quiz', 
-    timeCreated: 1683125870, 
-    timeLastEdited: 1683125871, 
-    description: 'This is my quiz', 
+  if(!isValidUserId(authUserId)){
+    return {error: ERROR_MESSAGES.UID_NOT_EXIST};
+  }
+  if(!isValidQuizId(quizId)){
+    return {error: ERROR_MESSAGES.INVALID_QUIZ_ID};
+  }
+  if(!isQuizIdOwnedByUser(quizId, authUserId)){
+    return {error: ERROR_MESSAGES.NOT_AUTHORIZED};
+  }
+  const quiz = getData().quizzes.find(quiz => quiz.quizId === quizId);
+  return {
+    quizId: quiz.quizId,
+    name: quiz.name,
+    timeCreated: quiz.timeCreated,
+    timeLastEdited: quiz.timeLastEdited,
+    description: quiz.description
   };
 }
 

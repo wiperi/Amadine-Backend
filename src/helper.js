@@ -149,3 +149,12 @@ export function isQuizIdOwnedByUser(quizId, authUserId) {
   let quizList = getData().quizzes;
   return quizList.some((quiz) => quiz.quizId === quizId && quiz.authUserId === authUserId && quiz.active);
 }
+
+/**
+ * 
+ * @param {number} quizId 
+ * @returns {object} - quiz object
+ */
+export function findQuizById(quizId) {
+  return getData().quizzes.find(quiz => quiz.quizId === quizId);
+}

@@ -8,6 +8,10 @@ const ERROR_MESSAGES = {
   INVALID_DESCRIPTION: 'Invalid description format',
   //description
   INVALID_DESCRIPTION: 'Invalid description format',
+  // quizId
+  INVALID_QUIZ_ID: 'Invalid quizId',
+  //not authorized
+  NOT_AUTHORIZED: 'Not authorized',
   // authUserId
   UID_NOT_EXIST: 'authUserId does not exist.',
   // password
