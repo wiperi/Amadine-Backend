@@ -3,15 +3,15 @@ import { clear } from '../src/other';
 import * as auth from '../src/auth';
 import { adminAuthRegister } from '../src/auth';
 import { getData } from '../src/dataStore';
-///////////////////////////////////////////////////////////////////
-///test for adminQuizCreate
-///////////////////////////////////////////////////////////////////
 let authUser;
 const ERROR = { error: expect.any(String) };
 beforeEach(() => {
   clear();
   authUser = adminAuthRegister('fdhsjk@gmail.com', 'Password123', 'Tommy', 'Smith');
 });
+///////////////////////////////////////////////////////////////////
+///test for adminQuizCreate
+///////////////////////////////////////////////////////////////////
 // AuthUserId is not a valid user.
 // Name contains invalid characters. Valid characters are alphanumeric and spaces.
 // Name is either less than 3 characters long or more than 30 characters long.
@@ -48,4 +48,29 @@ describe('adminQuizCreate()', () => {
   describe('valid input', () => {
     test.todo('Use adminQuizInfo to check if the quiz was created');
   })
+});
+///////////////////////////////////////////////////////////////////
+///test for adminQuizInfo
+///////////////////////////////////////////////////////////////////
+describe('adminQuizInfo()', () => {
+  describe('invalid input', () => {
+    test('AuthUserId is not a valid user', () => {
+      expect(quiz.adminQuizInfo(0, 0)).toStrictEqual(ERROR);
+    });
+    test('QuizId is not a valid quiz', () => {
+      expect(quiz.adminQuizInfo(authUser.authUserId, 0)).toStrictEqual(ERROR);
+    });
+  });
+  describe('has a correct return type', () => {
+    test('should return an object', () => {
+      const quizId = quiz.adminQuizCreate(authUser.authUserId, 'Name', 'Description').quizId;
+      expect(quiz.adminQuizInfo(authUser.authUserId, quizId.)).toEqual({ quizId: expect.any(Number), name: expect.any(String), timeCreated: expect.any(Number), timeLastEdited: expect.any(Number), description: expect.any(String)});
+    });
+  });
+  describe('valid input', () => {
+    test('should return the correct information', () => {
+      const quiz = quiz.adminQuizCreate(authUser.authUserId, 'Name', 'Description').quizId;
+      expect(quiz.adminQuizInfo(authUser.authUserId, quiz.quizId)).toEqual({ quizId: quizId, name: 'Name', timeCreated: expect.any(Number), timeLastEdited: expect.any(Number), description: 'Description'});
+    });
+  });
 });
