@@ -292,15 +292,30 @@ describe('adminUserDetailsUpdate', () => {
   })
 
   describe('valid cases', () => {
-    test('Vaild Update', () => {
+    test('change all details', () => {
       const result = auth.adminUserDetailsUpdate(user.authUserId, 'newemail@test.com', 'Newfirst', 'Newlast');
       expect(result).toStrictEqual({});
-      const updateUser = auth.adminUserDetails(user.authUserId);
-      expect(updateUser).toStrictEqual({
+      const updatedUserDetail = auth.adminUserDetails(user.authUserId);
+      expect(updatedUserDetail).toStrictEqual({
         user: {
           userId: user.authUserId,
           name: 'Newfirst Newlast',
           email: 'newemail@test.com',
+          numSuccessfulLogins: 1,
+          numFailedPasswordsSinceLastLogin: 0,
+        }
+      });
+    });
+
+    test('same email, different name', () => {
+      const result = auth.adminUserDetailsUpdate(user.authUserId, 'updateuser@example.com', 'Newfirst', 'Newlast');
+      expect(result).toStrictEqual({});
+      const updatedUserDetail = auth.adminUserDetails(user.authUserId);
+      expect(updatedUserDetail).toStrictEqual({
+        user: {
+          userId: user.authUserId,
+          name: 'Newfirst Newlast',
+          email: 'updateuser@example.com',
           numSuccessfulLogins: 1,
           numFailedPasswordsSinceLastLogin: 0,
         }
@@ -320,7 +335,7 @@ describe('adminUserDetailsUpdate', () => {
     });
   
     test('Email is used by other', () => {
-      const other = auth.adminAuthRegister('Otheremial@test.com', 'OtherPassword12345', 'Firsr', 'Last')
+      auth.adminAuthRegister('Otheremial@test.com', 'OtherPassword12345', 'Firsr', 'Last')
       const result = auth.adminUserDetailsUpdate(user.authUserId, 'Otheremial@test.com', 'Newfirst', 'Newlast');
       expect(result).toStrictEqual(ERROR);
     });
