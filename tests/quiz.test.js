@@ -1,10 +1,14 @@
 import {
   adminQuizCreate,
   adminQuizInfo,
+  adminQuizNameUpdate,
   adminQuizList,
 } from '../src/quiz';
 import { clear } from '../src/other';
 import { adminAuthRegister } from '../src/auth';
+import { getData } from '../src/dataStore';
+import { notStrictEqual } from 'assert';
+import { findQuizById } from '../src/helper';
 
 const ERROR = { error: expect.any(String) };
 
@@ -125,6 +129,80 @@ describe('adminQuizList()', () => {
         { quizId: quiz1.quizId, name: 'Quiz1' },
         { quizId: quiz2.quizId, name: 'Quiz2' }
       ]));
+    });
+  });
+});
+
+/////////////////////////////////////////////////////////////////////////
+///test for adminQuizNameUpdate
+/////////////////////////////////////////////////////////////////////////
+// invalid cases:
+//   AuthUserId is not a valid user
+//   Quiz Id does not refer to a valid quiz
+//   Quiz Id does not refer to a quiz that this user owns
+//   Name contains invalid characters. (not alphanumeric and spaces)
+//   Name < 3 characters or > 30 characters
+//   Name is already used by the current logged in user for another quiz
+// valid cases:
+//   has the correct return type
+//   successful change the quiz name
+//   successful change the last edited time
+describe('adminQuizNameUpdate', () => {
+  let owner, quiz;
+  beforeEach(() => {
+    owner  = adminAuthRegister('peter@gmail.com', 'PumpkinEater123', 'Peter', 'Griffin');
+    quiz = adminQuizCreate(owner.authUserId, 'Name', 'Description');
+  });
+
+  describe('invalid input', () => {
+    test('authUserId is not a valid user', () => {
+      expect(adminQuizNameUpdate(0, 0, 'newName')).toStrictEqual(ERROR);
+    });
+
+    test('quiz id does not refer to a valid quiz', () => {
+      expect(adminQuizNameUpdate(authUser.authUserId, 0, 'newName')).toStrictEqual(ERROR);
+    });
+
+    test('quiz id does not refer to a quiz that this user owns', () => {
+      expect(adminQuizNameUpdate(authUser.adminUserId, quiz.quizId, 'newName')).toStrictEqual(ERROR);
+    });
+
+    test('name contains invalid characters', () => {
+      expect(adminQuizNameUpdate(owner.authUserId, quiz.quizId, 'مرحبا')).toStrictEqual(ERROR);
+    });
+
+    test('name less than 3 characters or more than 30 characters', () => {
+      expect(adminQuizNameUpdate(owner.authUserId, quiz.quizId, 'n')).toStrictEqual(ERROR);
+      expect(adminQuizNameUpdate(owner.authUserId, quiz.quizId, 'morethanthirtycharsmorethanthirty')).toStrictEqual(ERROR);
+    });
+
+    test('name is already used by the current logged in user for another quiz', () => {
+      const myQuiz = adminQuizCreate(authUser.adminUserId, 'myQuizName', 'myDescription');
+      expect(adminQuizNameUpdate(authUser.adminUserId, myQuiz.quizId, 'Name')).toStrictEqual(ERROR);
+    });
+  });
+
+  describe('valid input', () => {
+    test('has correct return type', () => {
+      expect(adminQuizNameUpdate(owner.authUserId, quiz.quizId, 'speedRound')).toStrictEqual({});
+    });
+
+    test('successful update the quiz name', () => {
+      adminQuizNameUpdate(owner.authUserId, quiz.quizId, 'speedRound');
+      expect(adminQuizInfo(owner.authUserId, quiz.quizId)).toStrictEqual({ quizId: quiz.quizId, name: 'speedRound', timeCreated: expect.any(Number), timeLastEdited: expect.any(Number), description: 'Description' });
+    });
+
+    test('wait 1 second before successful update the last edited time', () => {
+
+      // mocking the time to be in the future
+      const NOW = '2200-05-03T08:00:00.000Z';
+      const mockDateNow = jest.spyOn(global.Date, 'now').mockImplementation(() => new Date(NOW).getTime());
+      
+      adminQuizNameUpdate(owner.authUserId, quiz.quizId, 'speedRound');
+      const testQuiz = findQuizById(quiz.quizId);
+      expect(testQuiz.timeLastEdited).not.toEqual(testQuiz.timeCreated);
+
+      mockDateNow.mockRestore();
     });
   });
 });
