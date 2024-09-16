@@ -1,7 +1,8 @@
 import {
   adminQuizCreate,
   adminQuizInfo,
-}from '../src/quiz';
+  adminQuizList,
+} from '../src/quiz';
 import { clear } from '../src/other';
 import { adminAuthRegister } from '../src/auth';
 
@@ -39,7 +40,7 @@ describe('adminQuizCreate()', () => {
     test('Name is more than 30 characters long', () => {
       expect(adminQuizCreate(authUser.authUserId, 'Name'.repeat(10), 'Description')).toStrictEqual(ERROR);
     });
-    test('Name is already used by the current logged in user for another quiz' ,() => {
+    test('Name is already used by the current logged in user for another quiz', () => {
       adminQuizCreate(authUser.authUserId, 'Name', 'Description');
       expect(adminQuizCreate(authUser.authUserId, 'Name', 'Description')).toStrictEqual(ERROR);
     });
@@ -49,13 +50,13 @@ describe('adminQuizCreate()', () => {
   });
   describe('has a return type', () => {
     test('should return a number', () => {
-      expect(adminQuizCreate(authUser.authUserId, 'Name', 'Description')).toEqual({ quizId: expect.any(Number)});
+      expect(adminQuizCreate(authUser.authUserId, 'Name', 'Description')).toEqual({ quizId: expect.any(Number) });
     });
   });
   describe('valid input', () => {
     test('should add a quiz to the data store', () => {
       const quiz = adminQuizCreate(authUser.authUserId, 'Name', 'Description');
-      expect(adminQuizInfo(authUser.authUserId, quiz.quizId)).toEqual({ quizId: quiz.quizId, name: 'Name', timeCreated: expect.any(Number), timeLastEdited: expect.any(Number), description: 'Description'});
+      expect(adminQuizInfo(authUser.authUserId, quiz.quizId)).toEqual({ quizId: quiz.quizId, name: 'Name', timeCreated: expect.any(Number), timeLastEdited: expect.any(Number), description: 'Description' });
     });
   })
 });
@@ -65,7 +66,7 @@ describe('adminQuizCreate()', () => {
 ///////////////////////////////////////////////////////////////////
 
 describe('adminQuizInfo()', () => {
-  
+
   describe('invalid input', () => {
     test('AuthUserId is not a valid user', () => {
       expect(adminQuizInfo(0, 0)).toStrictEqual(ERROR);
@@ -79,14 +80,51 @@ describe('adminQuizInfo()', () => {
   describe('has a correct return type', () => {
     test('should return an object', () => {
       const quiz = adminQuizCreate(authUser.authUserId, 'Name', 'Description');
-      expect(adminQuizInfo(authUser.authUserId, quiz.quizId)).toEqual({ quizId: expect.any(Number), name: expect.any(String), timeCreated: expect.any(Number), timeLastEdited: expect.any(Number), description: expect.any(String)});
+      expect(adminQuizInfo(authUser.authUserId, quiz.quizId)).toEqual({ quizId: expect.any(Number), name: expect.any(String), timeCreated: expect.any(Number), timeLastEdited: expect.any(Number), description: expect.any(String) });
     });
   });
 
   describe('valid input', () => {
     test('should return the correct information', () => {
       const quiz = adminQuizCreate(authUser.authUserId, 'Name', 'Description');
-      expect(adminQuizInfo(authUser.authUserId, quiz.quizId)).toEqual({ quizId: quiz.quizId, name: 'Name', timeCreated: expect.any(Number), timeLastEdited: expect.any(Number), description: 'Description'});
+      expect(adminQuizInfo(authUser.authUserId, quiz.quizId)).toEqual({ quizId: quiz.quizId, name: 'Name', timeCreated: expect.any(Number), timeLastEdited: expect.any(Number), description: 'Description' });
+    });
+  });
+});
+
+/////////////////////////////////////////////////////////////////////
+// adminQuizList()
+/////////////////////////////////////////////////////////////////////
+
+describe('adminQuizList()', () => {
+
+  describe('invalid input', () => {
+    test('authUserId is not a valid user', () => {
+      expect(adminQuizList(authUser.authUserId + 1)).toStrictEqual(ERROR);
+    });
+  });
+
+  test('correct return type', () => {
+    const quiz = adminQuizCreate(authUser.authUserId, 'Quiz1', 'Description1');
+    expect(adminQuizList(authUser.authUserId)).toStrictEqual({
+      quizzes: [
+        {
+          quizId: quiz.quizId,
+          name: 'Quiz1'
+        }
+      ]
+    });
+  });
+
+  describe('valid input', () => {
+    test('should return the correct list of quizzes', () => {
+      const quiz1 = adminQuizCreate(authUser.authUserId, 'Quiz1', 'Description1');
+      const quiz2 = adminQuizCreate(authUser.authUserId, 'Quiz2', 'Description2');
+      const quizList = adminQuizList(authUser.authUserId);
+      expect(quizList.quizzes).toEqual(expect.arrayContaining([
+        { quizId: quiz1.quizId, name: 'Quiz1' },
+        { quizId: quiz2.quizId, name: 'Quiz2' }
+      ]));
     });
   });
 });
