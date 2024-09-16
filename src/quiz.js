@@ -199,6 +199,5 @@ export function adminQuizRemove(authUserId, quizId) {
   }
   const quiz = findQuizById(quizId);
   quiz.active = false;
-  quiz.timeLastEdited = Date.now();
   return {};
 }
