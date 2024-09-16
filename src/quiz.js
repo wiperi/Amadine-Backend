@@ -1,5 +1,5 @@
 import { adminAuthRegister } from './auth.js';
-import { getData, Quiz, setData, User } from './dataStore.js';
+import { getData, Quiz, User } from './dataStore.js';
 import { ERROR_MESSAGES } from './errors.js';
 import {
   getNewID,
@@ -178,6 +178,8 @@ export function adminQuizList(authUserId) {
 }
 
 /**
+ * Make a quiz be inactive if the user is the owner
+ * Return an empty object if succeed
  * 
  * @param {number} authUserId - The ID of the authenticated user.
  * @param {number} quizId - The ID of quiz.
@@ -195,13 +197,8 @@ export function adminQuizRemove(authUserId, quizId) {
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
     return { error: ERROR_MESSAGES.NOT_AUTHORIZED };
   }
-  const quizInData = getData().quizzes.find(quiz => quiz.quizId === quizId);
-  if (quizInData) {
-    quizInData.active = false;
-    quizInData.timeLastEdited = Date.now();
-    setData(getData());
-    return {};
-  }
-
-  return { error: ERROR_MESSAGES.INVALID_QUIZ_ID };
+  const quiz = findQuizById(quizId);
+  quiz.active = false;
+  quiz.timeLastEdited = Date.now();
+  return {};
 }
