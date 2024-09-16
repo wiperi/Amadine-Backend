@@ -2,6 +2,7 @@ import {
   adminQuizCreate,
   adminQuizInfo,
   adminQuizNameUpdate,
+  adminQuizDescriptionUpdate,
   adminQuizList,
 } from '../src/quiz';
 import { clear } from '../src/other';
@@ -206,3 +207,47 @@ describe('adminQuizNameUpdate', () => {
     });
   });
 });
+
+///////////////////////////////////////////////////////////////////
+  ///test for adminQuizDescriptionUpdate
+  ///////////////////////////////////////////////////////////////////
+  describe('adminQuizDescriptionUpdate()', () => {
+    describe('invalid input', () => {
+      test('AuthUserId is not a valid user', () => {
+        expect(adminQuizDescriptionUpdate(0, 0, 'Description')).toStrictEqual(ERROR);
+      });
+      test('Quiz ID does not refer to a valid quiz', () => {
+        expect(adminQuizDescriptionUpdate(authUser.authUserId, 0, 'Description')).toStrictEqual(ERROR);
+      });
+      test('Quiz ID does not refer to a quiz that this user owns', () => {
+        const quiz = adminQuizCreate(authUser.authUserId, 'Name', 'Description');
+        const user = adminAuthRegister('artoria@example.com', 'Artoria123', 'Artoria', 'Pendragon');
+        expect(adminQuizDescriptionUpdate(user.authUserId, quiz.quizId, 'New Description')).toStrictEqual(ERROR);
+      });
+      test('Description is more than 100 characters in length', () => {
+        const quiz = adminQuizCreate(authUser.authUserId, 'Name', 'Description');
+        expect(adminQuizDescriptionUpdate(authUser.authUserId, quiz.quizId, 'Description'.repeat(10))).toStrictEqual(ERROR);
+      });
+    });
+  
+    describe('valid input', () => {
+      test('should update the description of the quiz', () => {
+        const quiz = adminQuizCreate(authUser.authUserId, 'Fate', 'Description');
+        adminQuizDescriptionUpdate(authUser.authUserId, quiz.quizId, 'New Description');
+        expect(adminQuizInfo(authUser.authUserId, quiz.quizId)).toEqual({ quizId: quiz.quizId, name: 'Fate', timeCreated: expect.any(Number), timeLastEdited: expect.any(Number), description: 'New Description'});
+      });
+      test ('timeLastEdited should be updated', () => {
+        const authUser = adminAuthRegister('validuser@example.com', 'ValidPass123', 'Valid', 'User');
+        const quiz = adminQuizCreate(authUser.authUserId, 'Fate', 'Description');
+        const NOW = '2200-05-03T08:00:00.000Z';
+        const mockDateNow = jest.spyOn(global.Date, 'now').mockImplementation(() => new Date(NOW).getTime());
+
+        adminQuizDescriptionUpdate(authUser.authUserId, quiz.quizId, 'New Description');
+        const testQuiz = findQuizById(quiz.quizId);
+        expect(testQuiz.timeLastEdited).not.toEqual(testQuiz.timeCreated);
+
+        mockDateNow.mockRestore();
+      });
+    });
+  });
+  
