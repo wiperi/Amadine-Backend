@@ -21,7 +21,7 @@ import { isValidQuizName, isValidQuizDescription } from './helper.js';
  * @param {string} description - The description of the quiz.
  * @returns {Object} - An empty object.
  */
-export function adminQuizDescriptionUpdate (authUserId, quizId, description) {
+export function adminQuizDescriptionUpdate(authUserId, quizId, description) {
   if(!isValidUserId(authUserId)){
     return {error: ERROR_MESSAGES.UID_NOT_EXIST};
   }
