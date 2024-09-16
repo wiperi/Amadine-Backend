@@ -9,7 +9,7 @@ import { adminAuthRegister } from '../src/auth';
 import { getData } from '../src/dataStore';
 import { notStrictEqual } from 'assert';
 import { findQuizById } from '../src/helper';
-let authUser;
+
 const ERROR = { error: expect.any(String) };
 
 let authUser;
