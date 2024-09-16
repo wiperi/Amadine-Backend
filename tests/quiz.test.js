@@ -4,6 +4,7 @@ import {
   adminQuizNameUpdate,
   adminQuizDescriptionUpdate,
   adminQuizList,
+  adminQuizRemove,
 } from '../src/quiz';
 import { clear } from '../src/other';
 import { adminAuthRegister } from '../src/auth';
@@ -250,4 +251,52 @@ describe('adminQuizNameUpdate', () => {
       });
     });
   });
-  
+
+/////////////////////////////////////////////////////////////////////////
+///test for adminQuizRemove
+/////////////////////////////////////////////////////////////////////////
+
+describe('adminQuizRemove()', () => {
+
+  describe('invalid input', () => {
+    test('AuthUserId is not a valid user', () => {
+      const quiz = adminQuizCreate(authUser.authUserId, 'Remove', 'Description');
+      expect(adminQuizRemove(0, quiz.quizId)).toStrictEqual(ERROR);
+    });
+
+    test('QuizId is not a valid quiz', () => {
+      expect(adminQuizRemove(authUser.authUserId, 1234)).toStrictEqual(ERROR);
+    });
+
+    test('QuizId does not belong to the current user', () => {
+      const anotherUser = adminAuthRegister('anotheruser@gmail.com', 'Anothepassword123', 'First', 'Last');
+      const anotherUserQuiz = adminQuizCreate(anotherUser.authUserId, 'Anotherquiz', 'Description');
+      expect(adminQuizRemove(authUser.authUserId, anotherUserQuiz.quizId)).toStrictEqual(ERROR);
+    });
+  });
+
+  describe('valid input', () => {
+    test('should successfully remove a quiz by the owner', () => {
+      const quiz = adminQuizCreate(authUser.authUserId, 'Remove', 'Description');
+      const result = adminQuizRemove(authUser.authUserId, quiz.quizId);
+      
+      expect(result).toEqual({});
+      
+      const quizInfo = adminQuizInfo(authUser.authUserId, quiz.quizId);
+      expect(quizInfo.active).toBeFalsy();
+    });
+
+    test('should not list removed quiz in adminQuizList', () => {
+      const quiz1 = adminQuizCreate(authUser.authUserId, 'Quiz1', 'Description1');
+      const quiz2 = adminQuizCreate(authUser.authUserId, 'Quiz2', 'Description2');
+    
+      adminQuizRemove(authUser.authUserId, quiz1.quizId);
+      const quizList = adminQuizList(authUser.authUserId);
+      const expectedQuizList = [
+        { quizId: quiz2.quizId, name: 'Quiz2' }
+      ];
+    
+      expect(quizList.quizzes).toEqual(expectedQuizList);
+    });
+  });
+});

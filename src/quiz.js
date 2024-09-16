@@ -167,7 +167,7 @@ export function adminQuizList(authUserId) {
   }
 
   // filter quizzes by authUserId, then map to correct format
-  const quizzes = getData().quizzes.filter(quiz => quiz.authUserId === authUserId).map(quiz => {
+  const quizzes = getData().quizzes.filter(quiz => quiz.authUserId === authUserId && quiz.active).map(quiz => {
     return {
       quizId: quiz.quizId,
       name: quiz.name
@@ -178,11 +178,27 @@ export function adminQuizList(authUserId) {
 }
 
 /**
+ * Make a quiz be inactive if the user is the owner
+ * Return an empty object if succeed
  * 
  * @param {number} authUserId - The ID of the authenticated user.
  * @param {number} quizId - The ID of quiz.
  * @returns 
  */
 export function adminQuizRemove(authUserId, quizId) {
+  if (!isValidUserId(authUserId)) {
+    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
+  }
+
+  if (!isValidQuizId(quizId)) {
+    return { error: ERROR_MESSAGES.INVALID_QUIZ_ID };
+  }
+
+  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
+    return { error: ERROR_MESSAGES.NOT_AUTHORIZED };
+  }
+  const quiz = findQuizById(quizId);
+  quiz.active = false;
+  quiz.timeLastEdited = Date.now();
   return {};
 }
