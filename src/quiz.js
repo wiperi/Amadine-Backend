@@ -1,5 +1,5 @@
 import { adminAuthRegister } from './auth.js';
-import { getData, Quiz, User } from './dataStore.js';
+import { getData, Quiz, setData, User } from './dataStore.js';
 import { ERROR_MESSAGES } from './errors.js';
 import {
   getNewID,
@@ -167,7 +167,7 @@ export function adminQuizList(authUserId) {
   }
 
   // filter quizzes by authUserId, then map to correct format
-  const quizzes = getData().quizzes.filter(quiz => quiz.authUserId === authUserId).map(quiz => {
+  const quizzes = getData().quizzes.filter(quiz => quiz.authUserId === authUserId && quiz.active).map(quiz => {
     return {
       quizId: quiz.quizId,
       name: quiz.name
@@ -184,5 +184,24 @@ export function adminQuizList(authUserId) {
  * @returns 
  */
 export function adminQuizRemove(authUserId, quizId) {
-  return {};
+  if (!isValidUserId(authUserId)) {
+    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
+  }
+
+  if (!isValidQuizId(quizId)) {
+    return { error: ERROR_MESSAGES.INVALID_QUIZ_ID };
+  }
+
+  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
+    return { error: ERROR_MESSAGES.NOT_AUTHORIZED };
+  }
+  const quizInData = getData().quizzes.find(quiz => quiz.quizId === quizId);
+  if (quizInData) {
+    quizInData.active = false;
+    quizInData.timeLastEdited = Date.now();
+    setData(getData());
+    return {};
+  }
+
+  return { error: ERROR_MESSAGES.INVALID_QUIZ_ID };
 }
