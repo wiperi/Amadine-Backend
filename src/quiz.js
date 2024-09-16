@@ -1,3 +1,4 @@
+import { adminAuthRegister } from './auth.js';
 import { getData, Quiz, User } from './dataStore.js';
 import { ERROR_MESSAGES } from './errors.js';
 import {
@@ -8,7 +9,7 @@ import {
   isValidUserName,
   isQuizIdOwnedByUser,
   isValidQuizId,
-  isUserQuiz,
+  findQuizById,
 } from './helper.js';
 import { isValidQuizName, isValidQuizDescription } from './helper.js';
 
@@ -54,6 +55,13 @@ export function adminQuizInfo(authUserId, quizId){
 
 /**
  * Update the name of the relevant quiz.
+ *  error cases:
+ *    1. authUserId is not a valid user
+ *    2. quizId does not refer to a valid quiz
+ *    3. quizId does not refer to a quiz that this user owns
+ *    4. name contains invalid characters.
+ *    5. name length < 3 or > 30
+ *    6. name is already used by the current logged in user for another quiz
  *
  * @param {number} authUserId - The ID of the authenticated user.
  * @param {number} quizId - The ID of quiz.
@@ -61,9 +69,28 @@ export function adminQuizInfo(authUserId, quizId){
  * @returns {} - An empty object. 
  */
 export function adminQuizNameUpdate(authUserId, quizId, name){
-  return{};
-}
+  if (!isValidUserId(authUserId)) {
+    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
+  }
 
+  if (!isValidQuizId(quizId)) {
+    return { error: ERROR_MESSAGES.INVALID_QUIZ_ID };
+  }
+
+  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
+    return { error: ERROR_MESSAGES.NOT_AUTHORIZED };
+  }
+
+  if (!isValidQuizName(name)) {
+    return { error: ERROR_MESSAGES.INVALID_NAME };
+  }
+
+  let quiz = findQuizById(quizId);  
+  quiz.name = name;
+  quiz.timeLastEdited = Date.now();
+
+  return {};
+}
 
 /**
  * 

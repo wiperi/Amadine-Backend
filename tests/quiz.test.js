@@ -7,6 +7,7 @@ import { clear } from '../src/other';
 import { adminAuthRegister } from '../src/auth';
 import { getData } from '../src/dataStore';
 import { notStrictEqual } from 'assert';
+import { findQuizById } from '../src/helper';
 let authUser;
 const ERROR = { error: expect.any(String) };
 beforeEach(() => {
@@ -97,9 +98,10 @@ describe('adminQuizInfo()', () => {
 //   successful change the quiz name
 //   successful change the last edited time
 describe('adminQuizNameUpdate', () => {
+  let owner, quiz;
   beforeEach(() => {
-    const owner  = adminAuthRegister('peter@gmail.com', 'PumpkinEater123', 'Peter', 'Griffin');
-    const quiz = adminQuizCreate(owner.authUserId, 'Name', 'Description');
+    owner  = adminAuthRegister('peter@gmail.com', 'PumpkinEater123', 'Peter', 'Griffin');
+    quiz = adminQuizCreate(owner.authUserId, 'Name', 'Description');
   });
 
   describe('invalid input', () => {
@@ -137,12 +139,20 @@ describe('adminQuizNameUpdate', () => {
 
     test('successful update the quiz name', () => {
       adminQuizNameUpdate(owner.authUserId, quiz.quizId, 'speedRound');
-      expect(adminQuizInfo(owner.authUserId, quiz.quizId)).toStrictEqual({ quizId: quiz.quizId, name: 'speedRound', timeCreated: quiz.timeCreated, timeLastEdited: expect.any(Number), description: 'Description' })
+      expect(adminQuizInfo(owner.authUserId, quiz.quizId)).toStrictEqual({ quizId: quiz.quizId, name: 'speedRound', timeCreated: expect.any(Number), timeLastEdited: expect.any(Number), description: 'Description' });
     });
 
-    test('successful update the last edited time', () => {
+    test('wait 1 second before successful update the last edited time', () => {
+
+      // mocking the time to be in the future
+      const NOW = '2200-05-03T08:00:00.000Z';
+      const mockDateNow = jest.spyOn(global.Date, 'now').mockImplementation(() => new Date(NOW).getTime());
+      
       adminQuizNameUpdate(owner.authUserId, quiz.quizId, 'speedRound');
-      expect(adminQuizInfo(owner.authUserId, quiz.quizId)).toStrictEqual({ quizId: quiz.quizId, name: expect.any(String), timeCreated: quiz.timeCreated, timeLastEdited: notStrictEqual(quiz.timeCreated), description: 'Description' })
-    })
+      const testQuiz = findQuizById(quiz.quizId);
+      expect(testQuiz.timeLastEdited).not.toEqual(testQuiz.timeCreated);
+
+      mockDateNow.mockRestore();
+    });
   });
 });
