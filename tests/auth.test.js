@@ -281,3 +281,73 @@ describe('adminUserDetails', () => {
     });
   });
 });
+
+// Test for adminUserDetailsUpdate
+describe('adminUserDetailsUpdate', () => {
+
+  let user;
+  beforeEach(() => {
+    clear();
+    user = auth.adminAuthRegister('updateuser@example.com', 'UpdatePassword123', 'Update', 'User');
+  })
+
+  describe('valid cases', () => {
+    test('change all details', () => {
+      const result = auth.adminUserDetailsUpdate(user.authUserId, 'newemail@test.com', 'Newfirst', 'Newlast');
+      expect(result).toStrictEqual({});
+      const updatedUserDetail = auth.adminUserDetails(user.authUserId);
+      expect(updatedUserDetail).toStrictEqual({
+        user: {
+          userId: user.authUserId,
+          name: 'Newfirst Newlast',
+          email: 'newemail@test.com',
+          numSuccessfulLogins: 1,
+          numFailedPasswordsSinceLastLogin: 0,
+        }
+      });
+    });
+
+    test('same email, different name', () => {
+      const result = auth.adminUserDetailsUpdate(user.authUserId, 'updateuser@example.com', 'Newfirst', 'Newlast');
+      expect(result).toStrictEqual({});
+      const updatedUserDetail = auth.adminUserDetails(user.authUserId);
+      expect(updatedUserDetail).toStrictEqual({
+        user: {
+          userId: user.authUserId,
+          name: 'Newfirst Newlast',
+          email: 'updateuser@example.com',
+          numSuccessfulLogins: 1,
+          numFailedPasswordsSinceLastLogin: 0,
+        }
+      });
+    });
+  })
+
+  describe('error cases', () => {
+    test('User ID does not exist', () => {
+      const result = auth.adminUserDetailsUpdate(123, 'newemail@test.com', 'Newfirst', 'Newlast');
+      expect(result).toStrictEqual(ERROR);
+    });
+  
+    test('Invaild email format', () => {
+      const result = auth.adminUserDetailsUpdate(user.authUserId, 'Invalid', 'Newfirst', 'Newlast');
+      expect(result).toStrictEqual(ERROR);
+    });
+  
+    test('Email is used by other', () => {
+      auth.adminAuthRegister('Otheremial@test.com', 'OtherPassword12345', 'Firsr', 'Last')
+      const result = auth.adminUserDetailsUpdate(user.authUserId, 'Otheremial@test.com', 'Newfirst', 'Newlast');
+      expect(result).toStrictEqual(ERROR);
+    });
+
+    test('Invaild first name', () => {
+      const result = auth.adminUserDetailsUpdate(user.authUserId, 'Otheremial@test.com', 'Newfirst1', 'Newlast');
+      expect(result).toStrictEqual(ERROR);
+    });
+
+    test('Invaild last name', () => {
+      const result = auth.adminUserDetailsUpdate(user.authUserId, 'Otheremial@test.com', 'Newfirst', 'Newlast1');
+      expect(result).toStrictEqual(ERROR);
+    });
+  });
+});

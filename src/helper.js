@@ -30,14 +30,23 @@ export function isValidPassword(password) {
 }
 
 /**
- * Check the email, the email must follow the format
- * and one email can not use twice
- * and the string of email can not be empty
+ * Check email format.
+ * 
  * @param {string} email - The email of user
  * @returns {boolean} - Return true if email is correct
  */
 export function isValidEmail(email) {
-  return isEmail(email) && getData().users.every(user => user.email !== email);
+  return isEmail(email);
+}
+
+/**
+ * Checks if the provided email is not used by any user.
+ *
+ * @param {string} email - The email to check for usage.
+ * @returns {boolean} - Returns true if the email is not used by any user, otherwise false.
+ */
+export function isUnusedEmail(email) {
+  return getData().users.every(user => user.email !== email);
 }
 
 /**

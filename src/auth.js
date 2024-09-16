@@ -2,6 +2,7 @@ import { getData, Quiz, User } from './dataStore.js';
 import { ERROR_MESSAGES } from './errors.js';
 import {
   getNewID,
+  isUnusedEmail,
   isValidEmail,
   isValidPassword,
   isValidUserId,
@@ -23,7 +24,11 @@ export function adminAuthRegister(email, password, nameFirst, nameLast) {
   const data = getData();
 
   if (!isValidEmail(email)) {
-    return { error: ERROR_MESSAGES.INVALID_EMAIL };
+    return { error: ERROR_MESSAGES.INVALID_EMAIL_FORMAT };
+  }
+
+  if (!isUnusedEmail(email)) {
+    return { error: ERROR_MESSAGES.USED_EMAIL };
   }
 
   if (!isValidUserName(nameFirst) || !isValidUserName(nameLast)) {
@@ -86,7 +91,33 @@ export function adminAuthLogin(email, password) {
  * @returns {Object} - An empty object.
  */
 export function adminUserDetailsUpdate(authUserId, email, nameFirst, nameLast) {
-  return {}
+
+  if (!isValidUserId(authUserId)) {
+    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
+  }
+  
+  if (!isValidEmail(email)) {
+    return { error: ERROR_MESSAGES.INVALID_EMAIL_FORMAT };
+  }
+
+  const data = getData();
+  const user = data.users.find((user) => user.userId === authUserId);
+  
+  const emailUsedByOthers = data.users.find(user => user.email === email && user.userId !== authUserId);
+
+  if (emailUsedByOthers) {
+    return { error: ERROR_MESSAGES.USED_EMAIL };
+  }
+
+  if (!isValidUserName(nameFirst) || !isValidUserName(nameLast)) {
+    return { error: ERROR_MESSAGES.INVALID_NAME };
+  }
+
+  user.email = email;
+  user.nameFirst = nameFirst;
+  user.nameLast = nameLast;
+
+  return {};
 }
 
 /**
