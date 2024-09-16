@@ -21,7 +21,25 @@ import { isValidQuizName, isValidQuizDescription } from './helper.js';
  * @param {string} description - The description of the quiz.
  * @returns {Object} - An empty object.
  */
-export function adminQuizDescriptionUpdate(authUserId, quizId, description) {
+export function adminQuizDescriptionUpdate (authUserId, quizId, description) {
+  if(!isValidUserId(authUserId)){
+    return {error: ERROR_MESSAGES.UID_NOT_EXIST};
+  }
+
+  if(!isValidQuizId(quizId)){
+    return {error: ERROR_MESSAGES.INVALID_QUIZ_ID};
+  }
+
+  if(!isQuizIdOwnedByUser(quizId, authUserId)){
+    return {error: ERROR_MESSAGES.NOT_AUTHORIZED};
+  }
+
+  if (!isValidQuizDescription(description)){
+    return {error: ERROR_MESSAGES.INVALID_DESCRIPTION};
+  }
+
+  findQuizById(quizId).description = description;
+  findQuizById(quizId).timeLastEdited = Date.now();
   return {};
 }
 
