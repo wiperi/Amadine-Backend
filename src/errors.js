@@ -1,7 +1,8 @@
 const ERROR_MESSAGES = {
   // email
-  INVALID_EMAIL: 'Invalid email format or duplicated email',
+  INVALID_EMAIL_FORMAT: 'Invalid email format or duplicated email',
   EMAIL_NOT_EXIST: 'Email address does not exist.',
+  USED_EMAIL: 'Email address already in use.',
   // name
   INVALID_NAME: 'Invalid name format',
   // quizname
