@@ -2,50 +2,83 @@
 
 ## Example Data Store State
 ```javascript
-let data = {
-  // TODO: insert your data structure that contains 
-  // users + quizzes here
-  Users: [
-    {
-      email = 'cheongmail@gmail.com',
-      password = 'nicepassword',
-      nameFirst = 'Cheong' 
-      nameLast = 'Zhang'
-      authUserId = 10,
-      numSuccessfulLogins = 3,
-      numFailedPasswordsSinceLastLogin = 4
-    },
-    {
-      email = 'tingmail@gmail.com',
-      password =  'tingpassword',
-      nameFirst = 'Ting', 
-      nameLast = 'Bai',
-      authUserId = 20,
-      numSuccessfulLogins = 4,
-      numFailedPasswordsSinceLastLogin = 5
-    }
-  ]
-
-  Quizs: [
-    {
-      authUserId = 10,
-      quizId = 110,
-      name = '1093 class', 
-      description = 'I love sasa'
-      timeCreated = 1683125870, 
-      timeLastEdited = 1683125880,
-    },
-    {
-      authUserId = 20,
-      quizId = 120,
-      name = '1093 class',
-      description = 'nice JS', 
-      timeCreated = 1683125870, 
-      timeLastEdited = 1683125880,
-    }
-  ]
+export class user {
+  /**
+   * creates an instance of a user.
+   * 
+   * @constructor
+   * @param {number} userid - the unique identifier for the user.
+   * @param {string} email - the email address of the user.
+   * @param {string} password - the password for the user.
+   * @param {string} namefirst - the first name of the user.
+   * @param {string} namelast - the last name of the user.
+   */
+  constructor(userid, email, password, namefirst, namelast) {
+    this.userid = userid;
+    this.email = email;
+    this.password = password;
+    this.namefirst = namefirst;
+    this.namelast = namelast;
+    this.numsuccessfullogins = 1;
+    this.numfailedpasswordssincelastlogin = 0;
+    /**
+     * @type {array<string>}
+     */
+    this.oldpasswords = [];
+  }
 }
-  ```
+
+
+export class Quiz {
+  /**
+   * Creates an instance of Quiz.
+   * 
+   * @constructor
+   * @param {string} authUserId - The ID of the authenticated user.
+   * @param {string} quizId - The ID of the quiz.
+   * @param {string} name - The name of the data store.
+   * @param {string} description - The description of the data store.
+   */
+  constructor(authUserId, quizId, name, description) {
+    this.authUserId = authUserId;
+    this.quizId = quizId;
+    this.name = name;
+    this.description = description;
+    this.timeCreated = Date.now();
+    this.timeLastEdited = Date.now();
+    this.active = true;
+  }
+}
+
+/**
+ * @type {{users: Array<User>, quizzes: Array<Quiz>}}
+ */
+let data = {
+  users: [
+    // {
+    //   userId: 616425961674,
+    //   email: 'cheongmail@gmail.com',
+    //   password: 'nicepassword',
+    //   nameFirst: 'Cheong',
+    //   nameLast: 'Zhang',
+    //   numSuccessfulLogins: 3,
+    //   numFailedPasswordsSinceLastLogin: 4,
+    //   oldPasswords: ['MyOldPass1234'],
+    // }
+  ],
+  quizzes: [
+    // {
+    //   authUserId: 616425961674,
+    //   quizId: 174712181430,
+    //   name: '1093 class',
+    //   description: 'I love sasa',
+    //   timeCreated: 1627312,
+    //   timeLastEdited: 128372,
+    //   active: true,
+    // }
+  ]
+};
+```
 ## Short description of the Data Model
 
 Here you should describe what each property of data model object does.
