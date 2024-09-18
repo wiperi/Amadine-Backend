@@ -2,49 +2,84 @@
 
 ## Example Data Store State
 ```javascript
-let data = {
-  // TODO: insert your data structure that contains 
-  // users + quizzes here
-  Users: [
-    {
-      email = 'cheongmail@gmail.com',
-      password = 'nicepassword',
-      nameFirst = 'Cheong' 
-      nameLast = 'Zhang'
-      authUserId = 10,
-      numSuccessfulLogins = 3,
-      numFailedPasswordsSinceLastLogin = 4
-    },
-    {
-      email = 'tingmail@gmail.com',
-      password =  'tingpassword',
-      nameFirst = 'Ting', 
-      nameLast = 'Bai',
-      authUserId = 20,
-      numSuccessfulLogins = 4,
-      numFailedPasswordsSinceLastLogin = 5
-    }
-  ]
-
-  Quizs: [
-    {
-      authUserId = 10,
-      quizId = 110,
-      name = '1093 class', 
-      description = 'I love sasa'
-      timeCreated = 1683125870, 
-      timeLastEdited = 1683125880,
-    },
-    {
-      authUserId = 20,
-      quizId = 120,
-      name = '1093 class',
-      description = 'nice JS', 
-      timeCreated = 1683125870, 
-      timeLastEdited = 1683125880,
-    }
-  ]
+export class Quiz {
+  /**
+   * Creates an instance of Quiz.
+   * 
+   * @constructor
+   * @param {string} authUserId - The ID of the authenticated user.
+   * @param {string} quizId - The ID of the quiz.
+   * @param {string} name - The name of the data store.
+   * @param {string} description - The description of the data store.
+   */
+  constructor(authUserId, quizId, name, description) {
+    this.authUserId = authUserId;
+    this.quizId = quizId;
+    this.name = name;
+    this.description = description;
+    this.timeCreated = Date.now();
+    this.timeLastEdited = Date.now();
+    this.active = true;
+  }
 }
+
+/**
+ * @type {{users: Array<User>, quizzes: Array<Quiz>}}
+ */
+let data = {
+  users: [
+    // {
+    //   userId: 616425961674,
+    //   email: 'cheongmail@gmail.com',
+    //   password: 'nicepassword',
+    //   nameFirst: 'Cheong',
+    //   nameLast: 'Zhang',
+    //   numSuccessfulLogins: 3,
+    //   numFailedPasswordsSinceLastLogin: 4,
+    //   oldPasswords: ['MyOldPass1234'],
+    // }
+  ],
+  quizzes: [
+    // {
+    //   authUserId: 616425961674,
+    //   quizId: 174712181430,
+    //   name: '1093 class',
+    //   description: 'I love sasa',
+    //   timeCreated: 1627312,
+    //   timeLastEdited: 128372,
+    //   active: true,
+    // }
+  ]
+};
+
+
+let data = {
+  users: [
+    // {
+    //   userId: 616425961674,
+    //   email: 'cheongmail@gmail.com',
+    //   password: 'nicepassword',
+    //   nameFirst: 'Cheong',
+    //   nameLast: 'Zhang',
+    //   numSuccessfulLogins: 3,
+    //   numFailedPasswordsSinceLastLogin: 4,
+    //   oldPasswords: ['MyOldPass1234'],
+    // }
+  ],
+  quizzes: [
+    // {
+    //   authUserId: 616425961674,
+    //   quizId: 174712181430,
+    //   name: '1093 class',
+    //   description: 'I love sasa',
+    //   timeCreated: 1627312,
+    //   timeLastEdited: 128372,
+    //   active: true,
+    // }
+  ]
+};
+
+
   ```
 ## Short description of the Data Model
 
