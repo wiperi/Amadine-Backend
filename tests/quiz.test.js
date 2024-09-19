@@ -249,6 +249,18 @@ describe('adminQuizNameUpdate', () => {
 
         mockDateNow.mockRestore();
       });
+
+      test ('Test successful quiz read after edit is different to creation time', () => {
+        Object.defineProperty(global, 'performance', {
+          writable: true,
+        });
+        jest.useFakeTimers();
+        setTimeout(() => {
+          adminQuizDescriptionUpdate(authUser.authUserId, quiz.quizId, 'newDescription');
+          const quizState1 = adminQuizInfo(authUser.authUserId, quiz.quizId);
+          expect(quizState1.timeLastEdited).not.toStrictEqual(quizState1.timeCreated);
+        });
+      })
     });
   });
 
