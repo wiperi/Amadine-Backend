@@ -39,7 +39,7 @@ export function adminQuizDescriptionUpdate(authUserId, quizId, description) {
   }
 
   findQuizById(quizId).description = description;
-  findQuizById(quizId).timeLastEdited = Date.now();
+  findQuizById(quizId).timeLastEdited = Date.now() / 1000;
   return {};
 }
 
@@ -105,7 +105,7 @@ export function adminQuizNameUpdate(authUserId, quizId, name){
 
   let quiz = findQuizById(quizId);  
   quiz.name = name;
-  quiz.timeLastEdited = Date.now();
+  quiz.timeLastEdited = Date.now() / 1000;
 
   return {};
 }
