@@ -17,7 +17,7 @@ Gitlab wiki
 
 3. Where will we communicate (e.g. Teams channel, Discord, Messenger)?
 
-wechat
+Wechat
 
 4. What is a reasonable response time for messages/posts when communicating?
 
@@ -25,11 +25,14 @@ Mon-Friday 9am - 5pm
 
 3. How will we handle conflicts (i.e. differing opinions)? Note: If conflicts cannot resolved this way, please contact your tutor.
 
-Speak it out without subjective feeling and do not be stuck in you personal view. We should work it out together.
+Speak it out without subjective feeling and do not be stuck in you personal view. We should work it out together. If still can't resolved the problem, resort to tutor.
 
 4. List the steps a team member does if they get stuck (e.g. can't meet a deadline or stuck debugging).
 
-    1. Search the website (goolge it)
-    2. wechat
-    3. at the meeeting 
-    3. asking tutor
+    - Before DDL
+        1. Search the website (goolge it)
+        2. Wechat
+        3. Ask team member during meeeting 
+        4. Ask tutor
+    - After DDL
+        1. His duty shift to other team member
