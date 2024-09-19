@@ -41,8 +41,8 @@ export class Quiz {
     this.quizId = quizId;
     this.name = name;
     this.description = description;
-    this.timeCreated = Date.now();
-    this.timeLastEdited = Date.now();
+    this.timeCreated = Math.floor(Date.now()/ 1000);
+    this.timeLastEdited = Math.floor(Date.now()/ 1000);
     this.active = true;
   }
 }
