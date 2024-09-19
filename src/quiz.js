@@ -22,6 +22,9 @@ import { isValidQuizName, isValidQuizDescription } from './helper.js';
  * @returns {Object} - An empty object.
  */
 export function adminQuizDescriptionUpdate(authUserId, quizId, description) {
+  Object.defineProperty(global, 'performance', {
+          writable: true,
+        });
   if(!isValidUserId(authUserId)){
     return {error: ERROR_MESSAGES.UID_NOT_EXIST};
   }
@@ -52,6 +55,9 @@ export function adminQuizDescriptionUpdate(authUserId, quizId, description) {
  *                     timeLastEdited and description
  */
 export function adminQuizInfo(authUserId, quizId) {
+  Object.defineProperty(global, 'performance', {
+          writable: true,
+        });
   if (!isValidUserId(authUserId)) {
     return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }
@@ -87,6 +93,9 @@ export function adminQuizInfo(authUserId, quizId) {
  * @returns {} - An empty object. 
  */
 export function adminQuizNameUpdate(authUserId, quizId, name){
+  Object.defineProperty(global, 'performance', {
+          writable: true,
+        });
   if (!isValidUserId(authUserId)) {
     return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }
@@ -121,6 +130,9 @@ export function adminQuizNameUpdate(authUserId, quizId, name){
  * @returns {number} return.quizId - The ID of the newly created quiz if successful.
  */
 export function adminQuizCreate(authUserId, name, description) {
+  Object.defineProperty(global, 'performance', {
+          writable: true,
+        });
   if (!isValidUserId(authUserId)) {
     return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }
@@ -161,7 +173,6 @@ export function adminQuizCreate(authUserId, name, description) {
  * }
  */
 export function adminQuizList(authUserId) {
-
   if (!isValidUserId(authUserId)) {
     return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }
