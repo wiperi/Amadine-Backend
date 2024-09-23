@@ -920,7 +920,498 @@ Please see section 7.5 for information on **peer assessment**.
 
 ## 🐝 4. Iteration 2: Building a Web Server
 
-Coming Soon
+
+### 🐝 4.1. Task
+
+In this iteration, more features were added to the specification, and the focus has been changed to HTTP endpoints. Most of the theory surrounding iteration 2 is covered in week 4-5 lectures. Note that there will still be some features of the frontend that will not work because the routes will not appear until iteration 3. There is no introductory video for iteration 2.
+
+Iteration 2 both reuses a lot of work from iteration 1, as well as has new work. Most of the work from iteration 1 can be recycled, but the following consideration(s) need to be made from previous work:
+ * `DELETE /v1/admin/quiz/{quizid}` now requires that upon deletion items are moved to trash instead of permanently removed.
+
+If you'd like more support in this iteration, you can see a [previous term's video](https://www.youtube.com/watch?v=j0P-SA8bwSs) where a lecturer discusses iteration 2 with the students of that term.
+
+In this iteration, you are expected to:
+
+1. Make adjustments to your existing code as per any feedback given by your tutor for iteration 1.
+2. Migrate to Typescript by changing `.js` file extensions to `.ts`.
+3. Implement and test the HTTP Express server according to the [entire interface provided in the specification](swagger.yaml).
+
+    * Part of this section may be automarked.
+
+    * Your implementation should build upon your work in iteration 1, and ideally your HTTP layer is just a wrapper for underlying functions you've written that handle the logic, see week 4 content.
+
+    * Your implementation will need to include persistence of data (see section 4.7).
+
+    * Introduce user sessions for your login system (see 4.9).
+
+    * You can structure your tests inside a `/tests` folder (or however you choose), as long as they are appended with `.test.ts`. For this iteration and iteration 3 we will only be testing your HTTP layer of tests. You may still wish to use your iteration 1 tests and simply wrap up them - that is a design choice up to you. An example of an HTTP test can be found in section 4.4.
+
+    * You do not have to rewrite all of your iteration 1 tests as HTTP tests - the latter can test the system at a higher level. For example, to test a success case for `POST /v1/admin/quiz/{quizid}/transfer` via HTTP routes you will need to call `POST /v1/admin/auth/register` and `POST /v1/admin/quiz`; this means you do not need the success case for those two functions seperately. Your HTTP tests will need to cover all success/error conditions for each endpoint, however.
+
+4. Ensure your code is linted to the provided style guide.
+
+    * `eslint` should be added to your repo via `npm` and then added to your `package.json` file to run when the command `npm run lint` is run. The provided `.eslintrc.json` file is *very* lenient, so there is no reason you should have to disable any additional checks. See section 4.6 below for instructions on adding linting to your pipeline.
+
+    * You are required to edit the `gitlab-ci.yml` file, as per section 4.5 to add linting to the code on `master`. **You must do this BEFORE merging anything from iteration 2 into `master`**, so that you ensure `master` is always stable.
+
+5. Continue demonstrating effective project management and effective git usage.
+
+    * You will be heavily marked for your use of thoughtful project management and use of git effectively. The degree to which your team works effectively will also be assessed. This iteration we will be enforcing a new git message policy.
+
+    * As for iteration 1, all task tracking and management will need to be done via the GitLab Issue Board or another tracking application approved by your tutor.
+
+    * As for iteration 1, regular group meetings must be documented with meeting minutes which should be stored at a timestamped location in your repo (e.g. uploading a word doc/pdf or writing in the GitLab repo wiki after each meeting).
+
+    * As for iteration 1, you must be able to demonstrate evidence of regular standups. We will provide a standup meeting template to help with this.
+
+    * You are required to regularly and thoughtfully make merge requests for the smallest reasonable units, and merge them into `master`.
+
+6. (Recommended) Remove any type errors in your code
+
+    * Run `npm run tsc` and incrementally fix all type errors.
+    
+    * Either choose to change one file at a time, or change all file extensions and use `// @ts-nocheck` at the beginning of select files to disable checking on that specific file, omitting errors.
+
+    * There are no explicit marks this term for completing this step, however:
+      * Groups who ensure their code are type-safe tend to perform much better in the automarker.
+      * For iteration 3, if you make your entire code type safe you will receive 10 bonus marks! Starting early makes that easier!
+
+A frontend has been built that you can use in this iteration, and use your backend to power it (note: an incomplete backend will mean the frontend cannot work). You can, if you wish, make changes to the frontend code, but it is not required. The source code for the frontend is only provided for your own fun or curiosity.
+
+**As part of this iteration it is required that your backend code can correctly power the frontend**. You should conduct acceptance tests (run your backend, run the frontend and check that it works) prior to submission.
+
+In this iteration we also expect for you to improve on any feedback left by tutors in iteration 1.
+
+### 🐝 4.2. Running the server
+
+To run the server you can the following command from the root directory of your project:
+
+```bash
+npm start
+```
+
+This will start the server on the port in the src/server.ts file, using `ts-node`.
+
+If you get an error stating that the address is already in use, you can change the port number in `config.json` to any number from `49152` to `65535`. Is it likely that another student may be using your original port number. We recommend that you use the format `49xxx` where `xxx` is the last 3 digits of your zID. E.g. if your zID is `5000123`, then you should change the port number in `config.json` to be `49123`
+
+Do **NOT** move the location of either `config.json` or `server.ts`
+
+### 🐝 4.3. Implementing and testing features
+
+You should first approach this project by considering its distinct "features". Each feature should add some meaningful functionality to the project, but still be as small as possible. You should aim to size features as the smallest amount of functionality that adds value without making the project more unstable. For each feature you should:
+
+1. Create a new branch.
+2. Write tests for that feature and commit them to the branch. These will fail as you have not yet implemented the feature.
+3. Implement that feature.
+4. Make any changes to the tests such that they pass with the given implementation. You should not have to do a lot here. If you find that you are, you're not spending enough time on your tests.
+5. Create a merge request for the branch.
+6. Get someone in your team who **did not** work on the feature to review the merge request. When reviewing, **not only should you ensure the new feature has tests that pass.** but you should also evaluate their correctness and completeness against the spec.
+7. Fix any issues identified in the review.
+8. Merge the merge request into master.
+
+For this project, a feature is typically sized somewhere between a single function, and a whole file of functions (e.g. `auth.ts`). It is up to you and your team to decide what each feature is.
+
+There is no requirement that each feature be implemented by only one person. In fact, we encourage you to work together closely on features, especially to help those who may still be coming to grips with Javascript.
+
+Please pay careful attention to the following:
+
+* We want to see **evidence that you wrote your tests before writing your implementation**. As noted above, the commits containing your initial tests should appear *before* your implementation for every feature branch. If we don't see this evidence, we will assume you did not write your tests first and your mark will be reduced.
+* You should have black-box tests for all tests required (i.e. testing each function/endpoint).
+* Merging in merge requests with failing pipelines is **very bad practice**. Not only does this interfere with your teams ability to work on different features at the same time, and thus slow down development, it is something you will be penalised for in marking.
+* Similarly, merging in branches with untested features is also **very bad practice**. We will assume, and you should too, that any code without tests does not work.
+* Pushing directly to `master` is not possible for this repo. The only way to get code into `master` is via a merge request. If you discover you have a bug in `master` that got through testing, create a bugfix branch and merge that in via a merge request.
+* As is the case with any system or functionality, there will be some things that you can test extensively, some things that you can test sparsely/fleetingly, and some things that you can't meaningfully test at all. You should aim to test as extensively as you can, and make judgements as to what things fall into what categories.
+
+### 🐝 4.4. Testing the interface
+
+In this iteration, **the layer of abstraction has changed to the HTTP level**, meaning that you are only required to write integration tests that check the HTTP endpoints, rather than the style of tests you write in iteration 1 where the behaviour of the Javascript functions themselves was tested.
+
+You will need to check as appropriate for each success/error condition:
+* The return value of the endpoint;
+* The behaviour (side effects) of the endpoint; and
+* The status code of the response.
+
+An example of how you would now test the echo interface is in `newecho.test.ts`.
+
+### 🐝 4.5. Testing time-based properties
+
+Some routes will have timestamps as properties. The tricky thing about timestamps is that the client makes a request at a known time, but there is a delay between when the client sends the request and when the server processes it. E.G. You might send an HTTP request to create a quiz, but the server takes 0.3 seconds until it actually creates the object, which means that the timestamp is 0.3 seconds out of sync with what you'd expect.
+
+To solve this, when checking if timestamps are what you would expect, just check that they are within a 1 second range.
+
+E.G. If I create a quiz at 12:22:21pm I will then check in my tests if the timestamp is somewhere between 12:22:21pm and 12:22:22pm.
+
+### 🐝 4.6. Continuous Integration
+
+With the introduction of linting to the project with `ESlint`, you will need to manually edit the `gitlab-ci.yml` file to lint code within the pipeline. This will require the following:
+ * Addition of `npm run lint` as a script under a custom `linting` variable, apart of `stage: checks`.
+
+Refer to the lecture slides on continuous integration to find exactly how you should add these.
+
+### 🐝 4.7. Storing data
+
+You are required to store data persistently in this iteration.
+
+Modify your backend such that it is able to persist and reload its data store if the process is stopped and started again. The persistence should happen at regular intervals so that in the event of unexpected program termination (e.g. sudden power outage) a minimal amount of data is lost. You may implement this using whatever method of serialisation you prefer (e.g. JSON).
+
+### 🐝 4.8. Versioning
+
+You might notice that some routes are prefixed with `v1`. Why is this? When you make changes to specifications, it's usually good practice to give the new function/capability/route a different unique name. This way, if people are using older versions of the specification they can't accidentally call the updated function/route with the wrong data input. If we make changes to these routes in iteration 3, we will increment the version to `v2`.
+
+Hint: Yes, your `v1` routes can use the functions you had in iteration 1, regardless of whether you rename the functions or not. The layer of abstraction in iteration 2 has changed from the function interface to the HTTP interface, and therefore your 'functions' from iteration 1 are essentially now just implementation details, and therefore are completely modifiable by you.
+
+### 🐝 4.9. User Sessions
+
+#### The problem with Iteration 1 `authUserId`
+
+In iteration 1, a problem we have with the `authUserId` is that there is no way to "log-out" a user - because all the user needs to identify themselves is just their user ID.
+
+In iteration 2, we want to issue something that abstracts their user ID into the notion of a user session - this way a single user can log in, log out, or maybe log in from multiple places at the same time.
+
+If you're not following the issue with the `authUserId`, imagine it like trying to board a plane flight but your boarding pass IS your passport. Your passport is a (effectively) a permanent thing - it is just "always you". That wouldn't work, which is why airlines issue out boarding passes - to essentially grant you a "session" on a plane. And your boarding pass is linked to your passport. In this same way, a user session is associated with an `authUserId`!
+
+#### How we adapt in Iteration 2 - User Sessions
+
+In iteration 2, instead of passing in `authUserId` into functions, we will instead pass in a user session. Then on our server we look up the user session information (which we've stored) to:
+* Identify if the user session is valid.
+* Identify which user this user session belongs to.
+
+Then in this way, we can now allow for things like the ability to meaningfully log someone out, as well as to have multiple user sessions at the same time for multiple users, or even the same user (e.g. imagine being logged in on two computers but only wanting to log one out).
+
+#### The term `token`
+
+You may however notice in the specification that the word `token` is used - not user session. This is because when sending HTTP requests a common practice is to package up information relating to the user session, we wrap it up into an object called a `token`. This token could take on a number of different forms, though the simplest form is to just have your user session inside a token object:
+```json
+{
+  "userSessionId": 23145
+}
+```
+
+A token is generally stringified for sending over HTTP - since everything over an HTTP request needs to be stringified. This is typically done with JSON. If you pass a JSONified object (as opposed to just a string or a number) as a token, we recommend that you use [encodeURIComponent](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent) and [decodeURIComponent](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent) to encode it to be friendly for transfer over URLs.
+
+How you generate unique identifiers for user sessions is up to you.
+
+#### In summary
+
+Implentation details are up to you, though the key things to ensure that you comply with are that:
+* Token is an object that contains some information that allows you to derive a user session.
+* Your system allows multiple user sessions to be able to be logged in and logged out at the same time.
+
+#### Other notes
+
+### 🐝 4.10. Error returning
+
+Either a `400 (Bad Request)` or `401 (Unauthorized)` or `403 (Forbidden)` is thrown when something goes wrong. A `400` error refers to issues with user input; a `401` error refers to when someone does not attempt to authenticate properly, and a a `403` error refers to issues with authorisation. Most of the routes in the API interface provided through types of these errors under various conditions.
+
+To throw one of these errors, simply use the code `res.status(400).send(JSON.stringify({ error: 'specific error message here' }))` or `res.status(400).json({ error: 'specific error message here' })` in your server where 400 is the error.
+
+Errors are thrown in the following order: 401, then 403, then 400.
+
+#### 🐝 4.11.1 HTTP Layer Seperation
+
+Ideally you will not need to change the way you return errors from your logic functions that you wrote in Iteration 1.
+
+Instead, your HTTP Layer should use helper function calls to handle 401 and 403 errors and rely on logic function calls to handle 400 errors.
+
+Apart from these error checks, there should be **no logic in your HTTP Layer (server.ts)**.
+
+What does this look like:
+
+```javascript
+// GET /v1/admin/quiz/{quizid}
+app.get('/v1/admin/quiz/:quizid', (req: Request, res: Response) => {
+  // manage the quizid from params 
+  const quizId = ...
+  // manage user session token 
+  const token = ...
+  // check for correct token using helperfunction getAuthUserIdFromToken
+  const authUserId = getAuthUserIdFromToken;
+  if (!authUserId) {
+    // can't find a correspoding user session for given token
+    return res.status(401).json({'error': 'Invalid token'});
+  }
+
+  // check to see if a quiz matching the quizId exists using the helper function getQuizFromQuizId
+  const quiz = getQuizFromQuizId(quizId);
+  if (!quiz) {
+    // quiz does not exist for given quizid
+    return res.status(403).json({'error': 'Invalid QuizId'});
+  }
+
+  // check to see if the quiz owner is the same as the current user session
+  if (quiz.authUserId !== authUserId) {
+    return res.status(403).json({'error': 'User does not own the quiz'});
+  }
+  // call the logic layer function
+  const result = adminQuizInfo(authUserId, quizId);
+  // if there is an error, return it with 400 status code
+  if ('error' in result) {
+    return res.status(400).json(result);
+  }
+  
+  // no errors, normal return managed by logic function
+  res.json(result);
+});
+```
+
+### 🐝 4.11. Working with the frontend
+
+There is a SINGLE repository available for all students at 
+https://nw-syd-gitlab.cseunsw.tech/DPST1093/24T3/project-frontend. 
+You can clone this frontend locally. 
+
+Please remember to pull regularly as we continue to work on the frontend.
+
+If you run the frontend at the same time as your express server is running on the backend, then you can power the frontend via your backend.
+
+Please note: The frontend may have very slight inconsistencies with expected behaviour outlined in the specification. Our automarkers will be running against your compliance to the specification. The frontend is there for further testing and demonstration.
+
+Please note: This frontend is experiment. It will not be perfect and is always under development.
+
+#### 🐝 4.11.1. Example implementation
+
+A working example of the Toohak application can be used at https://project-frontend-1531.vercel.app/. This is not a gospel implementation that dictates the required behaviour for all possible occurrences. Our implementation will make reasonable assumptions just as yours will, and they might be different, and that's fine. However, you may use this implementation as a guide for how your backend should behave in the case of ambiguities in the spec.
+
+The data is reset occasionally, but you can use this link to play around and get a feel for how the application should behave.
+
+Please note: This frontend and backend that powers this example is experiment. It will not be perfect and is always under 
+development.
+
+### 🐝 4.12. Recommended approach
+
+Our recommendation with this iteration is that you start out trying to implement the new functions similarly to how you did in iteration 1.
+
+1. Spend the first week organising, planning and transforming. Identify common functionality and build out a list of helper functions. Then organise the project into 4 sprints an set delivery dates for each sprint.
+2. Write HTTP tests. These will fail as you have not yet implemented the feature.
+  * ‼️‼️ HINT: To improve the marks you get and speed at which you get work done, consider trying to avoid re-writing your tests for iteration 2 and instead tweak your iteration 1 tests that they can be "used" by the HTTP server.
+3. Implement the feature and write the Express route/endpoint for that feature too.
+  * ‼️‼️ HINT: make sure GET and DELETE requests utilise query parameters, whereas POST and PUT requests utilise JSONified bodies.
+4. Run the tests and continue following 4.3. as necessary.
+
+**Please note, when you have a single route (e.g. `/my/route/name`) alongside a wildcard route (e.g. `/my/route/{variable}`) you need to define the single route before the variable route.**
+
+### 🐝 4.13. Sprint Planning and Organisation
+
+For this iteration, we expect you to do most of the organisation tasks introduced in Iteration 0 and Iteration 1 by yourselves.
+
+**NOTE:: This section will be assessed earlier than the rest of Iteration 2. It will be due Tue 9am, Week 06 (01st Oct).**
+
+#### 🐝 4.13.1. Sprint Organisation tasks
+
+You will be expected to go through Iteration 2 and do the following:
+1. Identify data model updates by doing a Data Model Walkthrough for the HTTP Routes for Iteration 2
+2. Identify Blocker and Helper/Common functions by doing an Organisation Walkthrough for Iteration 2
+3. Build a dependancy graph for all your functions
+4. Split all your tasks into Tiers to complete the least dependant items in earlier sprints and most dependant items in later sprints
+5. Splint those tasks amongst 4 sprints: one organisation and set-up sprint followed by three coding sprints - Use the Sprint Template in your Wiki to document what happens in each Sprint. We should see 4 seperate Sprint Organisation entries
+3. Carry out any updates recommended by your tutors/lab demonstrators to your iteration 1 functions
+4. Switch all your logic and test files from .js to .ts
+5. Merge Iteration 2 release into your master
+6. Write HTTP Layer Endpoint stubs into server.ts
+7. Write Logic Layer stubs into src/*.ts where * is the appropriate file
+
+#### 🐝 4.13.2. Sprint Leader
+
+This Iteration we are giving each person an opportunity to act as a leader. No-one can be the leader twice during the same Iteration.
+
+Each sprint you will designate a sprint leader. The leader will have the following responsibilities:
+1. Running Meetings by preparing an Agenda prior to each meeting.
+2. Recording Meeting Minutes on the Wiki
+3. Asking team questions from their Project Manager (Your designated Tutor)
+4. Preparing a hand-off for the next Sprint Leader at the end of the week:
+    1. A wiki entry titled "Iteration 2 - Sprint 1 or 2 or 3 or 4 - Hand-off" with the following:
+        1. Which of the designated tasks were done
+        2. Which (if any) are still pending
+        3. Any recommendations for the next sprint
+
+### 🐝 4.14. Git Commit Message Guidelines
+
+In order to give greater clarity during code reviews, we are asking everyone to adhere to a git commit message guideline.
+
+This is to make your organisation more readable and to enforce atomic git practice (i.e. try to do only one type of change on one file per commit).
+
+We will mostly follow the guidelines outlined in Conventional Commits specification found here: [https://www.conventionalcommits.org/en/v1.0.0/#specification](https://www.conventionalcommits.org/en/v1.0.0/#specification).
+
+This [Medium post](https://medium.com/neudesic-innovation/conventional-commits-a-better-way-78d6785c2e08) is also very useful.
+
+In addition, we will add some other common practices as well.
+
+#### 🐝 4.14.1. Conventional Commits
+
+This guideline mostly looks to standardize commit messages by following this simple structure:
+```
+    <type>[(optional <scope>)]: <description>
+    <empty line>
+    [optional <body>]
+    <empty line>
+    [optional <footer(s)>] 
+```
+Let us describe the above structure:
+1. `<type>`: The reason the change to the code base was made. Typical reasons could be:
+    1. feat    : Adding a new feature
+    2. fix     : Updating/fixing an existing feature that had a bug
+    3. docs    : Adding/Changing Documentation
+    4. refactor: Cleaning up or refactoring code
+    5. test    : Adding/Changing tests
+    6. style   : Updating code style
+    7. ci      : Continuous Integration related task
+    8. chore   : Non-feature related or multi feature related technical or prevantive maintenance
+    9. other types can be found on the Conventional Commits website
+2. `optional` : This means you do not need to add this section
+3. `<scope>` : The broad area that is affected by this change. e.g. `feat(data)` would indicate a change to the data layer or `feat(http)` would indicate a change to the http layer.
+4. `<description>`: A short heading describing what you have done this commit. Usually less than 52 characters.
+5. `<empty line>`: An empty line to seperate sections of the commit message.
+6. `<body>`: Additional details and descriptions about what the changes were this commit.
+7. `<footer>`: A tag of the Issues or Merge Requests this commit is related to. E.g. #15!,#17! or #18,#MR12! etc.
+
+Our expectation is that you try to add the optional sections whenever possible.
+
+####  🐝 4.14.2. Example commit messages
+
+You can see some example commit messages from the commit history when you merge Iteration 2 into master. Here are some other examples:
+1. Updated data layer to have persistence:
+    ```
+    feat(data): Added persistence to data layer
+    
+    Added save() and load() functions to be called by setData() and getData() respectively
+
+    #74!
+    ```
+2. Added test for GET /v1/admin/quiz/{quizinfo}:
+    ```
+    test(http): Added error test cases for adminQuizInfo
+
+    Test case for 401 error
+    
+    #82!
+    ```
+3. After testing, fixed a bug in adminQuizInfo:
+    ```
+    fix: incorrect call on checkUserSession in AQI
+
+    checkUserSession expected a string input, AQI tried sending a number
+
+    #103!
+    ```
+4. Removed an extra newline/cleaned up some code spacing issues in AQI:
+    ```
+    style: cleaned up AQI
+    ```
+
+
+
+### 🐝 4.15. Marking Criteria
+
+<table>
+  <tr>
+    <th>Section</th>
+    <th>Weighting</th>
+    <th>Criteria</th>
+  </tr>
+  <tr>
+    <td>Automarking (Testing & Implementation)</td>
+    <td>45%</td>
+    <td>
+      <ul>
+      <li>Correct implementation of specified functions.</li>
+      <li>Correctly written tests based on the specification requirements.</li>
+      <li>Correctly linted code.</li>
+    </ul>
+    Whilst we look at your group's work as a whole, if we feel that materially unequal contributions occurred between group members we will assess your individual contribution against this criteria.
+    </td>
+  </tr>
+  <tr>
+    <td>Sprint Planning</td>
+    <td>10%</td>
+    <td>
+      <ul>
+        <li>Proper breakdown of Iteration 2 into <b>four week-long sprints</b> for organisation</li>
+        <li>Identify breaking and helper functions</li>
+        <li>Allocate tasks into sprints with <b>strict</b> deadlines inside each sprint</li>
+      </ul>
+      <b>Note :: This part is due Tues 9am, Week 06 (01st Oct)</b>
+    </td>
+  </tr>
+  <tr>
+    <td>Test Quality</td>
+    <td>15%</td>
+    <td>
+      <ul>
+        <li>Good test <b>coverage</b> - how well you cover the use cases (no need to run a coverage checker in this iteration).</li>
+        <li>Good test  <b>clarity</b> in communicating the purpose of tests and code.</li>
+        <li>Good test <b>design</b> - thoughtful, clear, and modular layout that follows course examples.</li>
+      </ul>
+      Whilst we look at your group's work as a whole, if we feel that materially unequal contributions occurred between group members we will assess your individual contribution against this criteria.
+    </td>
+  </tr>
+  <tr>
+    <td>General Code Quality</td>
+    <td>10%</td>
+    <td>
+      <ul>
+        <li>Appropriate use of Javascript data structures (arrays, objects, etc.).</li>
+        <li>Appropriate style as described in section 7.4.</li>
+        <li>Appropriate application of good software design practices.</li>
+        <li>Implementation of persistent state.</li>
+        <li>Demonstrated successful connection of the supplied frontend to the backend code required for iteration 2 (doesn't have to be perfect).</li>
+      </ul>
+      Whilst we look at your group's work as a whole, if we feel that materially unequal contributions occurred between group members we will assess your individual contribution against this criteria.
+    </td>
+  </tr>
+  <tr>
+    <td>Git Practices, Project Management, Teamwork</td>
+    <td>20%</td>
+    <td>
+      As an individual, in terms of git:
+      <ul>
+        <li>For particular features, committing the bulk of your tests prior to your implementation.</li>
+        <li>Most of your git commit messages are meaningful, clear, and informative and follow the standard set out by Conventional Commits in [4.14](#-414-git-commit-message-guidelines) and tutorial 05</li>
+        <li>You contribute at least 1 meaningful merge requests PER WEEK (approved by a team member) that merges your branch code to master.</li>
+      </ul>
+      As an individual, in terms of project management and teamwork:
+      <ul>
+        <li>Attendance to group check ins every week.</li>
+        <li>Effective use of course-provided MS Teams for effective communication with your group.</li>
+        <li>Use of issue board on Gitlab OR another equivalent tool that is used to effectively track your tasks.</li>
+        <li>Attendance and contributions at your teams standups, including at least one scenario where you were the leader of the meeting and took the minutes/notes for that meeting.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+For this and for all future milestones, you should consider the other expectations as outlined in section 7 below.
+
+The formula used for automarking in this iteration is:
+
+`Automark = 95*(t * i) + 5*e`
+(Mark equals 95% of `t` multiplied by `i` plus 5% of `e`). This formula produces a value between 0 and 1.
+
+Where:
+ * `t` is the mark between 0-1 you receive for your tests running against your code (100% = your implementation passes all of your tests).
+ * `i` is the mark between 0-1 you receive for our course tests (hidden) running against your code (100% = your implementation passes all of our tests).
+ * `e` is the score between 0-1 achieved by running eslint against your code with the provided configuration. You may find a mark of 0 if you have used eslint disable comments in your code.
+
+
+### 🐝 4.14. Dryrun
+
+The dryrun checks the format of your return types and simple expected behaviour for a few basic routes. Do not rely on these as an indicator for the correctness of your implementation or tests.
+
+To run the dryrun, you should be in the root directory of your project (e.g. `/project-backend`) and use the command:
+
+```bash
+1531 dryrun 2
+```
+
+To view the dryrun tests, you can run the following command on CSE machines:
+```bash
+cat ~cs1531/bin/iter2.test.js
+```
+
+### 🐝 4.15. Submission & Peer Assessment
+
+Please see section 6 for information on **due date** and on how you will **demonstrate this iteration**.
+
+Please see section 7.5 for information on **peer assessment**.
 
 ## 🦆 5. Iteration 3: Completing the Lifecycle
 
@@ -1020,7 +1511,6 @@ The following serves as a baseline for expected progress during project check-in
 From weeks 2 onward, your individual project mark may be reduced if you do not satisfy the following:
 * Attend all tutorials.
 * Participate in tutorials by asking questions and offering answers.
-* [online only] Have your web cam on for the duration of the tutorial and lab.
 
 We're comfortable with you missing or disengaging with 1 tutorial per term, but for anything more than that please email your tutor. If you cannot meet one of the above criteria, you will likely be directed to special consideration.
 
@@ -1143,5 +1633,3 @@ Relevant scholarship authorities will be informed if students holding scholarshi
 Do not provide or show your project work to any other person, except for your group and the teaching staff of DPST1093. If you knowingly provide or show your assignment work to another person for any reason, and work derived from it is submitted, you may be penalized, even if the work was submitted without your knowledge or consent. This may apply even if your work is submitted by a third party unknown to you.
 
 Note: you will not be penalized if your work has the potential to be taken without your consent or knowledge.
-
-
