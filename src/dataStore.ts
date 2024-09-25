@@ -77,6 +77,7 @@ export class UserSession {
 
 export class QuizSession {
   sessionId: number;
+  state: QuizSessionState;
   quizId: number;
   timeCreated: number;
 }
