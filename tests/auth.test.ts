@@ -1,5 +1,6 @@
-import * as auth from "../src/auth.js";
-import { clear } from "../src/other.js";
+// @ts-nocheck
+import * as auth from "../src/auth";
+import { clear } from "../src/other";
 
 /////////////////////////////////////////////////////////////////////
 // Example

@@ -1,5 +1,5 @@
-import { getData, Quiz, User } from './dataStore.js';
-import { ERROR_MESSAGES } from './errors.js';
+import { getData, Quiz, User } from '../dataStore.js';
+import { ERROR_MESSAGES } from '../errors.js';
 import {
   getNewID,
   isUnusedEmail,
@@ -7,7 +7,7 @@ import {
   isValidPassword,
   isValidUserId,
   isValidUserName,
-} from './helper.js';
+} from '../helper.js';
 
 /**
  * Register a user with an email, password, and names, 

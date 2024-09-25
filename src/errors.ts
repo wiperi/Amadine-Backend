@@ -5,8 +5,6 @@ const ERROR_MESSAGES = {
   USED_EMAIL: 'Email address already in use.',
   // name
   INVALID_NAME: 'Invalid name format',
-  // quizname
-  INVALID_DESCRIPTION: 'Invalid description format',
   //description
   INVALID_DESCRIPTION: 'Invalid description format',
   // quizId

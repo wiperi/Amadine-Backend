@@ -1,6 +1,6 @@
-import { adminAuthRegister } from './auth.js';
-import { getData, Quiz, User } from './dataStore.js';
-import { ERROR_MESSAGES } from './errors.js';
+import { adminAuthRegister } from '../auth.js';
+import { getData, Quiz, User } from '../dataStore.js';
+import { ERROR_MESSAGES } from '../errors.js';
 import {
   getNewID,
   isValidEmail,
@@ -10,8 +10,8 @@ import {
   isQuizIdOwnedByUser,
   isValidQuizId,
   findQuizById,
-} from './helper.js';
-import { isValidQuizName, isValidQuizDescription } from './helper.js';
+} from '../helper.js';
+import { isValidQuizName, isValidQuizDescription } from '../helper.js';
 
 /**
  * Update the description of the relevant quiz.
