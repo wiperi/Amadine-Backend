@@ -8,6 +8,7 @@ import path from 'path';
 
 export class User {
   userId: number;
+
   email: string;
   password: string;
   nameFirst: string;
@@ -31,11 +32,14 @@ export class User {
 export class Quiz {
   authUserId: number;
   quizId: number;
+
   name: string;
   description: string;
   timeCreated: number;
   timeLastEdited: number;
   active: boolean;
+  questions: Question[];
+  thumbnailUrl: string;
 
   constructor(authUserId: number, quizId: number, name: string, description: string) {
     this.authUserId = authUserId;
@@ -53,9 +57,17 @@ export class Quiz {
 // Classes below are working in progress, never used
 /// //////////////////////////////////////////////////////////////////
 
+export class UserSession {
+  sessionId: number;
+  authUserId: number;
+
+  token: string;
+}
+
 export class Question {
-  // Position in quiz matters
+  // Position matters in quiz
   questionId: number;
+
   question: string;
   duration: number;
   points: number;
@@ -64,27 +76,25 @@ export class Question {
 
 export class Answer {
   answerId: number;
-  answer: string;
-  colour: string;
-  correct: boolean;
-}
 
-export class UserSession {
-  sessionId: number;
-  authUserId: number;
-  timeCreated: number;
+  answer: string;
+  colour: string; // ramdomly generated when question is created
+  correct: boolean;
 }
 
 export class QuizSession {
   sessionId: number;
-  state: QuizSessionState;
   quizId: number;
+
+  messages: Message[];
+  state: QuizSessionState;
   timeCreated: number;
 }
 
 export class Player {
   playerId: number; // Must be globally unique
   quizSessionId: number;
+
   state: QuizSessionState;
   numQuestions: number;
   atQuestion: number;
@@ -92,6 +102,7 @@ export class Player {
 
 export class Message {
   playerId: number;
+  
   playerName: string;
   messageBody: string;
   timeSent: number;
@@ -99,8 +110,19 @@ export class Message {
 
 export enum QuizSessionState {
   LOBBY = 'LOBBY',
-  ACTIVE = 'ACTIVE',
-  SPECTATING = 'SPECTATING',
+  QUESTION_COUNTDOWN = 'QUESTION_COUNTDOWN',
+  QUESTION_OPEN = 'QUESTION_OPEN',
+  QUESTION_CLOSE = 'QUESTION_CLOSE',
+  ANSWER_SHOW = 'ANSWER_SHOW',
+  FINAL_RESULTS = 'FINAL_RESULTS',
+  END = 'END'
+}
+
+export enum PlayerAction {
+  NEXT_QUESTION = 'NEXT_QUESTION',
+  SKIP_COUNTDOWN = 'SKIP_COUNTDOWN',
+  GO_TO_ANSWER = 'GO_TO_ANSWER',
+  GO_TO_FINAL_RESULTS = 'GO_TO_FINAL_RESULTS',
   END = 'END',
 }
 
