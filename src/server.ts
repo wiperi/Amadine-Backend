@@ -9,6 +9,12 @@ import fs from 'fs';
 import path from 'path';
 import process from 'process';
 
+// Import routers
+import { authRouter } from './routers/auth';
+import { quizRouter } from './routers/quiz';
+import { userRouter } from './routers/user';
+import { playerRouter } from './routers/player';
+
 // Set up web app
 const app = express();
 // Use middleware that allows us to access the JSON body of requests
@@ -38,6 +44,11 @@ app.get('/echo', (req: Request, res: Response) => {
 
   return res.json(result);
 });
+
+app.use('/v1/admin/auth', authRouter);
+app.use('/v1/admin/quiz', quizRouter);
+app.use('/v1/admin/user', userRouter);
+app.use('/v1/player', playerRouter);
 
 // ====================================================================
 //  ================= WORK IS DONE ABOVE THIS LINE ===================
