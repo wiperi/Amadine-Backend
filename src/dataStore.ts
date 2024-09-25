@@ -1,6 +1,10 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW ONLY
 import fs from 'fs';
 
+/// //////////////////////////////////////////////////////////////////
+// Classes
+/// //////////////////////////////////////////////////////////////////
+
 export class User {
   userId: number;
   email: string;
@@ -37,11 +41,63 @@ export class Quiz {
     this.quizId = quizId;
     this.name = name;
     this.description = description;
+
     this.timeCreated = Math.floor(Date.now() / 1000);
     this.timeLastEdited = Math.floor(Date.now() / 1000);
     this.active = true;
   }
 }
+
+/// //////////////////////////////////////////////////////////////////
+// Classes below are working in progress, never used
+/// //////////////////////////////////////////////////////////////////
+
+export class Question {
+  // Position in quiz matters
+  questionId: number;
+  question: string;
+  duration: number;
+  points: number;
+  answers: Answer[];
+}
+
+export class Answer {
+  answerId: number;
+  answer: string;
+  colour: string;
+  correct: boolean;
+}
+
+export class UserSession {
+  sessionId: number;
+  authUserId: number;
+  timeCreated: number;
+}
+
+export class QuizSession {
+  sessionId: number;
+  quizId: number;
+  timeCreated: number;
+}
+
+export class Player {
+  playerId: number; // Must be globally unique
+  quizSessionId: number;
+  state: PlayerState;
+  numQuestions: number;
+  atQuestion: number;
+}
+
+enum PlayerState {
+  LOBBY = 'LOBBY',
+  ACTIVE = 'ACTIVE',
+  SPECTATING = 'SPECTATING',
+  END = 'END',
+}
+
+/// //////////////////////////////////////////////////////////////////
+// DataStore
+/// //////////////////////////////////////////////////////////////////
 
 type DataStore = {
   users: User[];

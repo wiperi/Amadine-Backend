@@ -1,5 +1,5 @@
 
-import { getData } from "../dataStore.js";
+import { getData } from '../dataStore.js';
 import isEmail from 'validator/lib/isEmail.js';
 
 /**
@@ -8,10 +8,10 @@ import isEmail from 'validator/lib/isEmail.js';
  * @returns {number} A random 12-digit number.
  */
 export function getNewID() {
-  let id =  Math.floor((Math.random() * (9 * Math.pow(10, 11))) + Math.pow(10, 11));
+  let id = Math.floor((Math.random() * (9 * Math.pow(10, 11))) + Math.pow(10, 11));
   const data = getData();
   while (data.users.some(user => user.userId === id) || data.quizzes.some(quiz => quiz.quizId === id)) {
-    id =  Math.floor((Math.random() * (9 * Math.pow(10, 11))) + Math.pow(10, 11));
+    id = Math.floor((Math.random() * (9 * Math.pow(10, 11))) + Math.pow(10, 11));
   }
   return id;
 }
@@ -26,12 +26,12 @@ export function isValidPassword(password) {
   const numberRequirement = /[0-9]/.test(password);
   const letterRequirement = /[a-zA-Z]/.test(password);
 
-  return (password.length >= 8 && numberRequirement && letterRequirement);  
+  return (password.length >= 8 && numberRequirement && letterRequirement);
 }
 
 /**
  * Check email format.
- * 
+ *
  * @param {string} email - The email of user
  * @returns {boolean} - Return true if email is correct
  */
@@ -52,9 +52,9 @@ export function isUnusedEmail(email) {
 /**
  * check the format and length of the userName
  * Name need more than 1 characters and less than 21 characters
- * Name cannot contains characters other than lowercase letters, 
+ * Name cannot contains characters other than lowercase letters,
  * uppercase letters, spaces, hyphens, or apostrophes
- * 
+ *
  * @param {string} userName - the name of user
  * @returns {boolean} - return true if userName is correct
  */
@@ -78,8 +78,8 @@ export function isValidUserName(userName) {
  *  1. contain not alphanumeric or spaces
  *  2. < 3 or > 30 characters
  *  3. already used by current logged in user for another quiz
- * 
- * @param {string} quizName 
+ *
+ * @param {string} quizName
  * @returns {boolean} - return whether quiz name is valid
  */
 export function isValidQuizName(quizName) {
@@ -94,7 +94,7 @@ export function isValidQuizName(quizName) {
   }
 
   const quizList = getData().quizzes;
-  if (quizList.some((quiz) => quiz.name === quizName && quiz.active === true)){
+  if (quizList.some((quiz) => quiz.name === quizName && quiz.active === true)) {
     return false;
   }
 
@@ -105,14 +105,13 @@ export function isValidQuizName(quizName) {
  * check if the provided quiz description is valid
  * invalid cases:
  *  1. quiz description is more than 100 characters in length
- * 
- * @param {string} quizDescription 
+ *
+ * @param {string} quizDescription
  * @returns {boolean} - return whether quiz description is valid
  */
 export function isValidQuizDescription(quizDescription) {
   return quizDescription.length <= 100;
 }
-
 
 /**
  * Checks if the given user ID is valid by verifying its presence in the user list.
@@ -121,14 +120,13 @@ export function isValidQuizDescription(quizDescription) {
  * @returns {boolean} - Returns true if the user ID is found in the user list, otherwise false.
  */
 export function isValidUserId(id) {
-  let userList = getData().users;
+  const userList = getData().users;
   return userList.some((user) => user.userId === id);
 }
 
-
 /**
- * 
- * @param {number} userId 
+ *
+ * @param {number} userId
  * @returns {object} - user object
  */
 export function findUserById(userId) {
@@ -142,10 +140,9 @@ export function findUserById(userId) {
  * @returns {boolean} - Returns true if the quizId refers to a active quiz, otherwise false.
  */
 export function isValidQuizId(quizId) {
-  let quizList = getData().quizzes;
+  const quizList = getData().quizzes;
   return quizList.some((quiz) => quiz.quizId === quizId && quiz.active);
 }
-
 
 /**
  * Checks if a quiz with the given quizId is owned by the user with the given authUserId and is active.
@@ -155,13 +152,13 @@ export function isValidQuizId(quizId) {
  * @returns {boolean} - Returns true if the quiz is owned by the user and is active, otherwise false.
  */
 export function isQuizIdOwnedByUser(quizId, authUserId) {
-  let quizList = getData().quizzes;
+  const quizList = getData().quizzes;
   return quizList.some((quiz) => quiz.quizId === quizId && quiz.authUserId === authUserId && quiz.active);
 }
 
 /**
- * 
- * @param {number} quizId 
+ *
+ * @param {number} quizId
  * @returns {object} - quiz object
  */
 export function findQuizById(quizId) {

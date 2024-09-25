@@ -1,4 +1,4 @@
-import { getData, Quiz, User } from '../dataStore.js';
+import { getData, User } from '../dataStore.js';
 import { ERROR_MESSAGES } from '../errors.js';
 import {
   getNewID,
@@ -10,9 +10,9 @@ import {
 } from '../helper.js';
 
 /**
- * Register a user with an email, password, and names, 
+ * Register a user with an email, password, and names,
  * then returns their authUserId value.
- * 
+ *
  * @param {string} email - The email address of a user
  * @param {string} password - The password of a user
  * @param {string} nameFirst - The first name of a user
@@ -20,7 +20,6 @@ import {
  * @returns {{ authUserId }} - Object with authUserId value
  */
 export function adminAuthRegister(email, password, nameFirst, nameLast) {
-
   const data = getData();
 
   if (!isValidEmail(email)) {
@@ -45,11 +44,10 @@ export function adminAuthRegister(email, password, nameFirst, nameLast) {
   return { authUserId: userId };
 }
 
-
 /**
- * Given a registered user's email and password 
+ * Given a registered user's email and password
  * returns their authUserId value.
- * 
+ *
  * @param {string} email - User's email
  * @param {string} password - User's password
  * @returns {{ authUserId }} - Object with authUserId value
@@ -68,7 +66,6 @@ export function adminAuthLogin(email, password) {
   // error case 2:
   //  password is not correct for the given email
   if (user.password !== password) {
-
     user.numFailedPasswordsSinceLastLogin++;
 
     return { error: ERROR_MESSAGES.WRONG_PASSWORD };
@@ -91,18 +88,17 @@ export function adminAuthLogin(email, password) {
  * @returns {Object} - An empty object.
  */
 export function adminUserDetailsUpdate(authUserId, email, nameFirst, nameLast) {
-
   if (!isValidUserId(authUserId)) {
     return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }
-  
+
   if (!isValidEmail(email)) {
     return { error: ERROR_MESSAGES.INVALID_EMAIL_FORMAT };
   }
 
   const data = getData();
   const user = data.users.find((user) => user.userId === authUserId);
-  
+
   const emailUsedByOthers = data.users.find(user => user.email === email && user.userId !== authUserId);
 
   if (emailUsedByOthers) {
@@ -122,9 +118,9 @@ export function adminUserDetailsUpdate(authUserId, email, nameFirst, nameLast) {
 
 /**
  * Given an admin user's authUserId, return details about the user.
- * "name" is the first and last name concatenated 
+ * "name" is the first and last name concatenated
  * with a single space between them.
- * 
+ *
  * @param {number} authUserId - User's Id
  * @returns {Object} - Object with userId, name, email, times of successful logins
  *                     times of failed passwords since last login
@@ -157,7 +153,6 @@ export function adminUserDetails(authUserId) {
  * @returns {Object} - An empty object.
  */
 export function adminUserPasswordUpdate(authUserId, oldPassword, newPassword) {
-
   if (!isValidUserId(authUserId)) {
     return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }
@@ -183,6 +178,5 @@ export function adminUserPasswordUpdate(authUserId, oldPassword, newPassword) {
   user.oldPasswords.push(oldPassword);
   user.password = newPassword;
 
-  return {}
+  return {};
 }
-

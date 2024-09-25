@@ -1,12 +1,8 @@
-import { adminAuthRegister } from '../auth.js';
-import { getData, Quiz, User } from '../dataStore.js';
+import { getData, Quiz } from '../dataStore.js';
 import { ERROR_MESSAGES } from '../errors.js';
 import {
   getNewID,
-  isValidEmail,
-  isValidPassword,
   isValidUserId,
-  isValidUserName,
   isQuizIdOwnedByUser,
   isValidQuizId,
   findQuizById,
@@ -23,22 +19,22 @@ import { isValidQuizName, isValidQuizDescription } from '../helper.js';
  */
 export function adminQuizDescriptionUpdate(authUserId, quizId, description) {
   Object.defineProperty(global, 'performance', {
-          writable: true,
-        });
-  if(!isValidUserId(authUserId)){
-    return {error: ERROR_MESSAGES.UID_NOT_EXIST};
+    writable: true,
+  });
+  if (!isValidUserId(authUserId)) {
+    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }
 
-  if(!isValidQuizId(quizId)){
-    return {error: ERROR_MESSAGES.INVALID_QUIZ_ID};
+  if (!isValidQuizId(quizId)) {
+    return { error: ERROR_MESSAGES.INVALID_QUIZ_ID };
   }
 
-  if(!isQuizIdOwnedByUser(quizId, authUserId)){
-    return {error: ERROR_MESSAGES.NOT_AUTHORIZED};
+  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
+    return { error: ERROR_MESSAGES.NOT_AUTHORIZED };
   }
 
-  if (!isValidQuizDescription(description)){
-    return {error: ERROR_MESSAGES.INVALID_DESCRIPTION};
+  if (!isValidQuizDescription(description)) {
+    return { error: ERROR_MESSAGES.INVALID_DESCRIPTION };
   }
 
   findQuizById(quizId).description = description;
@@ -48,7 +44,7 @@ export function adminQuizDescriptionUpdate(authUserId, quizId, description) {
 
 /**
  * Get all of the relevant information about the current quiz.
- * 
+ *
  * @param {number} authUserId - The ID of the authenticated user.
  * @param {number} quizId - The ID of quiz.
  * @returns {Object} - Object with quizId, name, timeCreated,
@@ -56,8 +52,8 @@ export function adminQuizDescriptionUpdate(authUserId, quizId, description) {
  */
 export function adminQuizInfo(authUserId, quizId) {
   Object.defineProperty(global, 'performance', {
-          writable: true,
-        });
+    writable: true,
+  });
   if (!isValidUserId(authUserId)) {
     return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }
@@ -90,12 +86,12 @@ export function adminQuizInfo(authUserId, quizId) {
  * @param {number} authUserId - The ID of the authenticated user.
  * @param {number} quizId - The ID of quiz.
  * @param {string} name - name of Quiz which should be updated.
- * @returns {} - An empty object. 
+ * @returns {} - An empty object.
  */
-export function adminQuizNameUpdate(authUserId, quizId, name){
+export function adminQuizNameUpdate(authUserId, quizId, name) {
   Object.defineProperty(global, 'performance', {
-          writable: true,
-        });
+    writable: true,
+  });
   if (!isValidUserId(authUserId)) {
     return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }
@@ -112,7 +108,7 @@ export function adminQuizNameUpdate(authUserId, quizId, name){
     return { error: ERROR_MESSAGES.INVALID_NAME };
   }
 
-  let quiz = findQuizById(quizId);  
+  const quiz = findQuizById(quizId);
   quiz.name = name;
   quiz.timeLastEdited = Math.floor(Date.now() / 1000);
 
@@ -131,8 +127,8 @@ export function adminQuizNameUpdate(authUserId, quizId, name){
  */
 export function adminQuizCreate(authUserId, name, description) {
   Object.defineProperty(global, 'performance', {
-          writable: true,
-        });
+    writable: true,
+  });
   if (!isValidUserId(authUserId)) {
     return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }
@@ -150,19 +146,19 @@ export function adminQuizCreate(authUserId, name, description) {
 }
 
 /**
- * Retrieves a list of quizzes created by a specific authenticated user, 
+ * Retrieves a list of quizzes created by a specific authenticated user,
  * if the user ID is valid. The quizzes are returned with their IDs and names.
  *
  * @param {string} authUserId - The authenticated user's ID to filter the quizzes.
- * 
+ *
  * @returns {Object} - Returns an object containing either the list of quizzes or an error message.
- * @returns {Object[]} [quizzes] - An array of quizzes created by the authenticated user, 
+ * @returns {Object[]} [quizzes] - An array of quizzes created by the authenticated user,
  * each object containing the quiz ID and quiz name.
  * @returns {string} quizzes[].quizId - The unique identifier of the quiz.
  * @returns {string} quizzes[].name - The name of the quiz.
  * @returns {Object} [error] - Returns an error object if the user ID is not valid.
  * @returns {string} error.message - The specific error message.
- * 
+ *
  * @example
  * // Example usage:
  * const result = adminQuizList('123412341234');
@@ -191,10 +187,10 @@ export function adminQuizList(authUserId) {
 /**
  * Make a quiz be inactive if the user is the owner
  * Return an empty object if succeed
- * 
+ *
  * @param {number} authUserId - The ID of the authenticated user.
  * @param {number} quizId - The ID of quiz.
- * @returns 
+ * @returns
  */
 export function adminQuizRemove(authUserId, quizId) {
   if (!isValidUserId(authUserId)) {

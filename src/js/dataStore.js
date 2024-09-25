@@ -3,7 +3,7 @@
 export class User {
   /**
    * Creates an instance of a user.
-   * 
+   *
    * @constructor
    * @param {number} userId - The unique identifier for the user.
    * @param {string} email - The email address of the user.
@@ -29,7 +29,7 @@ export class User {
 export class Quiz {
   /**
    * Creates an instance of Quiz.
-   * 
+   *
    * @constructor
    * @param {string} authUserId - The ID of the authenticated user.
    * @param {string} quizId - The ID of the quiz.

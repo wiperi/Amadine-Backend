@@ -5,11 +5,11 @@ const ERROR_MESSAGES = {
   USED_EMAIL: 'Email address already in use.',
   // name
   INVALID_NAME: 'Invalid name format',
-  //description
+  // description
   INVALID_DESCRIPTION: 'Invalid description format',
   // quizId
   INVALID_QUIZ_ID: 'Invalid quizId',
-  //not authorized
+  // not authorized
   NOT_AUTHORIZED: 'Not authorized',
   // authUserId
   UID_NOT_EXIST: 'authUserId does not exist.',
@@ -19,6 +19,6 @@ const ERROR_MESSAGES = {
   WRONG_OLD_PASSWORD: 'Given old password is not correct.',
   NEW_PASSWORD_SAME_AS_OLD: 'New password cannot be the same as the old password.',
   PASSWORD_ALREADY_USED: 'New password cannot be the same as any of used passwords.',
-}
+};
 
 export { ERROR_MESSAGES };
