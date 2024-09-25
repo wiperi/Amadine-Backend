@@ -1,17 +1,4 @@
 {
-  "users": [
-    {
-      "userId": 616425961674,
-      "email": "cheongmail@gmail.com",
-      "password": "nicepassword",
-      "nameFirst": "Cheong",
-      "nameLast": "Zhang",
-      "numSuccessfulLogins": 3,
-      "numFailedPasswordsSinceLastLogin": 4,
-      "oldPasswords": [
-        "MyOldPass1234"
-      ]
-    }
-  ],
+  "users": [],
   "quizzes": []
 }

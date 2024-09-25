@@ -1,5 +1,6 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW ONLY
 import fs from 'fs';
+import path from 'path';
 
 /// //////////////////////////////////////////////////////////////////
 // Classes
@@ -83,12 +84,19 @@ export class QuizSession {
 export class Player {
   playerId: number; // Must be globally unique
   quizSessionId: number;
-  state: PlayerState;
+  state: QuizSessionState;
   numQuestions: number;
   atQuestion: number;
 }
 
-enum PlayerState {
+export class Message {
+  playerId: number;
+  playerName: string;
+  messageBody: string;
+  timeSent: number;
+}
+
+export enum QuizSessionState {
   LOBBY = 'LOBBY',
   ACTIVE = 'ACTIVE',
   SPECTATING = 'SPECTATING',
@@ -106,16 +114,16 @@ type DataStore = {
 
 let data: DataStore = {
   users: [
-    {
-      userId: 616425961674,
-      email: 'cheongmail@gmail.com',
-      password: 'nicepassword',
-      nameFirst: 'Cheong',
-      nameLast: 'Zhang',
-      numSuccessfulLogins: 3,
-      numFailedPasswordsSinceLastLogin: 4,
-      oldPasswords: ['MyOldPass1234'],
-    }
+    // {
+    //   userId: 616425961674,
+    //   email: 'cheongmail@gmail.com',
+    //   password: 'nicepassword',
+    //   nameFirst: 'Cheong',
+    //   nameLast: 'Zhang',
+    //   numSuccessfulLogins: 3,
+    //   numFailedPasswordsSinceLastLogin: 4,
+    //   oldPasswords: ['MyOldPass1234'],
+    // }
   ],
   quizzes: [
     // {
@@ -148,7 +156,7 @@ Example usage
     setData(store)
 */
 
-const DATA_FILE_PATH = `${__dirname}/data.json`;
+const DATA_FILE_PATH = path.join(__dirname, 'data.json');
 
 // Use get() to access the data
 function getData(): DataStore {
