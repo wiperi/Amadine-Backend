@@ -5,6 +5,7 @@ image: comp1531/automarking:latest
 # Define the various pipelines
 stages:
   - checks
+  - lint
 
 # Instead of an install pipeline, we run a seperate script for setting up
 before_script:
@@ -28,3 +29,11 @@ tests:
     - cat $SERVER_LOG
 
 # You can add more pipelines or pipelines components that do things like: tsc or eslint
+
+lint:
+  stage: lint
+  only:
+    - master
+    - merge_requests
+  script:
+    - npm run lint
