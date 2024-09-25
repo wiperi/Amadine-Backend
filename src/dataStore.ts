@@ -1,4 +1,5 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW ONLY
+import fs from 'fs';
 
 export class User {
   userId: number;
@@ -49,16 +50,16 @@ type DataStore = {
 
 let data: DataStore = {
   users: [
-    // {
-    //   userId: 616425961674,
-    //   email: 'cheongmail@gmail.com',
-    //   password: 'nicepassword',
-    //   nameFirst: 'Cheong',
-    //   nameLast: 'Zhang',
-    //   numSuccessfulLogins: 3,
-    //   numFailedPasswordsSinceLastLogin: 4,
-    //   oldPasswords: ['MyOldPass1234'],
-    // }
+    {
+      userId: 616425961674,
+      email: 'cheongmail@gmail.com',
+      password: 'nicepassword',
+      nameFirst: 'Cheong',
+      nameLast: 'Zhang',
+      numSuccessfulLogins: 3,
+      numFailedPasswordsSinceLastLogin: 4,
+      oldPasswords: ['MyOldPass1234'],
+    }
   ],
   quizzes: [
     // {
@@ -91,14 +92,28 @@ Example usage
     setData(store)
 */
 
+const DATA_FILE_PATH = `${__dirname}/data.json`;
+
 // Use get() to access the data
 function getData(): DataStore {
   return data;
 }
 
-// Use set(newData) to pass in the entire data object, with modifications made
-function setData(newData: DataStore): void {
-  data = newData;
+/**
+ * Save current data to json file. If newData is provided, overwrite the current data with newData.
+ */
+function setData(newData?: DataStore): void {
+  if (newData) {
+    data = newData;
+  }
+  fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(data, null, 2));
 }
 
-export { getData, setData };
+/**
+ * Load data from json file.
+ */
+function loadData(): void {
+  data = JSON.parse(fs.readFileSync(DATA_FILE_PATH, 'utf8'));
+}
+
+export { getData, setData, loadData };
