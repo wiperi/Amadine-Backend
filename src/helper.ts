@@ -5,7 +5,7 @@ import { User, Quiz } from "./dataStore";
 /**
  * Generates a random 12-digit ID that is not already in use.
  *
- * @returns {number} A random 12-digit number.
+ * @returns return a random 12-digit number
  */
 export function getNewID(): number {
   let id: number = Math.floor((Math.random() * (9 * Math.pow(10, 11))) + Math.pow(10, 11));
@@ -17,10 +17,11 @@ export function getNewID(): number {
 }
 
 /**
- * validate password, password must be at least 8 characters long
+ * Validate password, password must be at least 8 characters long
  * and contain at least one number and one letter
- * @param {string} password
- * @returns {boolean}
+ * 
+ * @param password 
+ * @returns return true if password is correct
  */
 export function isValidPassword(password: string): boolean {
   const numberRequirement = /[0-9]/.test(password);
@@ -32,8 +33,8 @@ export function isValidPassword(password: string): boolean {
 /**
  * Check email format.
  * 
- * @param {string} email - The email of user
- * @returns {boolean} - Return true if email is correct
+ * @param email 
+ * @returns return true if email is correct
  */
 export function isValidEmail(email: string): boolean {
   return isEmail(email);
@@ -42,8 +43,8 @@ export function isValidEmail(email: string): boolean {
 /**
  * Checks if the provided email is not used by any user.
  *
- * @param {string} email - The email to check for usage.
- * @returns {boolean} - Returns true if the email is not used by any user, otherwise false.
+ * @param email 
+ * @returns return true if the email is not used by any user, otherwise false.
  */
 export function isUnusedEmail(email: string): boolean {
   return getData().users.every(user => user.email !== email);
@@ -51,12 +52,9 @@ export function isUnusedEmail(email: string): boolean {
 
 /**
  * check the format and length of the userName
- * Name need more than 1 characters and less than 21 characters
- * Name cannot contains characters other than lowercase letters, 
- * uppercase letters, spaces, hyphens, or apostrophes
  * 
- * @param {string} userName - the name of user
- * @returns {boolean} - return true if userName is correct
+ * @param userName 
+ * @returns return true if userName is correct
  */
 export function isValidUserName(userName: string): boolean {
   const nameRegex = /^[a-zA-Z\s'-]+$/;
@@ -74,13 +72,9 @@ export function isValidUserName(userName: string): boolean {
 
 /**
  * check if the provided quiz name is in a valid format
- * invalid cases:
- *  1. contain not alphanumeric or spaces
- *  2. < 3 or > 30 characters
- *  3. already used by current logged in user for another quiz
  * 
- * @param {string} quizName 
- * @returns {boolean} - return whether quiz name is valid
+ * @param quizName 
+ * @returns return whether quiz name is valid
  */
 export function isValidQuizName(quizName: string): boolean {
   // regex for alphanumeric and spaces
@@ -106,8 +100,8 @@ export function isValidQuizName(quizName: string): boolean {
  * invalid cases:
  *  1. quiz description is more than 100 characters in length
  * 
- * @param {string} quizDescription 
- * @returns {boolean} - return whether quiz description is valid
+ * @param quizDescription 
+ * @returns return whether quiz description is valid
  */
 export function isValidQuizDescription(quizDescription: string): boolean {
   return quizDescription.length <= 100;
@@ -115,29 +109,25 @@ export function isValidQuizDescription(quizDescription: string): boolean {
 
 /**
  * Checks if the given user ID is valid by verifying its presence in the user list.
- *
- * @param {number} id - The user ID to validate.
- * @returns {boolean} - Returns true if the user ID is found in the user list, otherwise false.
+ * 
+ * @param id 
+ * @returns Returns true if the user ID is found in the user list, otherwise false.
  */
 export function isValidUserId(id: number): boolean {
   let userList = getData().users;
   return userList.some((user) => user.userId === id);
 }
 
-/**
- * 
- * @param {number} userId 
- * @returns {User | undefined} - user object
- */
+
 export function findUserById(userId: number): User | undefined {
   return getData().users.find(user => user.userId === userId);
 }
 
 /**
  * Checks if the provided quizId is valid.
- *
- * @param {number} quizId - The ID of the quiz to validate.
- * @returns {boolean} - Returns true if the quizId refers to a active quiz, otherwise false.
+ * 
+ * @param quizId 
+ * @returns return true if the quizId refers to a active quiz, otherwise false.
  */
 export function isValidQuizId(quizId: number): boolean {
   let quizList = getData().quizzes;
@@ -146,21 +136,17 @@ export function isValidQuizId(quizId: number): boolean {
 
 /**
  * Checks if a quiz with the given quizId is owned by the user with the given authUserId and is active.
- *
- * @param {number} quizId - The ID of the quiz to check.
- * @param {number} authUserId - The ID of the user to check ownership against.
- * @returns {boolean} - Returns true if the quiz is owned by the user and is active, otherwise false.
+ * 
+ * @param quizId 
+ * @param authUserId 
+ * @returns return true if the quiz is owned by the user and is active, otherwise false.
  */
 export function isQuizIdOwnedByUser(quizId: number, authUserId: number): boolean {
   let quizList = getData().quizzes;
   return quizList.some((quiz) => quiz.quizId === quizId && quiz.authUserId === authUserId && quiz.active);
 }
 
-/**
- * 
- * @param {string} quizId 
- * @returns {Quiz | undefined} - quiz object
- */
+
 export function findQuizById(quizId: number): Quiz | undefined {
   return getData().quizzes.find(quiz => quiz.quizId === quizId);
 }
