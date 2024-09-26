@@ -1,4 +1,10 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW ONLY
+import fs from 'fs';
+import path from 'path';
+
+/// //////////////////////////////////////////////////////////////////
+// Classes
+/// //////////////////////////////////////////////////////////////////
 
 export class User {
   userId: number;
@@ -36,11 +42,71 @@ export class Quiz {
     this.quizId = quizId;
     this.name = name;
     this.description = description;
+
     this.timeCreated = Math.floor(Date.now() / 1000);
     this.timeLastEdited = Math.floor(Date.now() / 1000);
     this.active = true;
   }
 }
+
+/// //////////////////////////////////////////////////////////////////
+// Classes below are working in progress, never used
+/// //////////////////////////////////////////////////////////////////
+
+export class Question {
+  // Position in quiz matters
+  questionId: number;
+  question: string;
+  duration: number;
+  points: number;
+  answers: Answer[];
+}
+
+export class Answer {
+  answerId: number;
+  answer: string;
+  colour: string;
+  correct: boolean;
+}
+
+export class UserSession {
+  sessionId: number;
+  authUserId: number;
+  timeCreated: number;
+}
+
+export class QuizSession {
+  sessionId: number;
+  state: QuizSessionState;
+  quizId: number;
+  timeCreated: number;
+}
+
+export class Player {
+  playerId: number; // Must be globally unique
+  quizSessionId: number;
+  state: QuizSessionState;
+  numQuestions: number;
+  atQuestion: number;
+}
+
+export class Message {
+  playerId: number;
+  playerName: string;
+  messageBody: string;
+  timeSent: number;
+}
+
+export enum QuizSessionState {
+  LOBBY = 'LOBBY',
+  ACTIVE = 'ACTIVE',
+  SPECTATING = 'SPECTATING',
+  END = 'END',
+}
+
+/// //////////////////////////////////////////////////////////////////
+// DataStore
+/// //////////////////////////////////////////////////////////////////
 
 type DataStore = {
   users: User[];
@@ -91,14 +157,28 @@ Example usage
     setData(store)
 */
 
+const DATA_FILE_PATH = path.join(__dirname, 'data.json');
+
 // Use get() to access the data
 function getData(): DataStore {
   return data;
 }
 
-// Use set(newData) to pass in the entire data object, with modifications made
-function setData(newData: DataStore): void {
-  data = newData;
+/**
+ * Save current data to json file. If newData is provided, overwrite the current data with newData.
+ */
+function setData(newData?: DataStore): void {
+  if (newData) {
+    data = newData;
+  }
+  fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(data, null, 2));
 }
 
-export { getData, setData };
+/**
+ * Load data from json file.
+ */
+function loadData(): void {
+  data = JSON.parse(fs.readFileSync(DATA_FILE_PATH, 'utf8'));
+}
+
+export { getData, setData, loadData };

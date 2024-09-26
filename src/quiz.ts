@@ -13,7 +13,7 @@ import {
 /**
  * Update the description of the relevant quiz.
  */
-export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, description: string): {} | { error: string } {
+export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, description: string): Record<string, never> | { error: string } {
   if (!isValidUserId(authUserId)) {
     return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }
@@ -73,7 +73,7 @@ export function adminQuizInfo(authUserId: number, quizId: number): {
 /**
  * Update the name of the relevant quiz.
  */
-export function adminQuizNameUpdate(authUserId: number, quizId: number, name: string): {} | { error: string } {
+export function adminQuizNameUpdate(authUserId: number, quizId: number, name: string): Record<string, never> | { error: string } {
   if (!isValidUserId(authUserId)) {
     return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }
@@ -90,7 +90,7 @@ export function adminQuizNameUpdate(authUserId: number, quizId: number, name: st
     return { error: ERROR_MESSAGES.INVALID_NAME };
   }
 
-  let quiz = findQuizById(quizId);
+  const quiz = findQuizById(quizId);
   if (quiz) {
     quiz.name = name;
     quiz.timeLastEdited = Math.floor(Date.now() / 1000);
@@ -120,7 +120,7 @@ export function adminQuizCreate(authUserId: number, name: string, description: s
 }
 
 /**
- * Retrieves a list of quizzes created by a specific authenticated user, 
+ * Retrieves a list of quizzes created by a specific authenticated user,
  * if the user ID is valid. The quizzes are returned with their IDs and names.
  */
 export function adminQuizList(authUserId: number): { quizzes: { quizId: number; name: string }[] } | { error: string } {
@@ -142,7 +142,7 @@ export function adminQuizList(authUserId: number): { quizzes: { quizId: number; 
  * Make a quiz be inactive if the user is the owner
  * Return an empty object if succeed
  */
-export function adminQuizRemove(authUserId: number, quizId: number): {} | { error: string } {
+export function adminQuizRemove(authUserId: number, quizId: number): Record<string, never> | { error: string } {
   if (!isValidUserId(authUserId)) {
     return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }

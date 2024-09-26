@@ -1,4 +1,4 @@
-import express, { json, Request, Response } from 'express';
+import express, { json, Request, Response, NextFunction } from 'express';
 import { echo } from './newecho';
 import morgan from 'morgan';
 import config from './config.json';
@@ -8,6 +8,14 @@ import sui from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
 import process from 'process';
+
+// Import routers
+import { authRouter } from './routers/auth';
+import { quizRouter } from './routers/quiz';
+import { userRouter } from './routers/user';
+import { playerRouter } from './routers/player';
+
+import { loadData } from './dataStore';
 
 // Set up web app
 const app = express();
@@ -29,6 +37,17 @@ const HOST: string = process.env.IP || '127.0.0.1';
 //  ================= WORK IS DONE BELOW THIS LINE ===================
 // ====================================================================
 
+// Load data on very first request
+let dataLoaded = false;
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (!dataLoaded) {
+    loadData();
+    console.log('📊 Data loaded');
+    dataLoaded = true;
+  }
+  next();
+});
+
 // Example get request
 app.get('/echo', (req: Request, res: Response) => {
   const result = echo(req.query.echo as string);
@@ -38,6 +57,11 @@ app.get('/echo', (req: Request, res: Response) => {
 
   return res.json(result);
 });
+
+app.use('/v1/admin/auth', authRouter);
+app.use('/v1/admin/quiz', quizRouter);
+app.use('/v1/admin/user', userRouter);
+app.use('/v1/player', playerRouter);
 
 // ====================================================================
 //  ================= WORK IS DONE ABOVE THIS LINE ===================

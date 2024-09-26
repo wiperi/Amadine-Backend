@@ -1,6 +1,6 @@
 // @ts-nocheck
-import * as auth from "../src/auth";
-import { clear } from "../src/other";
+import * as auth from "../../src/auth";
+import { clear } from "../../src/other";
 
 /////////////////////////////////////////////////////////////////////
 // Example

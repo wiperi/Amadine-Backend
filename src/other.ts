@@ -1,10 +1,13 @@
-import { getData } from "./dataStore";
+import { getData, setData } from './dataStore';
 
 /**
  * Reset the state of the application back to the start.
  */
-export function clear(): {} {
-  getData().users = [];
-  getData().quizzes = [];
+export function clear(): Record<string, never> {
+  const data = getData();
+  data.users = [];
+  data.quizzes = [];
+
+  setData(data);
   return {};
 }
