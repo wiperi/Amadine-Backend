@@ -1,26 +1,32 @@
 const ERROR_MESSAGES = {
   // ID Gen
   INVALID_ID_TYPE: 'Invalid ID type',
-  // email
+  // Email
   INVALID_EMAIL_FORMAT: 'Invalid email format or duplicated email',
   EMAIL_NOT_EXIST: 'Email address does not exist.',
   USED_EMAIL: 'Email address already in use.',
-  // name
+  // Name
   INVALID_NAME: 'Invalid name format',
-  // description
+  // Description
   INVALID_DESCRIPTION: 'Invalid description format',
-  // quizId
+  // Quiz ID
   INVALID_QUIZ_ID: 'Invalid quizId',
-  // not authorized
+  // Not Authorized
   NOT_AUTHORIZED: 'Not authorized',
-  // authUserId
+  // Auth User ID
   UID_NOT_EXIST: 'authUserId does not exist.',
-  // password
+  // Password
   INVALID_PASSWORD: 'Invalid password format',
   WRONG_PASSWORD: 'Password is not correct for the given email.',
   WRONG_OLD_PASSWORD: 'Given old password is not correct.',
   NEW_PASSWORD_SAME_AS_OLD: 'New password cannot be the same as the old password.',
   PASSWORD_ALREADY_USED: 'New password cannot be the same as any of used passwords.',
+
+  // Bad Request
+  MISSING_REQUIRED_FIELDS: 'Request missing required fields',
+  // Token
+  MISSING_TOKEN: 'Request missing token',
+  INVALID_TOKEN: 'Request token is invalid',
 };
 
 export { ERROR_MESSAGES };
