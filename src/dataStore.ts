@@ -107,6 +107,24 @@ class Answer {
   }
 }
 
+export enum QuizSessionState {
+  LOBBY = 'LOBBY',
+  QUESTION_COUNTDOWN = 'QUESTION_COUNTDOWN',
+  QUESTION_OPEN = 'QUESTION_OPEN',
+  QUESTION_CLOSE = 'QUESTION_CLOSE',
+  ANSWER_SHOW = 'ANSWER_SHOW',
+  FINAL_RESULTS = 'FINAL_RESULTS',
+  END = 'END'
+}
+
+export enum PlayerAction {
+  NEXT_QUESTION = 'NEXT_QUESTION',
+  SKIP_COUNTDOWN = 'SKIP_COUNTDOWN',
+  GO_TO_ANSWER = 'GO_TO_ANSWER',
+  GO_TO_FINAL_RESULTS = 'GO_TO_FINAL_RESULTS',
+  END = 'END',
+}
+
 export class QuizSession {
   sessionId: number;
   quizId: number;
@@ -146,24 +164,6 @@ export class Message {
     this.playerName = playerName;
     this.messageBody = messageBody;
   }
-}
-
-export enum QuizSessionState {
-  LOBBY = 'LOBBY',
-  QUESTION_COUNTDOWN = 'QUESTION_COUNTDOWN',
-  QUESTION_OPEN = 'QUESTION_OPEN',
-  QUESTION_CLOSE = 'QUESTION_CLOSE',
-  ANSWER_SHOW = 'ANSWER_SHOW',
-  FINAL_RESULTS = 'FINAL_RESULTS',
-  END = 'END'
-}
-
-export enum PlayerAction {
-  NEXT_QUESTION = 'NEXT_QUESTION',
-  SKIP_COUNTDOWN = 'SKIP_COUNTDOWN',
-  GO_TO_ANSWER = 'GO_TO_ANSWER',
-  GO_TO_FINAL_RESULTS = 'GO_TO_FINAL_RESULTS',
-  END = 'END',
 }
 
 /// //////////////////////////////////////////////////////////////////

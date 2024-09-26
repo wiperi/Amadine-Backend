@@ -3,27 +3,30 @@ import isEmail from 'validator/lib/isEmail';
 import { User, Quiz } from './dataStore';
 import { ERROR_MESSAGES } from './errors';
 
-
 /**
  * Generates a globally unique ID based on the specified type.
- * 
+ *
  * @param type - The type of ID to generate.
  * @returns A unique ID number.
  * @throws Error if an invalid ID type is provided.
  */
 export function getNewID(type?: 'user' | 'quiz' | 'question' | 'answer' | 'user session' | 'quiz session' | 'player'): number {
-
   const numberInRange = (start: number, end: number) => {
     return Math.floor((Math.random() * (end - start)) + start);
-  }
+  };
 
   const getUniqueID = (idGenerator: () => number, dataSet: any[]) => {
     id = idGenerator();
-    while (dataSet.some(item => item.id === id)) {
+    while (dataSet.some(item => {
+      // Check if any property has a name contains 'id' and the value is the same as the id
+      return Object.keys(item).some(key => {
+        return key.toLowerCase().includes('id') && item[key] === id;
+      });
+    })) {
       id = idGenerator();
     }
     return id;
-  }
+  };
 
   const data = getData();
   let idGenerator: () => number;
@@ -32,6 +35,7 @@ export function getNewID(type?: 'user' | 'quiz' | 'question' | 'answer' | 'user 
 
   switch (type) {
     case undefined:
+      console.log('This Id type is deprecated, you should use a specific type like user, quiz, question, etc.');
       return numberInRange(1, 1000000000);
     case 'user':
       idGenerator = () => numberInRange(1 * Math.pow(10, 9), 10 * Math.pow(10, 9) - 1);
@@ -42,8 +46,8 @@ export function getNewID(type?: 'user' | 'quiz' | 'question' | 'answer' | 'user 
     case 'question':
       idGenerator = () => numberInRange(5 * Math.pow(10, 10), 10 * Math.pow(10, 10) - 1);
       dataSet = [];
-      for (let quiz of data.quizzes) {
-        for (let question of quiz.questions) {
+      for (const quiz of data.quizzes) {
+        for (const question of quiz.questions) {
           dataSet.push(question);
         }
       }
@@ -51,13 +55,14 @@ export function getNewID(type?: 'user' | 'quiz' | 'question' | 'answer' | 'user 
     case 'answer':
       idGenerator = () => numberInRange(1 * Math.pow(10, 11), 5 * Math.pow(10, 11) - 1);
       dataSet = [];
-      for (let quiz of data.quizzes) {
-        for (let question of quiz.questions) {
-          for (let answer of question.answers) {
+      for (const quiz of data.quizzes) {
+        for (const question of quiz.questions) {
+          for (const answer of question.answers) {
             dataSet.push(answer);
           }
         }
       }
+      return getUniqueID(idGenerator, dataSet);
     case 'user session':
       idGenerator = () => numberInRange(5 * Math.pow(10, 11), 10 * Math.pow(10, 11) - 1);
       return getUniqueID(idGenerator, data.userSessions);

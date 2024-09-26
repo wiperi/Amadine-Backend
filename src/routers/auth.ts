@@ -12,7 +12,6 @@ authRouter.get('/', (req: Request, res: Response) => {
 });
 
 authRouter.post('/register', (req: Request, res: Response) => {
-
   const { email, password, nameFirst, nameLast } = req.body;
 
   if (!email || !password || !nameFirst || !nameLast) {

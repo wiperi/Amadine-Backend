@@ -27,7 +27,6 @@ export function authorizeToken(req: Request, res: Response, next: NextFunction) 
     // For GET and DELETE, get token from query params
     if (req.method === 'GET' || req.method === 'DELETE') {
       token = req.query.token as string;
-
     }
     // For POST and PUT, get token from body
     if (req.method === 'POST' || req.method === 'PUT') {
@@ -56,23 +55,11 @@ export function authorizeToken(req: Request, res: Response, next: NextFunction) 
   next();
 }
 
-
-
-
-
-
-
-
-
-
-
-
 /**
  * Register a user with an email, password, and names,
  * then returns their authUserId value.
  */
 export function adminAuthRegister(email: string, password: string, nameFirst: string, nameLast: string): { token: string } | { error: string } {
-
   const data = getData();
 
   if (!isValidEmail(email)) {
