@@ -173,32 +173,17 @@ export enum PlayerAction {
 type DataStore = {
   users: User[];
   quizzes: Quiz[];
+  userSessions: UserSession[];
+  quizSessions: QuizSession[];
+  players: Player[];
 }
 
 let data: DataStore = {
-  users: [
-    // {
-    //   userId: 616425961674,
-    //   email: 'cheongmail@gmail.com',
-    //   password: 'nicepassword',
-    //   nameFirst: 'Cheong',
-    //   nameLast: 'Zhang',
-    //   numSuccessfulLogins: 3,
-    //   numFailedPasswordsSinceLastLogin: 4,
-    //   oldPasswords: ['MyOldPass1234'],
-    // }
-  ],
-  quizzes: [
-    // {
-    //   authUserId: '616425961674',
-    //   quizId: '174712181430',
-    //   name: '1093 class',
-    //   description: 'I love sasa',
-    //   timeCreated: 1627312,
-    //   timeLastEdited: 128372,
-    //   active: true,
-    // }
-  ]
+  users: [],
+  quizzes: [],
+  userSessions: [],
+  quizSessions: [],
+  players: [],
 };
 
 // YOU SHOULD MODIFY THIS OBJECT ABOVE ONLY

@@ -1,4 +1,6 @@
 const ERROR_MESSAGES = {
+  // ID Gen
+  INVALID_ID_TYPE: 'Invalid ID type',
   // email
   INVALID_EMAIL_FORMAT: 'Invalid email format or duplicated email',
   EMAIL_NOT_EXIST: 'Email address does not exist.',
