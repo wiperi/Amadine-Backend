@@ -16,6 +16,8 @@ import { userRouter } from './routers/user';
 import { playerRouter } from './routers/player';
 
 import { loadData } from './dataStore';
+import { clear } from './other';
+import { authorizeToken } from './auth';
 
 // Set up web app
 const app = express();
@@ -23,8 +25,14 @@ const app = express();
 app.use(json());
 // Use middleware that allows for access from other domains
 app.use(cors());
+
+// for logging requests (print to file)
+const logStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
+app.use(morgan('combined', { stream: logStream }));
+
 // for logging errors (print to terminal)
 app.use(morgan('dev'));
+
 // for producing the docs that define the API
 const file = fs.readFileSync(path.join(process.cwd(), 'swagger.yaml'), 'utf8');
 app.get('/', (req: Request, res: Response) => res.redirect('/docs'));
@@ -58,10 +66,16 @@ app.get('/echo', (req: Request, res: Response) => {
   return res.json(result);
 });
 
+app.use(authorizeToken);
+
 app.use('/v1/admin/auth', authRouter);
 app.use('/v1/admin/quiz', quizRouter);
 app.use('/v1/admin/user', userRouter);
 app.use('/v1/player', playerRouter);
+
+app.delete('/v1/clear', (req: Request, res: Response) => {
+  return res.status(200).json(clear());
+});
 
 // ====================================================================
 //  ================= WORK IS DONE ABOVE THIS LINE ===================
