@@ -7,7 +7,10 @@ export function clear(): Record<string, never> {
   const data = getData();
   data.users = [];
   data.quizzes = [];
+  data.userSessions = [];
+  data.quizSessions = [];
+  data.players = [];
 
-  setData(data);
+  setData();
   return {};
 }

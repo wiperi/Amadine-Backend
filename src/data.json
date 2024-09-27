@@ -1,4 +1,7 @@
 {
   "users": [],
-  "quizzes": []
+  "quizzes": [],
+  "userSessions": [],
+  "quizSessions": [],
+  "players": []
 }

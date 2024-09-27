@@ -1,4 +1,5 @@
 // @ts-nocheck
+// jest.ignore
 import {
   adminQuizCreate,
   adminQuizInfo,

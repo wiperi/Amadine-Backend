@@ -1,19 +1,80 @@
 import { getData } from './dataStore';
 import isEmail from 'validator/lib/isEmail';
 import { User, Quiz } from './dataStore';
+import { ERROR_MESSAGES } from './errors';
 
 /**
- * Generates a random 12-digit ID that is not already in use.
+ * Generates a globally unique ID based on the specified type.
  *
- * @returns return a random 12-digit number
+ * @param type - The type of ID to generate.
+ * @returns A unique ID number.
+ * @throws Error if an invalid ID type is provided.
  */
-export function getNewID(): number {
-  let id: number = Math.floor((Math.random() * (9 * Math.pow(10, 11))) + Math.pow(10, 11));
+export function getNewID(type?: 'user' | 'quiz' | 'question' | 'answer' | 'user session' | 'quiz session' | 'player'): number {
+  const numberInRange = (start: number, end: number) => {
+    return Math.floor((Math.random() * (end - start)) + start);
+  };
+
+  const getUniqueID = (idGenerator: () => number, dataSet: any[]) => {
+    id = idGenerator();
+    while (dataSet.some(item => {
+      // Check if any property has a name contains 'id' and the value is the same as the id
+      return Object.keys(item).some(key => {
+        return key.toLowerCase().includes('id') && item[key] === id;
+      });
+    })) {
+      id = idGenerator();
+    }
+    return id;
+  };
+
   const data = getData();
-  while (data.users.some(user => user.userId === id) || data.quizzes.some(quiz => quiz.quizId === id)) {
-    id = Math.floor((Math.random() * (9 * Math.pow(10, 11))) + Math.pow(10, 11));
+  let idGenerator: () => number;
+  let id: number;
+  let dataSet: any[] = [];
+
+  switch (type) {
+    case undefined:
+      console.log('This Id type is deprecated, you should use a specific type like user, quiz, question, etc.');
+      return numberInRange(1, 1000000000);
+    case 'user':
+      idGenerator = () => numberInRange(1 * Math.pow(10, 9), 10 * Math.pow(10, 9) - 1);
+      return getUniqueID(idGenerator, data.users);
+    case 'quiz':
+      idGenerator = () => numberInRange(1 * Math.pow(10, 10), 5 * Math.pow(10, 10) - 1);
+      return getUniqueID(idGenerator, data.quizzes);
+    case 'question':
+      idGenerator = () => numberInRange(5 * Math.pow(10, 10), 10 * Math.pow(10, 10) - 1);
+      dataSet = [];
+      for (const quiz of data.quizzes) {
+        for (const question of quiz.questions) {
+          dataSet.push(question);
+        }
+      }
+      return getUniqueID(idGenerator, dataSet);
+    case 'answer':
+      idGenerator = () => numberInRange(1 * Math.pow(10, 11), 5 * Math.pow(10, 11) - 1);
+      dataSet = [];
+      for (const quiz of data.quizzes) {
+        for (const question of quiz.questions) {
+          for (const answer of question.answers) {
+            dataSet.push(answer);
+          }
+        }
+      }
+      return getUniqueID(idGenerator, dataSet);
+    case 'user session':
+      idGenerator = () => numberInRange(5 * Math.pow(10, 11), 10 * Math.pow(10, 11) - 1);
+      return getUniqueID(idGenerator, data.userSessions);
+    case 'quiz session':
+      idGenerator = () => numberInRange(1 * Math.pow(10, 12), 5 * Math.pow(10, 12) - 1);
+      return getUniqueID(idGenerator, data.quizSessions);
+    case 'player':
+      idGenerator = () => numberInRange(5 * Math.pow(10, 12), 10 * Math.pow(10, 12) - 1);
+      return getUniqueID(idGenerator, data.players);
+    default:
+      throw new Error(ERROR_MESSAGES.INVALID_ID_TYPE);
   }
-  return id;
 }
 
 /**
