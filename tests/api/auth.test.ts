@@ -53,13 +53,13 @@ const validEmails = [
   'goodemail@gmail.com', 'user@example.com', 'test.user@domain.co'
 ];
 
+const ERROR = { error: expect.any(String) };
 
 describe('POST /v1/admin/auth/register', () => {
 
   const CORRECT_RESPONSE = { statusCode: 200, body: { token: expect.any(String) } };
   const ERROR_RESPONSE = { statusCode: 400, body: { error: expect.any(String) } };
 
-  const ERROR = { error: expect.any(String) };
   const CORRECT = { token: expect.any(String) };
 
   const validInputs = ['goodemail@gmail.com', 'GoodPassword123', 'Tommy', 'Smith'];
@@ -120,4 +120,69 @@ describe('POST /v1/admin/auth/register', () => {
 
   runTestsForOneParam('Invalid last names', invalidNames, 3, ERROR_RESPONSE);
   runTestsForOneParam('Valid last names', validNames, 3, CORRECT_RESPONSE);
+});
+
+describe.skip('POST /v1/admin/auth/logout', () => {
+
+  let token: string;
+  beforeEach(() => {
+    const res = request('POST', `${baseUrl}/register`, {
+      json: {
+        email: 'goodemail@gmail.com',
+        password: 'GoodPassword123',
+        nameFirst: 'Tommy',
+        nameLast: 'Smith'
+      }
+    });
+    expect(res.statusCode).toStrictEqual(200);
+    token = parseBody(res.body).token;
+  });
+
+  test('normal case', () => {
+    const res = request('POST', `${baseUrl}/logout`, {
+      json: {
+        token: token
+      }
+    });
+    expect(res.statusCode).toStrictEqual(200);
+    expect(parseBody(res.body)).toStrictEqual({});
+
+    const loginRes = request('POST', `${baseUrl}/login`, {
+      json: {
+        email: 'goodemail@gmail.com',
+        password: 'GoodPassword123'
+      }
+    });
+    expect(loginRes.statusCode).toStrictEqual(400);
+    expect(parseBody(loginRes.body)).toStrictEqual(ERROR);
+  });
+});
+
+describe.skip('PUT /v1/admin/user/password', () => {
+
+  let token: string;
+  beforeEach(() => {
+    const res = request('POST', `${baseUrl}/register`, {
+      json: {
+        email: 'goodemail@gmail.com',
+        password: 'GoodPassword123',
+        nameFirst: 'Tommy',
+        nameLast: 'Smith'
+      }
+    });
+    expect(res.statusCode).toStrictEqual(200);
+    token = parseBody(res.body).token;
+  });
+
+  test('normal case', () => {
+    const res = request('PUT', `${baseUrl}/password`, {
+      json: {
+        token: token,
+        oldPassword: 'GoodPassword123',
+        newPassword: 'NewPassword123'
+      }
+    });
+    expect(res.statusCode).toStrictEqual(200);
+    expect(parseBody(res.body)).toStrictEqual({});
+  });
 });
