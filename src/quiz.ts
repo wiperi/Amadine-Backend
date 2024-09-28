@@ -1,4 +1,4 @@
-import { getData, Quiz } from './dataStore';
+import { getData, Quiz, EmptyObject } from './dataStore';
 import { ERROR_MESSAGES } from './errors';
 import {
   getNewID,
@@ -159,4 +159,49 @@ export function adminQuizRemove(authUserId: number, quizId: number): Record<stri
     quiz.active = false;
   }
   return {};
+}
+
+export function adminQuizTrashView(): { quizzes: Array<{ quizId: number, name: string }> } {
+  // TODO: Implement this function
+  return { quizzes: [] };
+}
+
+export function adminQuizRestore(quizId: number): EmptyObject {
+  // TODO: Implement this function
+  return {};
+}
+
+export function adminQuizTrashEmpty(quizIds: number[]): EmptyObject {
+  // TODO: Implement this function
+  return {};
+}
+
+export function adminQuizTransfer(quizId: number, userEmail: string): EmptyObject {
+  // TODO: Implement this function
+  return {};
+}
+
+export function adminQuizQuestionCreate(quizId: number, question: string, duration: number, points: number, answers: Array<{ answer: string, correct: boolean }>): { questionId: number } {
+  // TODO: Implement this function
+  return { questionId: 0 };
+}
+
+export function adminQuizQuestionUpdate(quizId: number, questionId: number, question: string, duration: number, points: number, answers: Array<{ answer: string, correct: boolean }>): EmptyObject {
+  // TODO: Implement this function
+  return {};
+}
+
+export function adminQuizQuestionDelete(quizId: number, questionId: number): EmptyObject {
+  // TODO: Implement this function
+  return {};
+}
+
+export function adminQuizQuestionMove(quizId: number, questionId: number, newPosition: number): EmptyObject {
+  // TODO: Implement this function
+  return {};
+}
+
+export function adminQuizQuestionDuplicate(quizId: number, questionId: number): { newQuestionId: number } {
+  // TODO: Implement this function
+  return { newQuestionId: 0 };
 }
