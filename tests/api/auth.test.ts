@@ -236,9 +236,9 @@ describe('POST /v1/admin/auth/login', () => {
 
     test('different user return different id', () => {
       const res1 = request('POST', `${BASE_URL}/login`, { json: { email: 'goodemail@gmail.com', password: 'GlenPassword123' }});
-      const userRes = request('POST', `${BASE_URL}/register`, { json: { email: 'peter@gmail.com', password: 'PumpkinEater123' }});
-      const res2 = request('POST', `${BASE_URL}/login`, { json: { email: 'peter@gmail.com', password: 'PumkinEater123' }});
-      expect(parse(res2.body)).toStrictEqual(parse(userRes.body));
+      const userRes = request('POST', `${BASE_URL}/register`, { json: { email: 'peter@gmail.com', password: 'PumpkinEater123', nameFirst: 'peter', nameLast: 'griffin' }});
+      const res2 = request('POST', `${BASE_URL}/login`, { json: { email: 'peter@gmail.com', password: 'PumpkinEater123' }});
+      expect(parse(res2.body).token).toStrictEqual(parse(userRes.body).token);
       expect(parse(res1.body)).not.toStrictEqual(parse(res2.body));
     });
   });
