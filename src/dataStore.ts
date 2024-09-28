@@ -46,10 +46,6 @@ export class Quiz {
   }
 }
 
-/// //////////////////////////////////////////////////////////////////
-// Classes below are working in progress, never used
-/// //////////////////////////////////////////////////////////////////
-
 export class UserSession {
   sessionId: number;
   authUserId: number;
@@ -165,6 +161,21 @@ export class Message {
     this.messageBody = messageBody;
   }
 }
+
+export class HttpError extends Error {
+  statusCode: number;
+
+  constructor(statusCode: number, message: string) {
+    super(message);
+    this.statusCode = statusCode;
+  }
+}
+
+/// //////////////////////////////////////////////////////////////////
+// Types
+/// //////////////////////////////////////////////////////////////////
+
+export type EmptyObject = Record<never, never>;
 
 /// //////////////////////////////////////////////////////////////////
 // DataStore
