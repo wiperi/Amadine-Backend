@@ -1,9 +1,11 @@
 import request from 'sync-request-curl';
 import config from '../../src/config.json';
 
-const baseUrl = `${config.url}:${config.port}/v1/admin/auth`;
+const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
+const ERROR = { error: expect.any(String) };
 
-function parseBody(res: string | Buffer) {
+// Parse the response body as JSON
+function parse(res: string | Buffer) {
   return JSON.parse(res.toString());
 }
 
@@ -19,7 +21,7 @@ describe('DELETE /v1/clear', () => {
   it('should return empty object', () => {
     const res = request('DELETE', `${config.url}:${config.port}/v1/clear`);
     expect(res.statusCode).toStrictEqual(200);
-    expect(parseBody(res.body)).toStrictEqual({});
+    expect(parse(res.body)).toStrictEqual({});
   });
 });
 
@@ -53,7 +55,6 @@ const validEmails = [
   'goodemail@gmail.com', 'user@example.com', 'test.user@domain.co'
 ];
 
-const ERROR = { error: expect.any(String) };
 
 describe('POST /v1/admin/auth/register', () => {
 
@@ -71,7 +72,7 @@ describe('POST /v1/admin/auth/register', () => {
         let inputs = [...validInputs];
         inputs[paramIndex] = data;
         
-        const res = request('POST', `${baseUrl}/register`, {
+        const res = request('POST', `${BASE_URL}/register`, {
           json: {
             email: inputs[0],
             password: inputs[1],
@@ -80,13 +81,13 @@ describe('POST /v1/admin/auth/register', () => {
           }
         });
         expect(res.statusCode).toStrictEqual(expectOutput.statusCode);
-        expect(parseBody(res.body)).toStrictEqual(expectOutput.body);
+        expect(parse(res.body)).toStrictEqual(expectOutput.body);
       });
     });
   }
 
   test('Email is used', () => {
-    const res = request('POST', `${baseUrl}/register`, {
+    const res = request('POST', `${BASE_URL}/register`, {
       json: {
         email: validInputs[0],
         password: validInputs[1],
@@ -95,9 +96,9 @@ describe('POST /v1/admin/auth/register', () => {
       }
     });
     expect(res.statusCode).toStrictEqual(200);
-    expect(parseBody(res.body)).toStrictEqual(CORRECT);
+    expect(parse(res.body)).toStrictEqual(CORRECT);
 
-    const res2 = request('POST', `${baseUrl}/register`, {
+    const res2 = request('POST', `${BASE_URL}/register`, {
       json: {
         email: validInputs[0],
         password: validInputs[1],
@@ -106,7 +107,7 @@ describe('POST /v1/admin/auth/register', () => {
       }
     });
     expect(res2.statusCode).toStrictEqual(400);
-    expect(parseBody(res2.body)).toStrictEqual(ERROR);
+    expect(parse(res2.body)).toStrictEqual(ERROR);
   });
 
   runTestsForOneParam('Invalid emails', invalidEmails, 0, ERROR_RESPONSE);
@@ -126,7 +127,7 @@ describe.skip('POST /v1/admin/auth/logout', () => {
 
   let token: string;
   beforeEach(() => {
-    const res = request('POST', `${baseUrl}/register`, {
+    const res = request('POST', `${BASE_URL}/register`, {
       json: {
         email: 'goodemail@gmail.com',
         password: 'GoodPassword123',
@@ -135,26 +136,26 @@ describe.skip('POST /v1/admin/auth/logout', () => {
       }
     });
     expect(res.statusCode).toStrictEqual(200);
-    token = parseBody(res.body).token;
+    token = parse(res.body).token;
   });
 
   test('normal case', () => {
-    const res = request('POST', `${baseUrl}/logout`, {
+    const res = request('POST', `${BASE_URL}/logout`, {
       json: {
         token: token
       }
     });
     expect(res.statusCode).toStrictEqual(200);
-    expect(parseBody(res.body)).toStrictEqual({});
+    expect(parse(res.body)).toStrictEqual({});
 
-    const loginRes = request('POST', `${baseUrl}/login`, {
+    const loginRes = request('POST', `${BASE_URL}/login`, {
       json: {
         email: 'goodemail@gmail.com',
         password: 'GoodPassword123'
       }
     });
     expect(loginRes.statusCode).toStrictEqual(400);
-    expect(parseBody(loginRes.body)).toStrictEqual(ERROR);
+    expect(parse(loginRes.body)).toStrictEqual(ERROR);
   });
 });
 
@@ -162,7 +163,7 @@ describe.skip('PUT /v1/admin/user/password', () => {
 
   let token: string;
   beforeEach(() => {
-    const res = request('POST', `${baseUrl}/register`, {
+    const res = request('POST', `${BASE_URL}/register`, {
       json: {
         email: 'goodemail@gmail.com',
         password: 'GoodPassword123',
@@ -171,11 +172,11 @@ describe.skip('PUT /v1/admin/user/password', () => {
       }
     });
     expect(res.statusCode).toStrictEqual(200);
-    token = parseBody(res.body).token;
+    token = parse(res.body).token;
   });
 
   test('normal case', () => {
-    const res = request('PUT', `${baseUrl}/password`, {
+    const res = request('PUT', `${BASE_URL}/password`, {
       json: {
         token: token,
         oldPassword: 'GoodPassword123',
@@ -183,6 +184,6 @@ describe.skip('PUT /v1/admin/user/password', () => {
       }
     });
     expect(res.statusCode).toStrictEqual(200);
-    expect(parseBody(res.body)).toStrictEqual({});
+    expect(parse(res.body)).toStrictEqual({});
   });
 });
