@@ -29,11 +29,10 @@ app.use(cors());
 // for logging requests (print to file)
 const logStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
 // - self-defined token for morgan formatting
-morgan.token('method-url', (req: Request) => `${req.method} ${req.url}`);
 morgan.token('query', (req: Request) => JSON.stringify(req.query, null, 2));
 morgan.token('body', (req: Request) => JSON.stringify(req.body, null, 2));
 // - morgan logging format, using combined format plus query and body
-app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"\nquery: :query\nbody: :body\nresponse: :response\n', { stream: logStream }));
+app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"\nquery: :query\nbody: :body\n', { stream: logStream }));
 
 // for logging errors (print to terminal)
 app.use(morgan('dev'));

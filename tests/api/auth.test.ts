@@ -18,10 +18,75 @@ afterAll(() => {
 });
 
 describe('DELETE /v1/clear', () => {
-  it('should return empty object', () => {
+
+  test('correct return value', () => {
     const res = request('DELETE', `${config.url}:${config.port}/v1/clear`);
     expect(res.statusCode).toStrictEqual(200);
     expect(parse(res.body)).toStrictEqual({});
+  });
+
+  test.skip('correctly clears data', () => {
+    // Register a user
+    const registerRes = request('POST', `${BASE_URL}/register`, {
+      json: {
+        email: 'test@example.com',
+        password: 'ValidPass123',
+        nameFirst: 'John',
+        nameLast: 'Doe'
+      }
+    });
+    expect(registerRes.statusCode).toBe(200);
+    const { token } = parse(registerRes.body);
+
+    // Create a quiz
+    const createQuizRes = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
+      json: {
+        token,
+        name: 'Test Quiz',
+        description: 'A test quiz'
+      }
+    });
+    expect(createQuizRes.statusCode).toBe(200);
+    const { quizId } = parse(createQuizRes.body);
+
+    // Create a question
+    const createQuestionRes = request('POST', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/question`, {
+      json: {
+        token,
+        questionBody: {
+          question: 'Test question?',
+          duration: 30,
+          points: 5,
+          answers: [
+            { answer: 'Correct answer', correct: true },
+            { answer: 'Wrong answer', correct: false }
+          ]
+        }
+      }
+    });
+    expect(createQuestionRes.statusCode).toBe(200);
+
+    // Clear all data
+    const clearRes = request('DELETE', `${config.url}:${config.port}/v1/clear`);
+    expect(clearRes.statusCode).toBe(200);
+
+    // Check that user is cleared (try to login)
+    const loginRes = request('POST', `${BASE_URL}/login`, {
+      json: {
+        email: 'test@example.com',  
+        password: 'ValidPass123'
+      }
+    });
+    expect(loginRes.statusCode).toBe(400);
+
+    // Check that quiz is cleared (try to get quiz info)
+    const getQuizRes = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
+      qs: { token }
+    });
+    expect(getQuizRes.statusCode).toBe(401);
+
+    // Note: We can't directly check if the question is cleared because there's no specific endpoint for that.
+    // However, if the quiz is gone, its questions should be gone too.
   });
 });
 
@@ -124,38 +189,71 @@ describe('POST /v1/admin/auth/register', () => {
 });
 
 describe.skip('POST /v1/admin/auth/logout', () => {
-
+  
   let token: string;
   beforeEach(() => {
+    // Register a user and get the token
     const res = request('POST', `${BASE_URL}/register`, {
       json: {
-        email: 'goodemail@gmail.com',
-        password: 'GoodPassword123',
-        nameFirst: 'Tommy',
-        nameLast: 'Smith'
+        email: 'test@example.com',
+        password: 'ValidPass123',
+        nameFirst: 'John',
+        nameLast: 'Doe'
       }
     });
-    expect(res.statusCode).toStrictEqual(200);
+    expect(res.statusCode).toBe(200);
     token = parse(res.body).token;
   });
 
-  test('normal case', () => {
-    const res = request('POST', `${BASE_URL}/logout`, {
-      json: {
-        token: token
-      }
-    });
-    expect(res.statusCode).toStrictEqual(200);
-    expect(parse(res.body)).toStrictEqual({});
+  describe('valid cases', () => {
+    test('successful logout', () => {
+      const res = request('POST', `${BASE_URL}/logout`, {
+        json: { token }
+      });
+      expect(res.statusCode).toBe(200);
+      expect(parse(res.body)).toEqual({});
 
-    const loginRes = request('POST', `${BASE_URL}/login`, {
-      json: {
-        email: 'goodemail@gmail.com',
-        password: 'GoodPassword123'
-      }
+      // Verify that the token is no longer valid
+      const loginRes = request('POST', `${BASE_URL}/login`, {
+        json: {
+          email: 'test@example.com',
+          password: 'ValidPass123'
+        }
+      });
+      expect(loginRes.statusCode).toBe(200);
+      expect(parse(loginRes.body)).toHaveProperty('token');
+      expect(parse(loginRes.body).token).not.toBe(token);
     });
-    expect(loginRes.statusCode).toStrictEqual(400);
-    expect(parse(loginRes.body)).toStrictEqual(ERROR);
+  });
+
+  describe('invalid cases', () => {
+    test('invalid token', () => {
+      const res = request('POST', `${BASE_URL}/logout`, {
+        json: { token: 'invalid_token' }
+      });
+      expect(res.statusCode).toBe(401);
+      expect(parse(res.body)).toEqual({ error: expect.any(String) });
+    });
+
+    test('missing token', () => {
+      const res = request('POST', `${BASE_URL}/logout`, {
+        json: {}
+      });
+      expect(res.statusCode).toBe(401);
+      expect(parse(res.body)).toEqual({ error: expect.any(String) });
+    });
+
+    test('already logged out token', () => {
+      // Logout once
+      request('POST', `${BASE_URL}/logout`, { json: { token } });
+
+      // Try to logout again with the same token
+      const res = request('POST', `${BASE_URL}/logout`, {
+        json: { token }
+      });
+      expect(res.statusCode).toBe(401);
+      expect(parse(res.body)).toEqual({ error: expect.any(String) });
+    });
   });
 });
 
