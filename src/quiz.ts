@@ -1,4 +1,4 @@
-import { getData, Quiz } from './dataStore';
+import { getData, Quiz, setData } from './dataStore';
 import { ERROR_MESSAGES } from './errors';
 import {
   getNewID,
@@ -9,7 +9,8 @@ import {
   isValidQuizName,
   isValidQuizDescription
 } from './helper';
-
+import { HttpError } from './dataStore';
+import { set } from 'yaml/dist/schema/yaml-1.1/set';
 /**
  * Update the description of the relevant quiz.
  */
@@ -104,16 +105,19 @@ export function adminQuizNameUpdate(authUserId: number, quizId: number, name: st
  */
 export function adminQuizCreate(authUserId: number, name: string, description: string): { quizId: number } | { error: string } {
   if (!isValidUserId(authUserId)) {
-    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
+    throw new HttpError(401, ERROR_MESSAGES.USED_EMAIL);
   }
   if (!isValidQuizName(name)) {
-    return { error: ERROR_MESSAGES.INVALID_NAME };
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_NAME);
   }
   if (!isValidQuizDescription(description)) {
-    return { error: ERROR_MESSAGES.INVALID_DESCRIPTION };
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_DESCRIPTION);
   }
-  const quizId = getNewID();
-  getData().quizzes.push(new Quiz(authUserId, quizId, name, description));
+  const quizId = getNewID('quiz');
+  const data = getData();
+  data.quizzes.push(new Quiz(authUserId, quizId, name, description));
+  setData(data);
+
   return {
     quizId: quizId
   };
