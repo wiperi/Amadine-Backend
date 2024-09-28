@@ -4,6 +4,24 @@ import { User, Quiz } from './dataStore';
 import { ERROR_MESSAGES } from './errors';
 
 /**
+ * Recursively searches for a target value within an object or its nested properties.
+ *
+ * @param obj - The object to search within.
+ * @param target - The value to search for.
+ * @returns True if the target is found, false otherwise.
+ */
+export function recursiveFind(obj: any, target: any): boolean {
+  if (obj === target) return true;
+  for (const key in obj) {
+    if (obj[key] === target) return true;
+    if (typeof obj[key] === 'object' && obj[key] !== null) {
+      if (recursiveFind(obj[key], target)) return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Generates a globally unique ID based on the specified type.
  *
  * @param type - The type of ID to generate.
