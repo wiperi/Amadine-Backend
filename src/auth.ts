@@ -99,24 +99,34 @@ export function adminAuthRegister(email: string, password: string, nameFirst: st
  * Given a registered user's email and password
  * returns their authUserId value.
  */
-export function adminAuthLogin(email: string, password: string): { authUserId: number } | { error: string } {
+export function adminAuthLogin(email: string, password: string): { token: string } {
   const data = getData();
+
+  if (!email || !password) {
+    throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
+  }
 
   const user = data.users.find(user => user.email === email);
 
   if (!user) {
-    return { error: ERROR_MESSAGES.EMAIL_NOT_EXIST };
+    throw new HttpError(400, ERROR_MESSAGES.EMAIL_NOT_EXIST);
   }
 
   if (user.password !== password) {
     user.numFailedPasswordsSinceLastLogin++;
-    return { error: ERROR_MESSAGES.WRONG_PASSWORD };
+    throw new HttpError(400, ERROR_MESSAGES.WRONG_PASSWORD);
   }
 
   user.numFailedPasswordsSinceLastLogin = 0;
   user.numSuccessfulLogins++;
 
-  return { authUserId: user.userId };
+  const token = jwt.sign({ userId: user.userId }, config.jwtSecretKey);
+
+  data.userSessions.push(new UserSession(getNewID('user session'), user.userId, token));
+
+  setData(data);
+
+  return { token };
 }
 
 /**
