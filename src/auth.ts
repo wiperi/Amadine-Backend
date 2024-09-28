@@ -1,4 +1,4 @@
-import { getData, User, UserSession, setData } from './dataStore';
+import { getData, User, UserSession, setData, EmptyObject, HttpError } from './dataStore';
 import { ERROR_MESSAGES } from './errors';
 import {
   getNewID,
@@ -59,23 +59,27 @@ export function authorizeToken(req: Request, res: Response, next: NextFunction) 
  * Register a user with an email, password, and names,
  * then returns their authUserId value.
  */
-export function adminAuthRegister(email: string, password: string, nameFirst: string, nameLast: string): { token: string } | { error: string } {
+export function adminAuthRegister(email: string, password: string, nameFirst: string, nameLast: string): { token: string } {
   const data = getData();
 
+  if (!email || !password || !nameFirst || !nameLast) {
+    throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
+  }
+
   if (!isValidEmail(email)) {
-    throw ERROR_MESSAGES.INVALID_EMAIL_FORMAT;
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_EMAIL_FORMAT);
   }
 
   if (!isUnusedEmail(email)) {
-    throw ERROR_MESSAGES.USED_EMAIL;
+    throw new HttpError(400, ERROR_MESSAGES.USED_EMAIL);
   }
 
   if (!isValidUserName(nameFirst) || !isValidUserName(nameLast)) {
-    throw ERROR_MESSAGES.INVALID_NAME;
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_NAME);
   }
 
   if (!isValidPassword(password)) {
-    throw ERROR_MESSAGES.INVALID_PASSWORD;
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_PASSWORD);
   }
 
   const userId = getNewID('user');
@@ -118,7 +122,7 @@ export function adminAuthLogin(email: string, password: string): { authUserId: n
 /**
  * Updates the details of an admin user.
  */
-export function adminUserDetailsUpdate(authUserId: number, email: string, nameFirst: string, nameLast: string): Record<string, never> | { error: string } {
+export function adminUserDetailsUpdate(authUserId: number, email: string, nameFirst: string, nameLast: string): EmptyObject | { error: string } {
   if (!isValidUserId(authUserId)) {
     return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }
@@ -156,13 +160,15 @@ export function adminUserDetailsUpdate(authUserId: number, email: string, nameFi
  * "name" is the first and last name concatenated
  * with a single space between them.
  */
-export function adminUserDetails(authUserId: number): { user: {
-  userId: number;
-  name: string;
-  email: string;
-  numSuccessfulLogins: number;
-  numFailedPasswordsSinceLastLogin: number;
-}} | { error: string } {
+export function adminUserDetails(authUserId: number): {
+  user: {
+    userId: number;
+    name: string;
+    email: string;
+    numSuccessfulLogins: number;
+    numFailedPasswordsSinceLastLogin: number;
+  }
+} | { error: string } {
   const data = getData();
   const user = data.users.find(user => user.userId === authUserId);
   if (!user) {
@@ -183,7 +189,7 @@ export function adminUserDetails(authUserId: number): { user: {
 /**
  * Updates the password for an admin user.
  */
-export function adminUserPasswordUpdate(authUserId: number, oldPassword: string, newPassword: string): Record<string, never> | { error: string } {
+export function adminUserPasswordUpdate(authUserId: number, oldPassword: string, newPassword: string): EmptyObject | { error: string } {
   if (!isValidUserId(authUserId)) {
     return { error: ERROR_MESSAGES.UID_NOT_EXIST };
   }
