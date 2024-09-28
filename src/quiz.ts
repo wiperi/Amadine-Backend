@@ -1,4 +1,4 @@
-import { getData, Quiz, EmptyObject } from './dataStore';
+import { getData, Quiz, EmptyObject, HttpError } from './dataStore';
 import { ERROR_MESSAGES } from './errors';
 import {
   getNewID,
@@ -7,7 +7,8 @@ import {
   isValidQuizId,
   findQuizById,
   isValidQuizName,
-  isValidQuizDescription
+  isValidQuizDescription,
+  recursiveFind
 } from './helper';
 
 /**
@@ -181,13 +182,25 @@ export function adminQuizTransfer(quizId: number, userEmail: string): EmptyObjec
   return {};
 }
 
-export function adminQuizQuestionCreate(quizId: number, question: string, duration: number, points: number, answers: Array<{ answer: string, correct: boolean }>): { questionId: number } {
+type ParamQuestionBody = {
+  question: string;
+  duration: number;
+  points: number;
+  answers: Array<{ answer: string, correct: boolean }>;
+}
+export function adminQuizQuestionCreate(quizId: number, questionBody: ParamQuestionBody): { questionId: number } {
   // TODO: Implement this function
+  if (!quizId || recursiveFind(questionBody, undefined)) {
+    throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
+  }
   return { questionId: 0 };
 }
 
-export function adminQuizQuestionUpdate(quizId: number, questionId: number, question: string, duration: number, points: number, answers: Array<{ answer: string, correct: boolean }>): EmptyObject {
+export function adminQuizQuestionUpdate(quizId: number, questionId: number, questionBody: ParamQuestionBody): EmptyObject {
   // TODO: Implement this function
+  if (!quizId || recursiveFind(questionBody, undefined)) {
+    throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
+  }
   return {};
 }
 
