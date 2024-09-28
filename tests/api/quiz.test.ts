@@ -83,4 +83,81 @@ describe.skip('GET /v1/admin/quiz/list', () => {
     });
   });
 });
- 
+
+describe('POST /v1/admin/quiz',( ) => {
+  describe('valid cases', () => {
+    test('successful quiz creation', () => {
+      const res = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
+        json: {
+          token,
+          name: 'Test Quiz',
+          description: 'A test quiz'
+        }
+      });
+      expect(res.statusCode).toBe(200);
+      expect(parse(res.body)).toHaveProperty('quizId');
+    });
+    test('successful quiz creation with empty description', () => {
+      const res = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
+        json: {
+          token,
+          name: 'Test Quiz',
+          description: ''
+        }
+      });
+      expect(res.statusCode).toBe(200);
+      expect(parse(res.body)).toHaveProperty('quizId');
+    });
+  });
+  describe('invalid cases', () => {
+    test('invalid token', () => {
+      const res = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
+        qs: { token: 'invalid_token' }
+      });
+      expect(res.statusCode).toBe(401);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+    test('short name', () => {
+      const res = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
+        json: {
+          token,
+          name: 'a',
+          description: 'A test quiz'
+        }
+      });
+      expect(res.statusCode).toBe(400);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+    test('long name', () => {
+      const res = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
+        json: {
+          token,
+          name: 'a'.repeat(31),
+          description: 'A test quiz'
+        }
+      });
+      expect(res.statusCode).toBe(400);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+    test('repeated name', () => {
+      const res = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
+        json: {
+          token,
+          name: 'Test Quiz',
+          description: 'A test quiz'
+        }
+      });
+      expect(res.statusCode).toBe(200);
+      expect(parse(res.body)).toHaveProperty('quizId');
+      const res2 = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
+        json: {
+          token,
+          name: 'Test Quiz',
+          description: 'A test quiz'
+        }
+      });
+      expect(res2.statusCode).toBe(400);
+      expect(parse(res2.body)).toStrictEqual(ERROR);
+    });
+  }); 
+});
