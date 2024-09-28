@@ -1,4 +1,4 @@
-import { getData, Quiz, setData } from './dataStore';
+import { getData, Question, Quiz, setData } from './dataStore';
 import { ERROR_MESSAGES } from './errors';
 import {
   getNewID,
@@ -50,18 +50,17 @@ export function adminQuizInfo(authUserId: number, quizId: number): {
   description: string;
 } | { error: string } {
   if (!isValidUserId(authUserId)) {
-    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
+    throw new HttpError(401, ERROR_MESSAGES.INVALID_TOKEN);
   }
+
   if (!isValidQuizId(quizId)) {
-    return { error: ERROR_MESSAGES.INVALID_QUIZ_ID };
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
+
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
-    return { error: ERROR_MESSAGES.NOT_AUTHORIZED };
-  }
-  const quiz = getData().quizzes.find(quiz => quiz.quizId === quizId);
-  if (!quiz) {
-    return { error: ERROR_MESSAGES.INVALID_QUIZ_ID };
-  }
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  } 
+  const quiz = findQuizById(quizId);
   return {
     quizId: quiz.quizId,
     name: quiz.name,
@@ -117,7 +116,6 @@ export function adminQuizCreate(authUserId: number, name: string, description: s
   const data = getData();
   data.quizzes.push(new Quiz(authUserId, quizId, name, description));
   setData(data);
-
   return {
     quizId: quizId
   };
