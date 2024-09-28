@@ -257,31 +257,127 @@ describe.skip('POST /v1/admin/auth/logout', () => {
   });
 });
 
-describe.skip('PUT /v1/admin/user/password', () => {
-
+describe('PUT /v1/admin/user/password', () => {
+  
   let token: string;
   beforeEach(() => {
+    // Register a user and get the token
     const res = request('POST', `${BASE_URL}/register`, {
       json: {
-        email: 'goodemail@gmail.com',
-        password: 'GoodPassword123',
-        nameFirst: 'Tommy',
-        nameLast: 'Smith'
+        email: 'test@example.com',
+        password: 'OldPassword123',
+        nameFirst: 'John',
+        nameLast: 'Doe'
       }
     });
-    expect(res.statusCode).toStrictEqual(200);
+    expect(res.statusCode).toBe(200);
     token = parse(res.body).token;
   });
 
-  test('normal case', () => {
-    const res = request('PUT', `${BASE_URL}/password`, {
-      json: {
-        token: token,
-        oldPassword: 'GoodPassword123',
-        newPassword: 'NewPassword123'
-      }
+  describe('valid cases', () => {
+    test('successful password update', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/password`, {
+        json: {
+          token,
+          oldPassword: 'OldPassword123',
+          newPassword: 'NewPassword456'
+        }
+      });
+      expect(res.statusCode).toBe(200);
+      expect(parse(res.body)).toStrictEqual({});
+
+      // Verify that the new password works for login
+      const loginRes = request('POST', `${BASE_URL}/login`, {
+        json: {
+          email: 'test@example.com',
+          password: 'NewPassword456'
+        }
+      });
+      expect(loginRes.statusCode).toBe(200);
+      expect(parse(loginRes.body)).toHaveProperty('token');
     });
-    expect(res.statusCode).toStrictEqual(200);
-    expect(parse(res.body)).toStrictEqual({});
+  });
+
+  describe('invalid cases', () => {
+    test('invalid token', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/password`, {
+        json: {
+          token: 'invalid_token',
+          oldPassword: 'OldPassword123',
+          newPassword: 'NewPassword456'
+        }
+      });
+      expect(res.statusCode).toBe(401);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+
+    test('missing token', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/password`, {
+        json: {
+          oldPassword: 'OldPassword123',
+          newPassword: 'NewPassword456'
+        }
+      });
+      expect(res.statusCode).toBe(401);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+
+    test('incorrect old password', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/password`, {
+        json: {
+          token,
+          oldPassword: 'WrongOldPassword',
+          newPassword: 'NewPassword456'
+        }
+      });
+      expect(res.statusCode).toBe(400);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+
+    test('new password same as old password', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/password`, {
+        json: {
+          token,
+          oldPassword: 'OldPassword123',
+          newPassword: 'OldPassword123'
+        }
+      });
+      expect(res.statusCode).toBe(400);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+
+    test('new password has been used before', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/password`, {
+        json: {
+          token,
+          oldPassword: 'OldPassword123',
+          newPassword: 'NewPassword456'
+        }
+      });
+      expect(res.statusCode).toBe(200);
+      expect(parse(res.body)).toStrictEqual({});
+
+      const res2 = request('PUT', `${config.url}:${config.port}/v1/admin/user/password`, {
+        json: {
+          token,
+          oldPassword: 'NewPassword456',
+          newPassword: 'OldPassword123'
+        }
+      });
+      expect(res2.statusCode).toBe(400);
+      expect(parse(res2.body)).toStrictEqual(ERROR);
+    });
+
+    test.each(invalidPasswords)('new password is invalid: %s', (password) => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/password`, {
+        json: {
+          token,
+          oldPassword: 'OldPassword123',
+          newPassword: password
+        }
+      });
+      expect(res.statusCode).toBe(400);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
   });
 });
