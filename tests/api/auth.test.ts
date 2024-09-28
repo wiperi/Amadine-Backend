@@ -1,5 +1,6 @@
 import request from 'sync-request-curl';
 import config from '../../src/config.json';
+import { parse } from 'path';
 
 const baseUrl = `${config.url}:${config.port}/v1/admin/auth`;
 
@@ -184,5 +185,61 @@ describe.skip('PUT /v1/admin/user/password', () => {
     });
     expect(res.statusCode).toStrictEqual(200);
     expect(parseBody(res.body)).toStrictEqual({});
+  });
+});
+
+////////////////////////////////////////////////////////////////
+// Test for /v1/admin/auth/login
+////////////////////////////////////////////////////////////////
+describe('POST /v1/admin/auth/login', () => {
+  let token: string;
+  beforeEach(() => {
+    const res = request('POST', `${baseUrl}/register`, {
+      json: {
+        email: 'goodemail@gmail.com',
+        password: 'GlenPassword123',
+        nameFirst: 'Glen',
+        nameLast: 'Quagmire'
+      }
+    });
+    token = parseBody(res.body).token;
+  });
+
+  describe('invalid cases', () => {
+    test('Email does not exist', () => {
+      const res = request('POST', `${baseUrl}/register`, { json: { email: 'petergriffin@gmail.com', password: 'PumpkinEater123' }});
+      expect(parseBody(res.body)).toStrictEqual(ERROR);
+      expect(res.statusCode).toStrictEqual(400);
+    });
+
+    test('Password is not correct for the given email', () => {
+      const res = request('POST', `${baseUrl}/register`, { json: { email: 'goodemail@email.com', password: 'Ifogortmypassword123' }});
+      expect(parseBody(res.body)).toStrictEqual(ERROR);
+      expect(res.statusCode).toStrictEqual(400);
+    });
+  });
+
+  describe('valid cases', () => {
+    test('successful login with correct id', () => {
+      const res = request('POST', `${baseUrl}/login`, { json: { email: 'goodemail@gmail.com', password: 'GlenPassword123' }});
+      expect(parseBody(res.body).token).toStrictEqual(token);
+      expect(res.statusCode).toStrictEqual(200);
+    });
+
+    test('same user return same id', () => {
+      const res1 = request('POST', `${baseUrl}/login`, { json: { email: 'goodemail@gmail.com', password: 'GlenPassword123' }});
+      const res2 = request('POST', `${baseUrl}/login`, { json: { email: 'goodemail@gmail.com', password: 'GlenPassword123' }});
+      expect(parseBody(res1.body)).toStrictEqual(parseBody(res2.body));
+      expect(res1.statusCode).toStrictEqual(200);
+      expect(res2.statusCode).toStrictEqual(200);
+    });
+
+    test('different user return different id', () => {
+      const res1 = request('POST', `${baseUrl}/login`, { json: { email: 'goodemail@gmail.com', password: 'GlenPassword123' }});
+      const userRes = request('POST', `${baseUrl}/register`, { json: { email: 'peter@gmail.com', password: 'PumpkinEater123' }});
+      const res2 = request('POST', `${baseUrl}/login`, { json: { email: 'peter@gmail.com', password: 'PumkinEater123' }});
+      expect(parseBody(res2.body)).toStrictEqual(parseBody(userRes.body));
+      expect(parseBody(res1.body)).not.toStrictEqual(parseBody(res2.body));
+    });
   });
 });
