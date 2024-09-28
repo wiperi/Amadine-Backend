@@ -237,3 +237,18 @@ export function adminUserPasswordUpdate(authUserId: number, oldPassword: string,
 
   return {};
 }
+
+export function adminAuthLogout(token: string): EmptyObject {
+  // token is guaranteed to be valid by the time this function is called
+  const { userSessions } = getData();
+  for (let i = 0; i < userSessions.length; i++) {
+    if (userSessions[i].token === token) {
+      userSessions.splice(i);
+      break;
+    }
+  }
+
+  setData();
+
+  return {};
+}

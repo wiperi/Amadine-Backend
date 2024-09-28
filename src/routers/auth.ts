@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { adminAuthLogin, adminAuthRegister } from '../auth';
+import { adminAuthLogin, adminAuthRegister, adminAuthLogout } from '../auth';
 
 export const authRouter = Router();
 
@@ -16,6 +16,15 @@ authRouter.post('/login', (req: Request, res: Response) => {
   const { email, password } = req.body;
   try {
     return res.json(adminAuthLogin(email, password));
+  } catch (error) {
+    return res.status(error.statusCode).json({ error: error.message });
+  }
+});
+
+authRouter.post('/logout', (req: Request, res: Response) => {
+  const { token } = req.body;
+  try {
+    return res.json(adminAuthLogout(token));
   } catch (error) {
     return res.status(error.statusCode).json({ error: error.message });
   }
