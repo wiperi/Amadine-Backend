@@ -99,7 +99,7 @@ export function adminAuthRegister(email: string, password: string, nameFirst: st
  * Given a registered user's email and password
  * returns their authUserId value.
  */
-export function adminAuthLogin(email: string, password: string): { token: string } | { error: string } {
+export function adminAuthLogin(email: string, password: string): { token: string } {
   const data = getData();
 
   if (!email || !password) {
