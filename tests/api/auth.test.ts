@@ -257,7 +257,7 @@ describe.skip('POST /v1/admin/auth/logout', () => {
   });
 });
 
-describe.skip('PUT /v1/admin/user/password', () => {
+describe('PUT /v1/admin/user/password', () => {
   
   let token: string;
   beforeEach(() => {

@@ -199,35 +199,41 @@ export function adminUserDetails(authUserId: number): {
 /**
  * Updates the password for an admin user.
  */
-export function adminUserPasswordUpdate(authUserId: number, oldPassword: string, newPassword: string): EmptyObject | { error: string } {
+export function adminUserPasswordUpdate(authUserId: number, oldPassword: string, newPassword: string): EmptyObject {
+  if (!authUserId || !oldPassword || !newPassword) {
+    throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
+  }
+
   if (!isValidUserId(authUserId)) {
-    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
+    throw new HttpError(400, ERROR_MESSAGES.UID_NOT_EXIST);
   }
 
   const user = getData().users.find(user => user.userId === authUserId);
 
   if (!user) {
-    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
+    throw new HttpError(400, ERROR_MESSAGES.UID_NOT_EXIST);
   }
 
   if (oldPassword !== user.password) {
-    return { error: ERROR_MESSAGES.WRONG_OLD_PASSWORD };
+    throw new HttpError(400, ERROR_MESSAGES.WRONG_OLD_PASSWORD);
   }
 
   if (oldPassword === newPassword) {
-    return { error: ERROR_MESSAGES.NEW_PASSWORD_SAME_AS_OLD };
+    throw new HttpError(400, ERROR_MESSAGES.NEW_PASSWORD_SAME_AS_OLD);
   }
 
   if (user.oldPasswords.includes(newPassword)) {
-    return { error: ERROR_MESSAGES.PASSWORD_ALREADY_USED };
+    throw new HttpError(400, ERROR_MESSAGES.PASSWORD_ALREADY_USED);
   }
 
   if (!isValidPassword(newPassword)) {
-    return { error: ERROR_MESSAGES.INVALID_PASSWORD };
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_PASSWORD);
   }
 
   user.oldPasswords.push(oldPassword);
   user.password = newPassword;
+
+  setData();
 
   return {};
 }
