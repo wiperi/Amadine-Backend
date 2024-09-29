@@ -2,6 +2,8 @@ import { getData } from './dataStore';
 import isEmail from 'validator/lib/isEmail';
 import { User, Quiz } from './dataStore';
 import { ERROR_MESSAGES } from './errors';
+import jwt from 'jsonwebtoken';
+import config from './config.json';
 
 /**
  * Recursively searches for a target value within an object or its nested properties.
@@ -226,4 +228,16 @@ export function isQuizIdOwnedByUser(quizId: number, authUserId: number): boolean
 
 export function findQuizById(quizId: number): Quiz | undefined {
   return getData().quizzes.find(quiz => quiz.quizId === quizId);
+}
+
+const secretKey = config.jwtSecretKey;
+
+export function extractUserIdFromToken(token: string): string | null {
+  try {
+    const decoded = jwt.verify(token, secretKey) as { userId: string };
+    return decoded.userId;
+  } catch (error) {
+    console.error('Invalid token:', error);
+    return null;
+  }
 }
