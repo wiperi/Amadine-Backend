@@ -1,4 +1,4 @@
-import { getData, Quiz, EmptyObject, HttpError } from './dataStore';
+import { getData, Quiz, setData, EmptyObject, HttpError } from './dataStore';
 import { ERROR_MESSAGES } from './errors';
 import {
   getNewID,
@@ -50,18 +50,17 @@ export function adminQuizInfo(authUserId: number, quizId: number): {
   description: string;
 } | { error: string } {
   if (!isValidUserId(authUserId)) {
-    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
+    throw new HttpError(401, ERROR_MESSAGES.UID_NOT_EXIST);
   }
+
   if (!isValidQuizId(quizId)) {
-    return { error: ERROR_MESSAGES.INVALID_QUIZ_ID };
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
+
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
-    return { error: ERROR_MESSAGES.NOT_AUTHORIZED };
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
-  const quiz = getData().quizzes.find(quiz => quiz.quizId === quizId);
-  if (!quiz) {
-    return { error: ERROR_MESSAGES.INVALID_QUIZ_ID };
-  }
+  const quiz = findQuizById(quizId);
   return {
     quizId: quiz.quizId,
     name: quiz.name,
@@ -105,16 +104,18 @@ export function adminQuizNameUpdate(authUserId: number, quizId: number, name: st
  */
 export function adminQuizCreate(authUserId: number, name: string, description: string): { quizId: number } | { error: string } {
   if (!isValidUserId(authUserId)) {
-    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
+    throw new HttpError(401, ERROR_MESSAGES.USED_EMAIL);
   }
   if (!isValidQuizName(name)) {
-    return { error: ERROR_MESSAGES.INVALID_NAME };
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_NAME);
   }
   if (!isValidQuizDescription(description)) {
-    return { error: ERROR_MESSAGES.INVALID_DESCRIPTION };
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_DESCRIPTION);
   }
-  const quizId = getNewID();
-  getData().quizzes.push(new Quiz(authUserId, quizId, name, description));
+  const quizId = getNewID('quiz');
+  const data = getData();
+  data.quizzes.push(new Quiz(authUserId, quizId, name, description));
+  setData(data);
   return {
     quizId: quizId
   };
