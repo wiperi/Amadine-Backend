@@ -1,5 +1,6 @@
 import request from 'sync-request-curl';
 import config from '../../src/config.json';
+import { time } from 'console';
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const ERROR = { error: expect.any(String) };
@@ -160,4 +161,59 @@ describe('POST /v1/admin/quiz',( ) => {
       expect(parse(res2.body)).toStrictEqual(ERROR);
     });
   }); 
+  describe('GET /v1/admin/quiz/:quizId', () => {
+    describe('valid cases', () => {
+      test('successful quiz retrieval', () => {
+        const createQuizRes = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
+          json: {
+            token,
+            name: 'Test Quiz',
+            description: 'A test quiz'
+          }
+        });
+        expect(createQuizRes.statusCode).toBe(200);
+        const { quizId } = parse(createQuizRes.body);
+
+        const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
+          qs: { token }
+        });
+        expect(res.statusCode).toBe(200);
+        expect(parse(res.body)).toStrictEqual({
+          quizId,
+          name: 'Test Quiz',
+          description: 'A test quiz',
+          timeCreated: expect.any(Number),
+          timeLastEdited: expect.any(Number)
+        });
+      });
+    });
+    describe('invalid cases', () => {
+      test('invalid token', () => {
+        const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/1`, {
+          qs: { token: 'invalid_token' }
+        });
+        expect(res.statusCode).toBe(401);
+        expect(parse(res.body)).toStrictEqual(ERROR);
+      });
+      test('missing token', () => {
+        const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/1`);
+        expect(res.statusCode).toBe(401);
+        expect(parse(res.body)).toStrictEqual(ERROR);
+      });
+      test('invalid quiz ID', () => {
+        const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/0`, {
+          qs: { token }
+        });
+        expect(res.statusCode).toBe(403);
+        expect(parse(res.body)).toStrictEqual(ERROR);
+      });
+      test('nonexistent quiz ID', () => {
+        const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/1`, {
+          qs: { token }
+        });
+        expect(res.statusCode).toBe(403);
+        expect(parse(res.body)).toStrictEqual(ERROR);
+      });
+    });
+  });
 });
