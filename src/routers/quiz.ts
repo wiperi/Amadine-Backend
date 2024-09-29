@@ -1,6 +1,5 @@
 import { Router, Request, Response } from 'express';
 import { adminQuizCreate, adminQuizInfo } from '../quiz';
-import { parse } from 'path';
 export const quizRouter = Router();
 
 quizRouter.get('/', (req: Request, res: Response) => {
@@ -13,7 +12,7 @@ quizRouter.post('/', (req: Request, res: Response) => {
     return res.json(adminQuizCreate(authUserId, name, description));
   } catch (error) {
     return res.status(error.statusCode).json({ error: error.message });
-  } 
+  }
 });
 
 quizRouter.get('/:quizid', (req: Request, res: Response) => {

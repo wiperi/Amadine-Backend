@@ -1,4 +1,4 @@
-import { getData, Question, Quiz, setData } from './dataStore';
+import { getData, Quiz, setData } from './dataStore';
 import { ERROR_MESSAGES } from './errors';
 import {
   getNewID,
@@ -10,7 +10,6 @@ import {
   isValidQuizDescription
 } from './helper';
 import { HttpError } from './dataStore';
-import { set } from 'yaml/dist/schema/yaml-1.1/set';
 /**
  * Update the description of the relevant quiz.
  */
@@ -50,7 +49,7 @@ export function adminQuizInfo(authUserId: number, quizId: number): {
   description: string;
 } | { error: string } {
   if (!isValidUserId(authUserId)) {
-    throw new HttpError(401, ERROR_MESSAGES.INVALID_TOKEN);
+    throw new HttpError(401, ERROR_MESSAGES.UID_NOT_EXIST);
   }
 
   if (!isValidQuizId(quizId)) {
@@ -59,7 +58,7 @@ export function adminQuizInfo(authUserId: number, quizId: number): {
 
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
-  } 
+  }
   const quiz = findQuizById(quizId);
   return {
     quizId: quiz.quizId,
