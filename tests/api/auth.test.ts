@@ -188,7 +188,7 @@ describe('POST /v1/admin/auth/register', () => {
   runTestsForOneParam('Valid last names', validNames, 3, CORRECT_RESPONSE);
 });
 
-describe.skip('POST /v1/admin/auth/logout', () => {
+describe('POST /v1/admin/auth/logout', () => {
   
   let token: string;
   beforeEach(() => {
@@ -206,7 +206,7 @@ describe.skip('POST /v1/admin/auth/logout', () => {
   });
 
   describe('valid cases', () => {
-    test('successful logout', () => {
+    test('successful logout', async () => {
       const res = request('POST', `${BASE_URL}/logout`, {
         json: { token }
       });
@@ -214,6 +214,8 @@ describe.skip('POST /v1/admin/auth/logout', () => {
       expect(parse(res.body)).toEqual({});
 
       // Verify that the token is no longer valid
+      // - Since jet generation is based on time, we need to wait for a second to ensure the new token is different to old one
+      await new Promise(resolve => setTimeout(resolve, 1000));
       const loginRes = request('POST', `${BASE_URL}/login`, {
         json: {
           email: 'test@example.com',
@@ -257,7 +259,7 @@ describe.skip('POST /v1/admin/auth/logout', () => {
   });
 });
 
-describe.skip('PUT /v1/admin/user/password', () => {
+describe('PUT /v1/admin/user/password', () => {
   
   let token: string;
   beforeEach(() => {

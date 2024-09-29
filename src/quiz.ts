@@ -1,4 +1,4 @@
-import { getData, Quiz, setData } from './dataStore';
+import { getData, Quiz, setData, EmptyObject, HttpError } from './dataStore';
 import { ERROR_MESSAGES } from './errors';
 import {
   getNewID,
@@ -7,9 +7,10 @@ import {
   isValidQuizId,
   findQuizById,
   isValidQuizName,
-  isValidQuizDescription
+  isValidQuizDescription,
+  recursiveFind
 } from './helper';
-import { HttpError } from './dataStore';
+
 /**
  * Update the description of the relevant quiz.
  */
@@ -47,7 +48,7 @@ export function adminQuizInfo(authUserId: number, quizId: number): {
   timeCreated: number;
   timeLastEdited: number;
   description: string;
-} | { error: string } {
+} {
   if (!isValidUserId(authUserId)) {
     throw new HttpError(401, ERROR_MESSAGES.UID_NOT_EXIST);
   }
@@ -101,7 +102,7 @@ export function adminQuizNameUpdate(authUserId: number, quizId: number, name: st
 /**
  * Creates a new quiz if the provided user ID, name, and description are valid.
  */
-export function adminQuizCreate(authUserId: number, name: string, description: string): { quizId: number } | { error: string } {
+export function adminQuizCreate(authUserId: number, name: string, description: string): { quizId: number } {
   if (!isValidUserId(authUserId)) {
     throw new HttpError(401, ERROR_MESSAGES.USED_EMAIL);
   }
@@ -160,4 +161,61 @@ export function adminQuizRemove(authUserId: number, quizId: number): Record<stri
     quiz.active = false;
   }
   return {};
+}
+
+export function adminQuizTrashView(): { quizzes: Array<{ quizId: number, name: string }> } {
+  // TODO: Implement this function
+  return { quizzes: [] };
+}
+
+export function adminQuizRestore(quizId: number): EmptyObject {
+  // TODO: Implement this function
+  return {};
+}
+
+export function adminQuizTrashEmpty(quizIds: number[]): EmptyObject {
+  // TODO: Implement this function
+  return {};
+}
+
+export function adminQuizTransfer(quizId: number, userEmail: string): EmptyObject {
+  // TODO: Implement this function
+  return {};
+}
+
+type ParamQuestionBody = {
+  question: string;
+  duration: number;
+  points: number;
+  answers: Array<{ answer: string, correct: boolean }>;
+}
+export function adminQuizQuestionCreate(quizId: number, questionBody: ParamQuestionBody): { questionId: number } {
+  // TODO: Implement this function
+  if (!quizId || recursiveFind(questionBody, undefined)) {
+    throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
+  }
+  return { questionId: 0 };
+}
+
+export function adminQuizQuestionUpdate(quizId: number, questionId: number, questionBody: ParamQuestionBody): EmptyObject {
+  // TODO: Implement this function
+  if (!quizId || recursiveFind(questionBody, undefined)) {
+    throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
+  }
+  return {};
+}
+
+export function adminQuizQuestionDelete(quizId: number, questionId: number): EmptyObject {
+  // TODO: Implement this function
+  return {};
+}
+
+export function adminQuizQuestionMove(quizId: number, questionId: number, newPosition: number): EmptyObject {
+  // TODO: Implement this function
+  return {};
+}
+
+export function adminQuizQuestionDuplicate(quizId: number, questionId: number): { newQuestionId: number } {
+  // TODO: Implement this function
+  return { newQuestionId: 0 };
 }

@@ -1,6 +1,5 @@
 import request from 'sync-request-curl';
 import config from '../../src/config.json';
-import { time } from 'console';
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const ERROR = { error: expect.any(String) };
@@ -160,7 +159,8 @@ describe('POST /v1/admin/quiz',( ) => {
       expect(res2.statusCode).toBe(400);
       expect(parse(res2.body)).toStrictEqual(ERROR);
     });
-  }); 
+  });
+  
   describe('GET /v1/admin/quiz/:quizId', () => {
     describe('valid cases', () => {
       test('successful quiz retrieval', () => {

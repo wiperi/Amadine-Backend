@@ -26,45 +26,45 @@ beforeEach(() => {
 ///test for adminQuizCreate
 ///////////////////////////////////////////////////////////////////
 
-describe('adminquizcreate()', () => {
+describe('adminQuizCreate()', () => {
 
-  // authuserid is not a valid user.
-  // name contains invalid characters. valid characters are alphanumeric and spaces.
-  // name is either less than 3 characters long or more than 30 characters long.
-  // name is already used by the current logged in user for another quiz.
-  // description is more than 100 characters in length (note: empty strings are ok).
+  // AuthUserId is not a valid user.
+  // Name contains invalid characters. Valid characters are alphanumeric and spaces.
+  // Name is either less than 3 characters long or more than 30 characters long.
+  // Name is already used by the current logged in user for another quiz.
+  // Description is more than 100 characters in length (note: empty strings are OK).
 
   describe('invalid input', () => {
-    test('authuserid is not a valid user', () => {
-      expect(adminquizcreate(0, 'name', 'description')).tostrictequal(error);
+    test('AuthUserId is not a valid user', () => {
+      expect(adminQuizCreate(0, 'Name', 'Description')).toStrictEqual(ERROR);
     });
 
-    test('name contains invalid characters', () => {
-      expect(adminquizcreate(authuser.authuserid, 'name!', 'description')).tostrictequal(error);
+    test('Name contains invalid characters', () => {
+      expect(adminQuizCreate(authUser.authUserId, 'Name!', 'Description')).toStrictEqual(ERROR);
     });
-    test('name is less than 3 characters long', () => {
-      expect(adminquizcreate(authuser.authuserid, 'na', 'description')).tostrictequal(error);
+    test('Name is less than 3 characters long', () => {
+      expect(adminQuizCreate(authUser.authUserId, 'Na', 'Description')).toStrictEqual(ERROR);
     });
-    test('name is more than 30 characters long', () => {
-      expect(adminquizcreate(authuser.authuserid, 'name'.repeat(10), 'description')).tostrictequal(error);
+    test('Name is more than 30 characters long', () => {
+      expect(adminQuizCreate(authUser.authUserId, 'Name'.repeat(10), 'Description')).toStrictEqual(ERROR);
     });
-    test('name is already used by the current logged in user for another quiz', () => {
-      adminquizcreate(authuser.authuserid, 'name', 'description');
-      expect(adminquizcreate(authuser.authuserid, 'name', 'description')).tostrictequal(error);
+    test('Name is already used by the current logged in user for another quiz', () => {
+      adminQuizCreate(authUser.authUserId, 'Name', 'Description');
+      expect(adminQuizCreate(authUser.authUserId, 'Name', 'Description')).toStrictEqual(ERROR);
     });
-    test('description is more than 100 characters in length', () => {
-      expect(adminquizcreate(authuser.authuserid, 'name', 'description'.repeat(10))).tostrictequal(error);
+    test('Description is more than 100 characters in length', () => {
+      expect(adminQuizCreate(authUser.authUserId, 'Name', 'Description'.repeat(10))).toStrictEqual(ERROR);
     });
   });
   describe('has a return type', () => {
     test('should return a number', () => {
-      expect(adminquizcreate(authuser.authuserid, 'name', 'description')).toequal({ quizid: expect.any(number) });
+      expect(adminQuizCreate(authUser.authUserId, 'Name', 'Description')).toEqual({ quizId: expect.any(Number) });
     });
   });
   describe('valid input', () => {
     test('should add a quiz to the data store', () => {
-      const quiz = adminquizcreate(authuser.authuserid, 'name', 'description');
-      expect(adminquizinfo(authuser.authuserid, quiz.quizid)).toequal({ quizid: quiz.quizid, name: 'name', timecreated: expect.any(number), timelastedited: expect.any(number), description: 'description' });
+      const quiz = adminQuizCreate(authUser.authUserId, 'Name', 'Description');
+      expect(adminQuizInfo(authUser.authUserId, quiz.quizId)).toEqual({ quizId: quiz.quizId, name: 'Name', timeCreated: expect.any(Number), timeLastEdited: expect.any(Number), description: 'Description' });
     });
   })
 });

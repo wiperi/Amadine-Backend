@@ -16,11 +16,10 @@ quizRouter.post('/', (req: Request, res: Response) => {
 });
 
 quizRouter.get('/:quizid', (req: Request, res: Response) => {
-  const { quizid } = req.params;
+  const quizid = parseInt(req.params.quizid);
+  const { authUserId } = req.body;
   try {
-    const quizIdNumber = parseInt(quizid);
-    const result = adminQuizInfo(req.body.authUserId, quizIdNumber);
-    return res.json(result);
+    return res.json(adminQuizInfo(authUserId, quizid));
   } catch (error) {
     return res.status(error.statusCode).json({ error: error.message });
   }
