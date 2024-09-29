@@ -48,7 +48,7 @@ export function adminQuizInfo(authUserId: number, quizId: number): {
   timeCreated: number;
   timeLastEdited: number;
   description: string;
-} | { error: string } {
+} {
   if (!isValidUserId(authUserId)) {
     throw new HttpError(401, ERROR_MESSAGES.UID_NOT_EXIST);
   }
@@ -102,7 +102,7 @@ export function adminQuizNameUpdate(authUserId: number, quizId: number, name: st
 /**
  * Creates a new quiz if the provided user ID, name, and description are valid.
  */
-export function adminQuizCreate(authUserId: number, name: string, description: string): { quizId: number } | { error: string } {
+export function adminQuizCreate(authUserId: number, name: string, description: string): { quizId: number } {
   if (!isValidUserId(authUserId)) {
     throw new HttpError(401, ERROR_MESSAGES.USED_EMAIL);
   }
