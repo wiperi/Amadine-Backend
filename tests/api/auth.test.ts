@@ -1,5 +1,7 @@
 import request from 'sync-request-curl';
 import config from '../../src/config.json';
+import { extractUserIdFromToken } from '../../src/helper';
+import jwt from 'jsonwebtoken';
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const ERROR = { error: expect.any(String) };
@@ -436,6 +438,137 @@ describe('POST /v1/admin/auth/login', () => {
       const res2 = request('POST', `${BASE_URL}/login`, { json: { email: 'peter@gmail.com', password: 'PumpkinEater123' }});
       expect(parse(res2.body).token).toStrictEqual(parse(userRes.body).token);
       expect(parse(res1.body)).not.toStrictEqual(parse(res2.body));
+    });
+  });
+});
+describe('GET /v1/admin/auth/user/details', () => {
+  // Valid cases:
+  describe('adminUserDetails valid cases', () => {
+    test('numFailedPasswordsSinceLastLogin increments correctly', () => {
+      const registerRes = request('POST', `${BASE_URL}/register`, {
+        json: {
+          email: 'wick@example.com',
+          password: 'JohnWick123',
+          nameFirst: 'John',
+          nameLast: 'Wick'
+        }
+      });
+      expect(registerRes.statusCode).toBe(200);
+      const user = parse(registerRes.body);
+      const token = user.token;
+
+      request('POST', `${BASE_URL}/login`, { json: { email: 'wick@example.com', password: 'JohnWick123' } });
+      request('POST', `${BASE_URL}/login`, { json: { email: 'wick@example.com', password: 'JohnWick12' } });
+      request('POST', `${BASE_URL}/login`, { json: { email: 'wick@example.com', password: 'JohnWick1234' } });
+
+      const detailsRes = request('GET', `${BASE_URL}/details`, {
+        qs: {
+          token
+        }
+      });
+
+      expect(detailsRes.statusCode).toBe(200);
+      const details = parse(detailsRes.body);
+      const userId = extractUserIdFromToken(token);
+      expect(details).toStrictEqual({
+        user: {
+          userId: userId,
+          name: 'John Wick',
+          email: 'wick@example.com',
+          numSuccessfulLogins: 2,
+          numFailedPasswordsSinceLastLogin: 2
+        }
+      });
+    });
+
+    test('reset numFailedPasswordsSinceLastLogin', () => {
+      const registerRes = request('POST', `${BASE_URL}/register`, {
+        json: {
+          email: 'lucy@example.com',
+          password: 'Lucy12356',
+          nameFirst: 'Lucy',
+          nameLast: 'David'
+        }
+      });
+      const user = parse(registerRes.body);
+      const token = user.token;
+
+      request('POST', `${BASE_URL}/login`, { json: { email: 'lucy@example.com', password: 'Lucy1234567' } });
+      request('POST', `${BASE_URL}/login`, { json: { email: 'lucy@example.com', password: 'Lucy1234567' } });
+      request('POST', `${BASE_URL}/login`, { json: { email: 'lucy@example.com', password: 'Lucy12356' } });
+
+      const detailsRes = request('GET', `${BASE_URL}/details`, {
+        qs: {
+          token
+        }
+      });
+      const details = parse(detailsRes.body);
+      const userId = extractUserIdFromToken(token);
+      expect(details).toStrictEqual({
+        user: {
+          userId: userId,
+          name: 'Lucy David',
+          email: 'lucy@example.com',
+          numSuccessfulLogins: 2,
+          numFailedPasswordsSinceLastLogin: 0,
+        }
+      });
+    });
+
+    test('valid user details', () => {
+      const registerRes = request('POST', `${BASE_URL}/register`, {
+        json: {
+          email: 'artoria@example.com',
+          password: 'Artoria123',
+          nameFirst: 'Artoria',
+          nameLast: 'Pendragon'
+        }
+      });
+      const user = parse(registerRes.body);
+      const token = user.token;
+
+      request('POST', `${BASE_URL}/login`, { json: { email: 'artoria@example.com', password: 'Artoria123' } });
+
+      const detailsRes = request('GET', `${BASE_URL}/details`, {
+        qs: {
+          token
+        }
+      });
+      const details = parse(detailsRes.body);
+      const userId = extractUserIdFromToken(token);
+      expect(details).toStrictEqual({
+        user: {
+          userId: userId,
+          name: 'Artoria Pendragon',
+          email: 'artoria@example.com',
+          numSuccessfulLogins: 2,
+          numFailedPasswordsSinceLastLogin: 0,
+        }
+      });
+    });
+  });
+
+  // Error cases:
+  describe('adminUserDetails error cases', () => {
+    test('User ID does not exist', () => {
+      request('POST', `${BASE_URL}/register`, {
+        json: {
+          email: 'test@example.com',
+          password: 'TestPassword123',
+          nameFirst: 'Test',
+          nameLast: 'User'
+        }
+      });
+      // const user = parse(registerRes.body);
+      // const token = user.token;
+      const token = jwt.sign({ userId: 1111 }, config.jwtSecretKey);
+      const detailsRes = request('GET', `${BASE_URL}/details`, {
+        qs: {
+          token
+        }
+      });
+      expect(detailsRes.statusCode).toBe(401);
+      expect(parse(detailsRes.body)).toStrictEqual(ERROR);
     });
   });
 });
