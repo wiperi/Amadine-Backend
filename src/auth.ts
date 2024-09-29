@@ -178,12 +178,9 @@ export function adminUserDetails(authUserId: number): {
     numSuccessfulLogins: number;
     numFailedPasswordsSinceLastLogin: number;
   }
-} | { error: string } {
+} {
   const data = getData();
   const user = data.users.find(user => user.userId === authUserId);
-  if (!user) {
-    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
-  }
 
   return {
     user: {
