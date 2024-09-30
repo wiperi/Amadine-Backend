@@ -31,7 +31,7 @@ authRouter.post('/logout', (req: Request, res: Response) => {
 });
 
 authRouter.get('/details', (req: Request, res: Response) => {
-  const authUserId = parseInt(req.query.message as string);
+  const { authUserId } = req.body;
   try {
     return res.json(adminUserDetails(authUserId));
   } catch (error) {
