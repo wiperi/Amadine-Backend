@@ -228,6 +228,11 @@ export function findQuizById(quizId: number): Quiz | undefined {
   return getData().quizzes.find(quiz => quiz.quizId === quizId);
 }
 
-export async function wait1Seconds() {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+export function sleep(milliseconds: number) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
 }
