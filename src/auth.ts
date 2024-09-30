@@ -132,9 +132,9 @@ export function adminAuthLogin(email: string, password: string): { token: string
 /**
  * Updates the details of an admin user.
  */
-export function adminUserDetailsUpdate(authUserId: number, email: string, nameFirst: string, nameLast: string): EmptyObject | { error: string } {
+export function adminUserDetailsUpdate(authUserId: number, email: string, nameFirst: string, nameLast: string): EmptyObject {
   if (!isValidUserId(authUserId)) {
-    throw new HttpError(400, ERROR_MESSAGES.UID_NOT_EXIST);
+    throw new HttpError(401, ERROR_MESSAGES.UID_NOT_EXIST);
   }
 
   if (!isValidEmail(email)) {
@@ -143,10 +143,6 @@ export function adminUserDetailsUpdate(authUserId: number, email: string, nameFi
 
   const data = getData();
   const user = data.users.find((user) => user.userId === authUserId);
-
-  if (!user) {
-    throw new HttpError(404, ERROR_MESSAGES.UID_NOT_EXIST);
-  }
 
   const emailUsedByOthers = data.users.find(user => user.email === email && user.userId !== authUserId);
 
