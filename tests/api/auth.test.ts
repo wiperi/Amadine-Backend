@@ -536,7 +536,7 @@ describe('PUT /v1/admin/user/details', () => {
       expect(res.statusCode).toBe(401);  // Expect 401 for missing token
       expect(parse(res.body)).toStrictEqual(ERROR);
     });
-  })
+  });
   
   describe('check the first name', () => {
     test('error for invalid characters in first name', () => {
@@ -577,8 +577,7 @@ describe('PUT /v1/admin/user/details', () => {
       expect(res.statusCode).toBe(400);
       expect(parse(res.body)).toStrictEqual(ERROR);
     });
-  
-  })
+  });
 
   describe('check the second name', () => {
     test('error for invalid characters in second name', () => {
@@ -619,7 +618,5 @@ describe('PUT /v1/admin/user/details', () => {
       expect(res.statusCode).toBe(400);
       expect(parse(res.body)).toStrictEqual(ERROR);
     });
-  
-  })
-
+  });
 });
