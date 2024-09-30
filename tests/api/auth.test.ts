@@ -459,19 +459,20 @@ describe('PUT /v1/admin/user/details', () => {
     expect(registerRes.statusCode).toBe(200);
     token = parse(registerRes.body).token;
   });
-
-  test('successful update of user details', () => {
-    const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
-      json: {
-        token,
-        email: 'newemail@example.com',
-        nameFirst: 'Johnny',
-        nameLast: 'Smith'
-      }
+  describe('valid case', () => {
+    test('successful update of user details', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
+        json: {
+          token,
+          email: 'newemail@example.com',
+          nameFirst: 'Johnny',
+          nameLast: 'Smith'
+        }
+      });
+      expect(res.statusCode).toBe(200);
+      expect(parse(res.body)).toStrictEqual({});
     });
-    expect(res.statusCode).toBe(200);
-    expect(parse(res.body)).toStrictEqual({});
-  });
+  })
 
   test('error for invalid email format', () => {
     const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
@@ -509,4 +510,116 @@ describe('PUT /v1/admin/user/details', () => {
     expect(res.statusCode).toBe(400);
     expect(parse(res.body)).toStrictEqual(ERROR);
   });
+  describe('check the token', () => {
+    test('error for invalid token', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
+        json: {
+          token: 'invalid_token', 
+          email: 'testuser@example.com',
+          nameFirst: 'Johnny',
+          nameLast: 'Smith'
+        }
+      });
+      expect(res.statusCode).toBe(401); 
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+  
+    test('error for empty token', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
+        json: {
+          token: '',  // Empty token
+          email: 'newemail@example.com',
+          nameFirst: 'Johnny',
+          nameLast: 'Smith'
+        }
+      });
+      expect(res.statusCode).toBe(401);  // Expect 401 for missing token
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+  })
+  
+  describe('check the first name', () => {
+    test('error for invalid characters in first name', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
+        json: {
+          token,
+          email: 'validemail@example.com',
+          nameFirst: 'Johnny#',
+          nameLast: 'Smith'
+        }
+      });
+      expect(res.statusCode).toBe(400);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+  
+    test('error for first name too short', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
+        json: {
+          token,
+          email: 'validemail@example.com',
+          nameFirst: 'J', 
+          nameLast: 'Smith'
+        }
+      });
+      expect(res.statusCode).toBe(400);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+
+    test('error for first name too long', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
+        json: {
+          token,
+          email: 'validemail@example.com',
+          nameFirst: 'A'.repeat(21), 
+          nameLast: 'Smith'
+        }
+      });
+      expect(res.statusCode).toBe(400);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+  
+  })
+
+  describe('check the second name', () => {
+    test('error for invalid characters in second name', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
+        json: {
+          token,
+          email: 'validemail@example.com',
+          nameFirst: 'Johnny',
+          nameLast: 'Smith#'
+        }
+      });
+      expect(res.statusCode).toBe(400);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+  
+    test('error for second name too short', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
+        json: {
+          token,
+          email: 'validemail@example.com',
+          nameFirst: 'Johnny', 
+          nameLast: 'S'
+        }
+      });
+      expect(res.statusCode).toBe(400);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+
+    test('error for second name too long', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
+        json: {
+          token,
+          email: 'validemail@example.com',
+          nameFirst: 'Smith',
+          nameLast: 'A'.repeat(21)
+        }
+      });
+      expect(res.statusCode).toBe(400);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+  
+  })
+
 });
