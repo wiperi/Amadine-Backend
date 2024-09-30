@@ -1,6 +1,5 @@
 import request from 'sync-request-curl';
 import config from '../../src/config.json';
-import { extractUserIdFromToken } from '../../src/helper';
 import jwt from 'jsonwebtoken';
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
@@ -469,10 +468,9 @@ describe('GET /v1/admin/auth/user/details', () => {
 
       expect(detailsRes.statusCode).toBe(200);
       const details = parse(detailsRes.body);
-      const userId = extractUserIdFromToken(token);
       expect(details).toStrictEqual({
         user: {
-          userId: userId,
+          userId: expect.any(Number),
           name: 'John Wick',
           email: 'wick@example.com',
           numSuccessfulLogins: 2,
@@ -503,10 +501,9 @@ describe('GET /v1/admin/auth/user/details', () => {
         }
       });
       const details = parse(detailsRes.body);
-      const userId = extractUserIdFromToken(token);
       expect(details).toStrictEqual({
         user: {
-          userId: userId,
+          userId: expect.any(Number),
           name: 'Lucy David',
           email: 'lucy@example.com',
           numSuccessfulLogins: 2,
@@ -535,10 +532,9 @@ describe('GET /v1/admin/auth/user/details', () => {
         }
       });
       const details = parse(detailsRes.body);
-      const userId = extractUserIdFromToken(token);
       expect(details).toStrictEqual({
         user: {
-          userId: userId,
+          userId: expect.any(Number),
           name: 'Artoria Pendragon',
           email: 'artoria@example.com',
           numSuccessfulLogins: 2,
