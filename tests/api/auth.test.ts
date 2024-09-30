@@ -439,3 +439,43 @@ describe('POST /v1/admin/auth/login', () => {
     });
   });
 });
+
+describe.skip('PUT /v1/admin/user/details', () => {
+
+  let token: string;
+  beforeEach(() => {
+    // Register a user and get the token
+    const res = request('POST', `${BASE_URL}/register`, {
+      json: {
+        email: 'test@example.com',
+        password: 'ValidPass123',
+        nameFirst: 'John',
+        nameLast: 'Doe'
+      }
+    });
+    expect(res.statusCode).toBe(200);
+    token = parse(res.body).token;
+  });
+
+  describe('valid cases', () => {
+    test('successful update of all details', () => {
+    });
+  });
+
+  describe('invalid cases', () => {
+    test('invalid token', () => {
+    });
+
+    test('email already in use', () => {
+    });
+
+    test.each(invalidEmails)('invalid email: %s', (email) => {
+    });
+
+    test.each(invalidNames)('invalid first name: %s', (name) => {
+    });
+
+    test.each(invalidNames)('invalid last name: %s', (name) => {
+    });
+  });
+});
