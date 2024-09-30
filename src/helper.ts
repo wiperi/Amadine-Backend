@@ -227,3 +227,7 @@ export function isQuizIdOwnedByUser(quizId: number, authUserId: number): boolean
 export function findQuizById(quizId: number): Quiz | undefined {
   return getData().quizzes.find(quiz => quiz.quizId === quizId);
 }
+
+export async function wait1Seconds() {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+}
