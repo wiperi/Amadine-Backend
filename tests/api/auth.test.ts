@@ -1,6 +1,5 @@
 import request from 'sync-request-curl';
 import config from '../../src/config.json';
-import jwt from 'jsonwebtoken';
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const ERROR = { error: expect.any(String) };
@@ -555,9 +554,7 @@ describe('GET /v1/admin/auth/user/details', () => {
           nameLast: 'User'
         }
       });
-      // const user = parse(registerRes.body);
-      // const token = user.token;
-      const token = jwt.sign({ userId: 1111 }, config.jwtSecretKey);
+      const token = 11111;
       const detailsRes = request('GET', `${BASE_URL}/details`, {
         qs: {
           token
