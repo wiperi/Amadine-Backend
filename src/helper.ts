@@ -2,8 +2,6 @@ import { getData } from './dataStore';
 import isEmail from 'validator/lib/isEmail';
 import { User, Quiz } from './dataStore';
 import { ERROR_MESSAGES } from './errors';
-import jwt from 'jsonwebtoken';
-import config from './config.json';
 
 /**
  * Recursively searches for a target value within an object or its nested properties.
