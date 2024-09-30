@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { adminAuthLogin, adminAuthRegister, adminAuthLogout } from '../auth';
+import { adminAuthLogin, adminAuthRegister, adminAuthLogout, adminUserDetails } from '../auth';
 
 export const authRouter = Router();
 
@@ -25,6 +25,15 @@ authRouter.post('/logout', (req: Request, res: Response) => {
   const { token } = req.body;
   try {
     return res.json(adminAuthLogout(token));
+  } catch (error) {
+    return res.status(error.statusCode).json({ error: error.message });
+  }
+});
+
+authRouter.get('/details', (req: Request, res: Response) => {
+  const { authUserId } = req.body;
+  try {
+    return res.json(adminUserDetails(authUserId));
   } catch (error) {
     return res.status(error.statusCode).json({ error: error.message });
   }
