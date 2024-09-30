@@ -126,8 +126,12 @@ export function adminQuizCreate(authUserId: number, name: string, description: s
  * if the user ID is valid. The quizzes are returned with their IDs and names.
  */
 export function adminQuizList(authUserId: number): { quizzes: { quizId: number; name: string }[] } | { error: string } {
+  if (!authUserId) {
+    throw new HttpError(401, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
+  }
+
   if (!isValidUserId(authUserId)) {
-    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
+    throw new HttpError(401, ERROR_MESSAGES.UID_NOT_EXIST);
   }
 
   const quizzes = getData().quizzes
