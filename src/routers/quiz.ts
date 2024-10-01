@@ -27,8 +27,8 @@ quizRouter.get('/:quizid', (req: Request, res: Response) => {
 
 quizRouter.put('/:quizid/name', (req: Request, res: Response) => {
   const quizid = parseInt(req.params.quizid);
-  const { authUserId, name} = req.body;
-  try{
+  const { authUserId, name } = req.body;
+  try {
     return res.json(adminQuizNameUpdate(authUserId, quizid, name));
   } catch (error) {
     return res.status(error.statusCode).json({ error: error.message });

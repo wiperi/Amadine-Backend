@@ -74,8 +74,7 @@ export function adminQuizInfo(authUserId: number, quizId: number): {
  * Update the name of the relevant quiz.
  */
 export function adminQuizNameUpdate(authUserId: number, quizId: number, name: string): Record<string, never> {
-
-  if (!isValidQuizName(name)) { 
+  if (!isValidQuizName(name)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_NAME);
   }
 
