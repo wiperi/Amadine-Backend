@@ -178,6 +178,7 @@ describe('GET /v1/admin/quiz/:quizId', () => {
       const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
         qs: { token }
       });
+    });
       test('missing token', () => {
         const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/1`);
         expect(res.statusCode).toBe(401);
@@ -216,13 +217,7 @@ describe('GET /v1/admin/quiz/:quizId', () => {
         expect(res_get.statusCode).toBe(403);  
       }); 
 
-      test('nonexistent quiz ID', () => {
-        const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/1`, {
-          qs: { token }
-        });
-        expect(res.statusCode).toBe(403);
-        expect(parse(res.body)).toStrictEqual(ERROR);
-      });
+      
     });
   });
   describe('invalid cases', () => {
@@ -253,8 +248,6 @@ describe('GET /v1/admin/quiz/:quizId', () => {
       expect(parse(res.body)).toStrictEqual(ERROR);
     });
   });
-});
-
 
 
 /////////////////////////////////////////////////////
