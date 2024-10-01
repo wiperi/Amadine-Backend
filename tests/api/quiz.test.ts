@@ -1,6 +1,6 @@
 import request from 'sync-request-curl';
 import config from '../../src/config.json';
-import { wait1Seconds } from '../../src/helper';
+import { wait1Seconds, sleep } from '../../src/helper';
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const ERROR = { error: expect.any(String) };
@@ -238,7 +238,7 @@ describe('GET /v1/admin/quiz/:quizId', () => {
 function requestAdminQuizNameUpdate(quizId: Number, token: String, name: String) {
   const res = request(
     'PUT', 
-    `${config.url}: ${config.port}/v1/admin/quiz/${quizId}/name`,
+    `${config.url}:${config.port}/v1/admin/quiz/${quizId}/name`,
     {
       json: {
         token,
@@ -251,6 +251,10 @@ function requestAdminQuizNameUpdate(quizId: Number, token: String, name: String)
     return parse(res.body);
   }
   return res.statusCode;
+}
+
+function delay() {
+  return new Promise(resolve => setTimeout(resolve, 1000));
 }
 
 describe('PUT /v1/admin/quiz/{quizid}/name', () => {
@@ -310,7 +314,7 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
     test('user is not a owner of the quiz', () => {
       const userRes = request('POST', `${BASE_URL}/register`, {
         json: {
-          email: 'peter@exmaple',
+          email: 'peter@example.com',
           password: 'PumpkinEater123',
           nameFirst: 'Peter',
           nameLast: 'Griffin'
@@ -351,8 +355,9 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
     });
 
     test('successful update last edit time', () => {
-      wait1Seconds();
-      requestAdminQuizNameUpdate(quizId, token, "newName");
+      //wait1Seconds();
+      sleep(1000);
+      requestAdminQuizNameUpdate(quizId, token, "newName")
       const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
         qs: { token }
       });
