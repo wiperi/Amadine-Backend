@@ -253,10 +253,6 @@ function requestAdminQuizNameUpdate(quizId: Number, token: String, name: String)
   return res.statusCode;
 }
 
-function delay() {
-  return new Promise(resolve => setTimeout(resolve, 1000));
-}
-
 describe('PUT /v1/admin/quiz/{quizid}/name', () => {
   let quizId: Number;
   beforeEach(() => {
