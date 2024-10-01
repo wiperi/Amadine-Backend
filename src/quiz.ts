@@ -69,21 +69,17 @@ export function adminQuizInfo(authUserId: number, quizId: number): {
 /**
  * Update the name of the relevant quiz.
  */
-export function adminQuizNameUpdate(authUserId: number, quizId: number, name: string): Record<string, never> | { error: string } {
-  if (!isValidUserId(authUserId)) {
-    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
+export function adminQuizNameUpdate(authUserId: number, quizId: number, name: string): Record<string, never> {
+  if (!isValidQuizName(name)) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_NAME);
   }
 
   if (!isValidQuizId(quizId)) {
-    return { error: ERROR_MESSAGES.INVALID_QUIZ_ID };
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
 
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
-    return { error: ERROR_MESSAGES.NOT_AUTHORIZED };
-  }
-
-  if (!isValidQuizName(name)) {
-    return { error: ERROR_MESSAGES.INVALID_NAME };
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
 
   const quiz = findQuizById(quizId);
