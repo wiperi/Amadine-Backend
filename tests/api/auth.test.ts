@@ -600,42 +600,6 @@ describe('PUT /v1/admin/user/details', () => {
     });
   })
 
-  test('error for invalid email format', () => {
-    const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
-      json: {
-        token,
-        email: 'invalidemail',
-        nameFirst: 'Johnny',
-        nameLast: 'Smith'
-      }
-    });
-    expect(res.statusCode).toBe(400);
-    expect(parse(res.body)).toStrictEqual(ERROR);
-  });
-
-  test('error for used email', () => {
-    // Register another user
-    request('POST', `${BASE_URL}/register`, {
-      json: {
-        email: 'otheruser@example.com',
-        password: 'ValidPass123',
-        nameFirst: 'Jane',
-        nameLast: 'Doe'
-      }
-    });
-
-    // Attempt to update with the same email
-    const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
-      json: {
-        token,
-        email: 'otheruser@example.com',
-        nameFirst: 'Johnny',
-        nameLast: 'Smith'
-      }
-    });
-    expect(res.statusCode).toBe(400);
-    expect(parse(res.body)).toStrictEqual(ERROR);
-  });
   describe('check the token', () => {
     test('error for invalid token', () => {
       const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
@@ -664,7 +628,7 @@ describe('PUT /v1/admin/user/details', () => {
     });
   })
   
-  describe('Invalid email cases', () => {
+  describe('Invalid email cases and used email', () => {
     test.each(invalidEmails)('error for invalid email: %s', (invalidEmail) => {
       const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
         json: {
@@ -675,6 +639,30 @@ describe('PUT /v1/admin/user/details', () => {
         }
       });
       expect(res.statusCode).toBe(400);  // Expect 400 for invalid email
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+
+    test('error for used email', () => {
+      // Register another user
+      request('POST', `${BASE_URL}/register`, {
+        json: {
+          email: 'otheruser@example.com',
+          password: 'ValidPass123',
+          nameFirst: 'Jane',
+          nameLast: 'Doe'
+        }
+      });
+  
+      // Attempt to update with the same email
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
+        json: {
+          token,
+          email: 'otheruser@example.com',
+          nameFirst: 'Johnny',
+          nameLast: 'Smith'
+        }
+      });
+      expect(res.statusCode).toBe(400);
       expect(parse(res.body)).toStrictEqual(ERROR);
     });
   });
@@ -690,6 +678,21 @@ describe('PUT /v1/admin/user/details', () => {
         }
       });
       expect(res.statusCode).toBe(400);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+  });
+  
+  describe('Invalid last name cases', () => {
+    test.each(invalidNames)('error for invalid last name: %s', (invalidName) => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
+        json: {
+          token,
+          email: 'validemail@example.com',
+          nameFirst: 'Johnny',
+          nameLast: invalidName  // Invalid last name
+        }
+      });
+      expect(res.statusCode).toBe(400);  // Expect 400 for invalid name
       expect(parse(res.body)).toStrictEqual(ERROR);
     });
   });
