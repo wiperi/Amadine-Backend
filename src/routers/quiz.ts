@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { adminQuizCreate, adminQuizInfo, adminQuizList } from '../quiz';
+import { adminQuizCreate, adminQuizInfo, adminQuizNameUpdate, adminQuizList } from '../quiz';
 export const quizRouter = Router();
 
 quizRouter.post('/', (req: Request, res: Response) => {
@@ -25,6 +25,16 @@ quizRouter.get('/:quizid', (req: Request, res: Response) => {
   const { authUserId } = req.body;
   try {
     return res.json(adminQuizInfo(authUserId, quizid));
+  } catch (error) {
+    return res.status(error.statusCode).json({ error: error.message });
+  }
+});
+
+quizRouter.put('/:quizid/name', (req: Request, res: Response) => {
+  const quizid = parseInt(req.params.quizid);
+  const { authUserId, name } = req.body;
+  try {
+    return res.json(adminQuizNameUpdate(authUserId, quizid, name));
   } catch (error) {
     return res.status(error.statusCode).json({ error: error.message });
   }
