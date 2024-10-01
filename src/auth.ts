@@ -23,7 +23,7 @@ export function authorizeToken(req: Request, res: Response, next: NextFunction) 
   // Get token from request
   let token: string;
 
-  if (req.url.includes('v1')) {
+  if (req.url.startsWith('/v1')) {
     // For GET and DELETE, get token from query params
     if (req.method === 'GET' || req.method === 'DELETE') {
       token = req.query.token as string;
@@ -34,7 +34,7 @@ export function authorizeToken(req: Request, res: Response, next: NextFunction) 
     }
   }
 
-  if (req.url.includes('v2')) {
+  if (req.url.startsWith('/v2')) {
     // Get token from header.token
     token = req.header('token') as string;
   }
