@@ -53,10 +53,6 @@ export function adminQuizInfo(authUserId: number, quizId: number): {
     throw new HttpError(401, ERROR_MESSAGES.UID_NOT_EXIST);
   }
 
-  if (!isValidQuizId(quizId)) {
-    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
-  }
-
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }

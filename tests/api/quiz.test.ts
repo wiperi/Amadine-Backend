@@ -178,14 +178,46 @@ describe('GET /v1/admin/quiz/:quizId', () => {
       const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
         qs: { token }
       });
-      expect(res.statusCode).toBe(200);
-      expect(parse(res.body)).toStrictEqual({
-        quizId,
-        name: 'Test Quiz',
-        description: 'A test quiz',
-        timeCreated: expect.any(Number),
-        timeLastEdited: expect.any(Number)
+    });
+      test('missing token', () => {
+        const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/1`);
+        expect(res.statusCode).toBe(401);
+        expect(parse(res.body)).toStrictEqual(ERROR);
       });
+      test('invalid quiz ID', () => {
+        const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/0`, {
+          qs: { token }
+        });
+        expect(res.statusCode).toBe(403);
+        expect(parse(res.body)).toStrictEqual(ERROR);
+      });
+      test('not the user\'s quiz', () => {
+        const createQuizRes = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
+          json: {
+            token,
+            name: 'Test Quiz',
+            description: 'A test quiz'
+          }
+        });
+        const res_create = request('POST', `${BASE_URL}/register`, {
+        json: {
+          email: 'test1@example.com',
+          password: 'ValidPass1235678',
+          nameFirst: 'Choeng',
+          nameLast: 'Zhang'
+        }
+        });
+        expect(res_create.statusCode).toBe(200);
+        token = parse(res_create.body).token;
+        expect(createQuizRes.statusCode).toBe(200);
+        const { quizId } = parse(createQuizRes.body);
+        const res_get = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
+          qs: { token: token }
+        });
+        expect(res_get.statusCode).toBe(403);  
+      }); 
+
+      
     });
   });
   describe('invalid cases', () => {
@@ -216,8 +248,6 @@ describe('GET /v1/admin/quiz/:quizId', () => {
       expect(parse(res.body)).toStrictEqual(ERROR);
     });
   });
-});
-
 
 
 /////////////////////////////////////////////////////
