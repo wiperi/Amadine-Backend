@@ -207,6 +207,32 @@ describe('POST /v1/admin/quiz',( ) => {
         expect(res.statusCode).toBe(403);
         expect(parse(res.body)).toStrictEqual(ERROR);
       });
+      test('not the user\'s quiz', () => {
+        const createQuizRes = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
+          json: {
+            token,
+            name: 'Test Quiz',
+            description: 'A test quiz'
+          }
+        });
+        const res_create = request('POST', `${BASE_URL}/register`, {
+        json: {
+          email: 'test1@example.com',
+          password: 'ValidPass1235678',
+          nameFirst: 'Choeng',
+          nameLast: 'Zhang'
+        }
+        });
+        expect(res_create.statusCode).toBe(200);
+        token = parse(res_create.body).token;
+        expect(createQuizRes.statusCode).toBe(200);
+        const { quizId } = parse(createQuizRes.body);
+        const res_get = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
+          qs: { token: token }
+        });
+        expect(res_get.statusCode).toBe(403);  
+      }); 
+
       test('nonexistent quiz ID', () => {
         const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/1`, {
           qs: { token }
