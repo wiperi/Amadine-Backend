@@ -133,7 +133,6 @@ export function adminAuthLogin(email: string, password: string): { token: string
  * Updates the details of an admin user.
  */
 export function adminUserDetailsUpdate(authUserId: number, email: string, nameFirst: string, nameLast: string): EmptyObject {
-
   if (!isValidEmail(email)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_EMAIL_FORMAT);
   }
