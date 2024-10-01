@@ -1,6 +1,6 @@
 import request from 'sync-request-curl';
 import config from '../../src/config.json';
-import { wait1Seconds, sleep } from '../../src/helper';
+import { sleep } from '../../src/helper';
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const ERROR = { error: expect.any(String) };
@@ -355,7 +355,6 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
     });
 
     test('successful update last edit time', () => {
-      //wait1Seconds();
       sleep(1000);
       requestAdminQuizNameUpdate(quizId, token, "newName")
       const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
