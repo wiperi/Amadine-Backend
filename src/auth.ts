@@ -132,36 +132,28 @@ export function adminAuthLogin(email: string, password: string): { token: string
 /**
  * Updates the details of an admin user.
  */
-export function adminUserDetailsUpdate(authUserId: number, email: string, nameFirst: string, nameLast: string): EmptyObject | { error: string } {
-  if (!isValidUserId(authUserId)) {
-    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
-  }
-
+export function adminUserDetailsUpdate(authUserId: number, email: string, nameFirst: string, nameLast: string): EmptyObject {
   if (!isValidEmail(email)) {
-    return { error: ERROR_MESSAGES.INVALID_EMAIL_FORMAT };
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_EMAIL_FORMAT);
   }
 
   const data = getData();
   const user = data.users.find((user) => user.userId === authUserId);
 
-  if (!user) {
-    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
-  }
-
   const emailUsedByOthers = data.users.find(user => user.email === email && user.userId !== authUserId);
 
   if (emailUsedByOthers) {
-    return { error: ERROR_MESSAGES.USED_EMAIL };
+    throw new HttpError(400, ERROR_MESSAGES.USED_EMAIL);
   }
 
   if (!isValidUserName(nameFirst) || !isValidUserName(nameLast)) {
-    return { error: ERROR_MESSAGES.INVALID_NAME };
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_NAME);
   }
 
   user.email = email;
   user.nameFirst = nameFirst;
   user.nameLast = nameLast;
-
+  setData(data);
   return {};
 }
 
