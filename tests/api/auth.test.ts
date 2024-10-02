@@ -17,7 +17,6 @@ import {
   restoreQuiz,
   deleteQuizPermanently
 } from './apiTestHelpersV1';
-import { get } from 'http';
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const ERROR = { error: expect.any(String) };
