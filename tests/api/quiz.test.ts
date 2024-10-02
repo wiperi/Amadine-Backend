@@ -198,7 +198,9 @@ describe('GET /v1/admin/quiz/:quizId', () => {
         name: 'Test Quiz',
         description: 'A test quiz',
         timeCreated: expect.any(Number),
-        timeLastEdited: expect.any(Number)
+        timeLastEdited: expect.any(Number),
+        numofQuestions: 0,
+        questions: []
       });
     });
   });
@@ -385,7 +387,9 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
         name: 'newName',
         description: 'A test quiz',
         timeCreated: expect.any(Number),
-        timeLastEdited: expect.any(Number)
+        timeLastEdited: expect.any(Number),
+        numofQuestions: 0,
+        questions: []
       });
     });
 
@@ -409,7 +413,7 @@ describe.skip('PUT /v1/admin/quiz/{quizid}/question/{questionid}/move', () => {
 
   beforeEach(() => {
     // Create a quiz
-    const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz', 60);
+    const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz');
     expect(createQuizRes.statusCode).toBe(200);
     quizId = createQuizRes.body.quizId;
 
@@ -524,29 +528,50 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
 
   beforeEach(() => {
     // Create a quiz before each test using the helper function with duration
-    const quizResponse = createQuiz(token, 'Test Quiz', 'A test quiz', 180);
+    const quizResponse = createQuiz(token, 'Test Quiz', 'A test quiz');
     expect(quizResponse.statusCode).toBe(200);
     quizId = quizResponse.body.quizId;
   });
-
   describe('valid cases', () => {
-    test('successful question creation', () => {
-      const questionBody = {
-        question: 'What is the capital of France?',
-        duration: 60,
-        points: 5,
-        answers: [
-          { answer: 'Paris', correct: true },
-          { answer: 'Berlin', correct: false },
-          { answer: 'Rome', correct: false },
-        ],
-      };
+  test('successful question creation', () => {
+    const questionBody = {
+      question: 'What is the capital of France?',
+      duration: 60,
+      points: 5,
+      answers: [
+        { answer: 'Paris', correct: true },
+        { answer: 'Berlin', correct: false },
+        { answer: 'Rome', correct: false },
+      ],
+    };
 
-      const res = createQuestion(token, quizId, questionBody);
-      expect(res).toHaveProperty('questionId');
-    });
+    const res = createQuestion(token, quizId, questionBody);
+    expect(res.body).toStrictEqual({ questionId: expect.any(Number) });
+    const getQuizRes = getQuizDetails(token, quizId);
+    expect(getQuizRes.statusCode).toBe(200);
+    const questions = getQuizRes.body.questions;
+    console.log('body:', getQuizRes.body);
+    // console.log('Questions:', questions); 
+    expect(questions).toBeDefined();
+    expect(questions.length).toBeGreaterThan(0);
+
+    // Optionally, verify that the question matches what was added
+    const addedQuestion = questions.find(
+      (q:any) => q.questionId === res.body.questionId
+    );
+    expect(addedQuestion).toBeDefined();
+    expect(addedQuestion.question).toBe(questionBody.question);
+    expect(addedQuestion.duration).toBe(questionBody.duration);
+    expect(addedQuestion.points).toBe(questionBody.points);
+    expect(addedQuestion.answers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ answer: 'Paris', correct: true }),
+        expect.objectContaining({ answer: 'Berlin', correct: false }),
+        expect.objectContaining({ answer: 'Rome', correct: false }),
+      ])
+    );
   });
-
+  });
   describe('invalid cases', () => {
     test('invalid token', () => {
       const questionBody = {
@@ -561,7 +586,7 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
 
       const res = createQuestion('invalid_token', quizId, questionBody);
       expect(res.statusCode).toBe(401);
-      expect(res).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('missing token', () => {
@@ -577,7 +602,7 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
 
       const res = createQuestion('', quizId, questionBody);
       expect(res.statusCode).toBe(401);
-      expect(res).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('user is not the owner of the quiz', () => {
@@ -598,7 +623,7 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
 
       const res = createQuestion(otherToken, quizId, questionBody);
       expect(res.statusCode).toBe(403);
-      expect(res).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('question string is less than 5 characters', () => {
@@ -614,7 +639,7 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
 
       const res = createQuestion(token, quizId, questionBody);
       expect(res.statusCode).toBe(400);
-      expect(res).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('question string is more than 50 characters', () => {
@@ -631,7 +656,7 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
 
       const res = createQuestion(token, quizId, questionBody);
       expect(res.statusCode).toBe(400);
-      expect(res).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('number of answers is less than 2', () => {
@@ -644,7 +669,7 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
 
       const res = createQuestion(token, quizId, questionBody);
       expect(res.statusCode).toBe(400);
-      expect(res).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('number of answers is more than 6', () => {
@@ -665,7 +690,7 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
 
       const res = createQuestion(token, quizId, questionBody);
       expect(res.statusCode).toBe(400);
-      expect(res).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('question duration is not positive', () => {
@@ -681,7 +706,7 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
 
       const res = createQuestion(token, quizId, questionBody);
       expect(res.statusCode).toBe(400);
-      expect(res).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('sum of question durations exceeds quiz duration', () => {
@@ -696,7 +721,7 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
       };
 
       const resFirst = createQuestion(token, quizId, firstQuestionBody);
-      expect(resFirst).toHaveProperty('questionId');
+      expect(resFirst.body).toHaveProperty('questionId');
 
       const secondQuestionBody = {
         question: 'Second question',
@@ -710,7 +735,7 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
 
       const resSecond = createQuestion(token, quizId, secondQuestionBody);
       expect(resSecond.statusCode).toBe(400);
-      expect(resSecond).toStrictEqual(ERROR);
+      expect(resSecond.body).toStrictEqual(ERROR);
     });
 
     test('points awarded are less than 1', () => {
@@ -726,7 +751,7 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
 
       const res = createQuestion(token, quizId, questionBody);
       expect(res.statusCode).toBe(400);
-      expect(res).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('points awarded are greater than 10', () => {
@@ -742,7 +767,7 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
 
       const res = createQuestion(token, quizId, questionBody);
       expect(res.statusCode).toBe(400);
-      expect(res).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('answer length shorter than 1 character', () => {
@@ -758,7 +783,7 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
 
       const res = createQuestion(token, quizId, questionBody);
       expect(res.statusCode).toBe(400);
-      expect(res).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('answer length longer than 30 characters', () => {
@@ -775,7 +800,7 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
 
       const res = createQuestion(token, quizId, questionBody);
       expect(res.statusCode).toBe(400);
-      expect(res).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('duplicate answer strings within the same question', () => {
@@ -791,7 +816,7 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
 
       const res = createQuestion(token, quizId, questionBody);
       expect(res.statusCode).toBe(400);
-      expect(res).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('no correct answers provided', () => {
@@ -807,7 +832,8 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
 
       const res = createQuestion(token, quizId, questionBody);
       expect(res.statusCode).toBe(400);
-      expect(res).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
   });
 });
+

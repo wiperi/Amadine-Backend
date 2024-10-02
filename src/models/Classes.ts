@@ -64,15 +64,16 @@ export class Question {
   points: number;
   answers: Answer[] = [];
 
-  constructor(questionId: number, question: string, duration: number, points: number) {
+  constructor(questionId: number, question: string, duration: number, points: number, answers: Answer[]) {
     this.questionId = questionId;
     this.question = question;
     this.duration = duration;
     this.points = points;
+    this.answers = answers;
   }
 }
 
-class Answer {
+export class Answer {
   answerId: number;
 
   answer: string;
