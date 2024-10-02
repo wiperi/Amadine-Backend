@@ -98,25 +98,23 @@ export function getQuizDetails(token: string, quizId: number): ParsedResponse {
   return parse(res);
 }
 
-export function createQuiz(token: string, name: string, description: string, duration: number): ParsedResponse {
+export function createQuiz(token: string, name: string, description: string): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}`, {
     json: {
       token,
       name,
       description,
-      duration
     }
   });
   return parse(res);
 }
 
-export function updateQuiz(token: string, quizId: number, name: string, description: string, duration: number): ParsedResponse {
+export function updateQuiz(token: string, quizId: number, name: string, description: string): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}`, {
     json: {
       token,
       name,
       description,
-      duration
     }
   });
   return parse(res);
