@@ -126,7 +126,8 @@ export function updateQuiz(token: string, quizId: number, name: string, descript
 export function deleteQuiz(token: string, quizId: number): ParsedResponse {
   const res = request('DELETE', `${QUIZ_URL}/${quizId}`, {
     qs: {
-      token
+      token,
+      quizId
     }
   });
   return parse(res);

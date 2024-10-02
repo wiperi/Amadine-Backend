@@ -515,3 +515,59 @@ describe.skip('PUT /v1/admin/quiz/{quizid}/question/{questionid}/move', () => {
     });
   });
 });
+
+describe('DELETE /v1/admin/quiz/:quizid', () => {
+  let quizId: number;
+
+  beforeEach(() => {
+    // Create a quiz before each test in this suite
+    const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz', 60);
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = createQuizRes.body.quizId;
+  });
+
+  describe('valid cases', () => {
+    test('successful quiz removal', () => {
+      const res = request('DELETE', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
+        qs: { token }
+      });
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body.toString())).toStrictEqual({});
+
+      // Verify the quiz is deleted
+      const resList = request('GET', `${config.url}:${config.port}/v1/admin/quiz/list`, {
+        qs: { token }
+      });
+      const body = JSON.parse(resList.body.toString());
+      expect(body.quizzes).not.toContainEqual(expect.objectContaining({ quizId }));
+    });
+  });
+
+  describe('invalid cases', () => {
+    test('invalid token', () => {
+      // Try deleting the quiz with an invalid token
+      const res = deleteQuiz('invalid_token', quizId);
+      expect(res.statusCode).toBe(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('quiz ID does not exist', () => {
+      // Try deleting a non-existent quiz ID
+      const res = deleteQuiz(token, 999999); 
+      expect(res.statusCode).toBe(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('user is not the owner of the quiz', () => {
+      // Register another user and attempt to delete the quiz created by the original user
+      const userRes = registerUser('peter@example.com', 'ValidPass123', 'Peter', 'Griffin');
+      expect(userRes.statusCode).toBe(200);
+      const newToken = userRes.body.token;
+
+      // Attempt to delete with the new user's token
+      const res = deleteQuiz(newToken, quizId);
+      expect(res.statusCode).toBe(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+  });
+});
