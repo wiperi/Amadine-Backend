@@ -3,6 +3,7 @@ import config from '../../src/config.json';
 
 const AUTH_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const QUIZ_URL = `${config.url}:${config.port}/v1/admin/quiz`;
+const USER_URL = `${config.url}:${config.port}/v1/admin/user`;
 
 type ParsedResponse = Omit<Response, 'body'> & { body: Record<string, any> };
 
@@ -50,8 +51,8 @@ export function logoutUser(token: string): ParsedResponse {
 }
 
 export function getUserDetails(token: string): ParsedResponse {
-  const res = request('GET', `${AUTH_URL}/user/details`, {
-    json: {
+  const res = request('GET', `${USER_URL}/details`, {
+    qs: {
       token
     }
   });

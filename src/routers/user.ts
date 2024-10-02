@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { adminUserPasswordUpdate, adminUserDetailsUpdate } from '@/services/auth';
+import { adminUserPasswordUpdate, adminUserDetailsUpdate, adminUserDetails } from '@/services/auth';
 export const userRouter = Router();
 
 userRouter.get('/', (req: Request, res: Response) => {
@@ -21,6 +21,15 @@ userRouter.put('/details', (req: Request, res: Response) => {
   const authUserId = req.body.authUserId;
   try {
     return res.json(adminUserDetailsUpdate(authUserId, email, nameFirst, nameLast));
+  } catch (error) {
+    return res.status(error.statusCode).json({ error: error.message });
+  }
+});
+
+userRouter.get('/details', (req: Request, res: Response) => {
+  const { authUserId } = req.body;
+  try {
+    return res.json(adminUserDetails(authUserId));
   } catch (error) {
     return res.status(error.statusCode).json({ error: error.message });
   }
