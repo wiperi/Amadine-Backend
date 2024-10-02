@@ -1,8 +1,8 @@
-import { getData, setData } from '../dataStore';
-import { HttpError } from '../utils/HttpError';
-import { Quiz } from '../models/Classes';
-import { EmptyObject } from '../models/Types';
-import { ERROR_MESSAGES } from '../utils/errors';
+import { getData, setData } from '@/dataStore';
+import { HttpError } from '@/utils/HttpError';
+import { Quiz } from '@/models/Classes';
+import { EmptyObject } from '@/models/Types';
+import { ERROR_MESSAGES } from '@/utils/errors';
 import {
   getNewID,
   isQuizIdOwnedByUser,
@@ -11,7 +11,7 @@ import {
   isValidQuizName,
   isValidQuizDescription,
   recursiveFind
-} from '../utils/helper';
+} from '@/utils/helper';
 
 /**
  * Update the description of the relevant quiz.

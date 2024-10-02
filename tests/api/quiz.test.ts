@@ -18,7 +18,7 @@ import {
   clear,
   moveQuestion,
   createQuestion
-} from './v1ApiTestHelpers'
+} from './apiTestHelpersV1'
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const ERROR = { error: expect.any(String) };
