@@ -15,7 +15,6 @@ import {
  * Update the description of the relevant quiz.
  */
 export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, description: string): Record<string, never> {
-
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -25,7 +24,7 @@ export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, d
   }
 
   if (!isValidQuizDescription(description)) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_DESCRIPTION );
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_DESCRIPTION);
   }
 
   const quiz = findQuizById(quizId);

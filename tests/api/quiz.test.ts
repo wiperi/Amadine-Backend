@@ -281,7 +281,7 @@ function requestAdminQuizNameUpdate(quizId: Number, token: String, name: String)
 }
 
 describe('PUT /v1/admin/quiz/{quizid}/name', () => {
-  let quizId: Number;
+  let quizId: number;
   beforeEach(() => {
     // create a quiz
     const createQuizRes = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
@@ -386,10 +386,11 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
       expect(res.statusCode).toBe(200);
       expect(parse(res.body).timeLastEdited).not.toStrictEqual(parse(res.body).timeCreated);
     });
-  })
+  });
 });
+
 describe('PUT /v1/admin/quiz/:quizId/description', () => {
-  let quizId: Number;
+  let quizId: number;
   beforeEach(() => {
     const createQuizRes = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
       json: {
@@ -401,10 +402,8 @@ describe('PUT /v1/admin/quiz/:quizId/description', () => {
     expect(createQuizRes.statusCode).toBe(200);
     quizId = parse(createQuizRes.body).quizId;
   });
-  
   describe('valid cases', () => {
     test('should update the description of the quiz', () => {
-      
       const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/description`, {
         json: {
           token,
@@ -426,7 +425,7 @@ describe('PUT /v1/admin/quiz/:quizId/description', () => {
       });
     });
     test('successful update last edit time', async () => {
-      await new Promise(resolve => setTimeout (resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/description`, {
         json: {
           token,
@@ -446,7 +445,7 @@ describe('PUT /v1/admin/quiz/:quizId/description', () => {
   describe('invalid cases', () => {
     test('invalid_token', () => {
       const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/description`, {
-        json: { 
+        json: {
           token: 'invalid_token',
           description: 'An updated test quiz'
         }

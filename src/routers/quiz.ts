@@ -43,4 +43,3 @@ quizRouter.put('/:quizid/description', (req: Request, res: Response) => {
     return res.status(error.statusCode).json({ error: error.message });
   }
 });
-
