@@ -1,49 +1,63 @@
 # Data Model
 
 ## Example Data Store State
-```javascript
-let data = {
-  users: [
+```json
+{
+  "users": [
     {
-      userId: 616425961674,
-      email: 'cheongmail@gmail.com',
-      password: 'nicepassword',
-      nameFirst: 'Cheong',
-      nameLast: 'Zhang',
-      numSuccessfulLogins: 3,
-      numFailedPasswordsSinceLastLogin: 4,
-      oldPasswords: ['MyOldPass1234'],
+      "numSuccessfulLogins": 2,
+      "numFailedPasswordsSinceLastLogin": 0,
+      "oldPasswords": [],
+      "userId": 6867318917,
+      "email": "test@test.com",
+      "password": "Password123!",
+      "nameFirst": "John",
+      "nameLast": "Doe"
     }
   ],
-  quizzes: [
+  "quizzes": [
     {
-      authUserId: 616425961674,
-      quizId: 174712181430,
-      name: '1093 class',
-      description: 'I love sasa',
-      timeCreated: 1234567890,
-      timeLastEdited: 1234567890,
-      active: true,
+      "timeCreated": 1727876047,
+      "timeLastEdited": 1727876047,
+      "active": true,
+      "questions": [],
+      "thumbnailUrl": "",
+      "authUserId": 1,
+      "quizId": 45081635485,
+      "name": "Test Quiz",
+      "description": "This is a test quiz"
     }
-  ]
-};
+  ],
+  "userSessions": [
+    {
+      "sessionId": 613610381134,
+      "authUserId": 6867318917,
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjY4NjczMTg5MTcsImlhdCI6MTcyNzg3NTk5MX0.WZeWHExleXeeQ3KFX0WWYgwCGJJGE2VXCgJdmwrG7N8"
+    },
+    {
+      "sessionId": 976139452081,
+      "authUserId": 6867318917,
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjY4NjczMTg5MTcsImlhdCI6MTcyNzg3NTk5MX0.WZeWHExleXeeQ3KFX0WWYgwCGJJGE2VXCgJdmwrG7N8"
+    }
+  ],
+  "quizSessions": [],
+  "players": []
+}
 ```
 ## Short description of the Data Model
 
-Here you should describe what each property of data model object does.
 
-| Property | Type | Description |
-| -------- | ---- | ----------- |
-| email    | string| User's email|
-|password  |string |User's password|
-|nameFirst |string |User's firstname|
-|nameLast |string |User's Lastname|
-|authUserId | number | 12 digit random integer |
-|numSuccessfulLogins|number |times of succssful login|
-|numFailedPasswordsSinceLastLogin|number|times of failed login|
-|quizId|number|12 digit random integer|
-|name|sting|Name of quiz|
-|decription|string|description of Quiz|
-|timeCreated|number| unix timestamp in seconds |
-|timeLastEdited|number|unix timestamp in seconds|
+![Data Model Diagram](./docs/dataStructrueDiagram.png)
+
+This simplified UML diagram illustrates the relationships between the main entities in our data model:
+
+- Users: Represent registered users of the system
+- Quizzes: Contain information about quizzes created by users
+- UserSessions: Track active user login sessions
+- QuizSessions: Represent ongoing or completed quiz gameplay sessions
+- Players: Store information about participants in quiz sessions
+
+The diagram shows the connections between these entities and their key attributes, providing a visual overview of the data structure used in the application.
+
+
 
