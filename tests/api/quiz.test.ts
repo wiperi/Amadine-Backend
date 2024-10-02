@@ -161,7 +161,9 @@ describe('POST /v1/admin/quiz',( ) => {
     });
   });
 });  
-
+/*
+ This is test for AQI
+ */
 describe('GET /v1/admin/quiz/:quizId', () => {
   describe('valid cases', () => {
     test('successful quiz retrieval', () => {
@@ -178,46 +180,14 @@ describe('GET /v1/admin/quiz/:quizId', () => {
       const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
         qs: { token }
       });
-    });
-      test('missing token', () => {
-        const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/1`);
-        expect(res.statusCode).toBe(401);
-        expect(parse(res.body)).toStrictEqual(ERROR);
+      expect(res.statusCode).toBe(200);
+      expect(parse(res.body)).toStrictEqual({
+        quizId,
+        name: 'Test Quiz',
+        description: 'A test quiz',
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number)
       });
-      test('invalid quiz ID', () => {
-        const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/0`, {
-          qs: { token }
-        });
-        expect(res.statusCode).toBe(403);
-        expect(parse(res.body)).toStrictEqual(ERROR);
-      });
-      test('not the user\'s quiz', () => {
-        const createQuizRes = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
-          json: {
-            token,
-            name: 'Test Quiz',
-            description: 'A test quiz'
-          }
-        });
-        const res_create = request('POST', `${BASE_URL}/register`, {
-        json: {
-          email: 'test1@example.com',
-          password: 'ValidPass1235678',
-          nameFirst: 'Choeng',
-          nameLast: 'Zhang'
-        }
-        });
-        expect(res_create.statusCode).toBe(200);
-        token = parse(res_create.body).token;
-        expect(createQuizRes.statusCode).toBe(200);
-        const { quizId } = parse(createQuizRes.body);
-        const res_get = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
-          qs: { token: token }
-        });
-        expect(res_get.statusCode).toBe(403);  
-      }); 
-
-      
     });
   });
   describe('invalid cases', () => {
@@ -240,6 +210,32 @@ describe('GET /v1/admin/quiz/:quizId', () => {
       expect(res.statusCode).toBe(403);
       expect(parse(res.body)).toStrictEqual(ERROR);
     });
+
+    test('user is not the owner of th quiz', () => {
+      const createQuizRes = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
+        json: {
+          token,
+          name: 'Test Quiz',
+          description: 'A test quiz'
+        }
+      });
+      expect(createQuizRes.statusCode).toBe(200);
+      const { quizId } = parse(createQuizRes.body);
+      const createUserRes = request('POST', `${BASE_URL}/register`, {
+        json: {
+          email: 'testfds@example.com',
+          password: 'ValidPass123',
+          nameFirst: 'cheong',
+          nameLast: 'Zhang'
+        }
+      });
+      expect(createUserRes.statusCode).toBe(200);
+      token = parse(createUserRes.body).token;
+      const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
+        qs: { token }
+      });
+      expect(res.statusCode).toBe(403);
+    });
     test('nonexistent quiz ID', () => {
       const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/1`, {
         qs: { token }
@@ -248,6 +244,8 @@ describe('GET /v1/admin/quiz/:quizId', () => {
       expect(parse(res.body)).toStrictEqual(ERROR);
     });
   });
+});
+
 
 
 /////////////////////////////////////////////////////
@@ -369,6 +367,7 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
       const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
         qs: { token }
       });
+      console.log(parse(res.body)); // debug
       expect(res.statusCode).toBe(200);
       expect(parse(res.body)).toStrictEqual({
         quizId,
