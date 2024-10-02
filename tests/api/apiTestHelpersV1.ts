@@ -58,10 +58,11 @@ export function getUserDetails(token: string): ParsedResponse {
   return parse(res);
 }
 
-export function updateUserDetails(token: string, nameFirst: string, nameLast: string): ParsedResponse {
+export function updateUserDetails(token: string, email: string, nameFirst: string, nameLast: string): ParsedResponse {
   const res = request('PUT', `${AUTH_URL}/user/details`, {
     json: {
       token,
+      email,
       nameFirst,
       nameLast
     }
@@ -125,7 +126,8 @@ export function updateQuiz(token: string, quizId: number, name: string, descript
 export function deleteQuiz(token: string, quizId: number): ParsedResponse {
   const res = request('DELETE', `${QUIZ_URL}/${quizId}`, {
     qs: {
-      token
+      token,
+      quizId
     }
   });
   return parse(res);
