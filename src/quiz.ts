@@ -187,7 +187,33 @@ export function adminQuizQuestionDelete(authUserId: number, quizId: number, ques
 }
 
 export function adminQuizQuestionMove(authUserId: number, quizId: number, questionId: number, newPosition: number): EmptyObject {
-  // TODO: Implement this function
+  // const quiz = findQuizById(quizId);
+  // if (!quiz) {
+  //   throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  // }
+
+  // if (quiz.authUserId !== authUserId) {
+  //   throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  // }
+
+  // if (newPosition < 0 || newPosition > (quiz.questions.length - 1)) {
+  //   throw new HttpError(400, ERROR_MESSAGES.INVALID_POSITION);
+  // }
+
+  // const question = quiz.questions.find(question => question.questionId === questionId);
+  // const currentPosition = quiz.questions.indexOf(question);
+
+  // if (!question) {
+  //   throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION_ID);
+  // }
+
+  // if (currentPosition === newPosition) {
+  //   throw new HttpError(400, ERROR_MESSAGES.SAME_POSITION);
+  // }
+
+  // quiz.questions.splice(currentPosition, 1);
+  // quiz.questions.splice(newPosition, 0, question);
+
   return {};
 }
 
