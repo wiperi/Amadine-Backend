@@ -16,17 +16,17 @@ import {
 /**
  * Update the description of the relevant quiz.
  */
-export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, description: string): Record<string, never> | { error: string } {
+export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, description: string): EmptyObject {
   if (!isValidQuizId(quizId)) {
-    return { error: ERROR_MESSAGES.INVALID_QUIZ_ID };
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
 
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
-    return { error: ERROR_MESSAGES.NOT_AUTHORIZED };
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
 
   if (!isValidQuizDescription(description)) {
-    return { error: ERROR_MESSAGES.INVALID_DESCRIPTION };
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_DESCRIPTION);
   }
 
   const quiz = findQuizById(quizId);
@@ -67,7 +67,7 @@ export function adminQuizInfo(authUserId: number, quizId: number): {
 /**
  * Update the name of the relevant quiz.
  */
-export function adminQuizNameUpdate(authUserId: number, quizId: number, name: string): Record<string, never> {
+export function adminQuizNameUpdate(authUserId: number, quizId: number, name: string): EmptyObject {
   if (!isValidQuizName(name)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_NAME);
   }
