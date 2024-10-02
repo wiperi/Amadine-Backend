@@ -1,6 +1,6 @@
 import { getData, setData } from '@/dataStore';
 import { HttpError } from '@/utils/HttpError';
-import { Quiz, Question, Answer} from '@/models/Classes';
+import { Quiz, Question, Answer } from '@/models/Classes';
 import { EmptyObject } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import {
@@ -12,10 +12,6 @@ import {
   isValidQuizDescription,
   recursiveFind
 } from '@/utils/helper';
-import { idText } from 'typescript';
-import { get } from 'http';
-import { set } from 'yaml/dist/schema/yaml-1.1/set';
-
 /**
  * Update the description of the relevant quiz.
  */
@@ -62,7 +58,7 @@ export function adminQuizInfo(
       answerId: number;
       answer: string;
       correct: boolean;
-      colour: any;
+      colour: string;
     }>;
   }>;
 } {
@@ -100,7 +96,6 @@ export function adminQuizInfo(
     questions: questions, // Include the questions array
   };
 }
-
 
 /**
  * Update the name of the relevant quiz.
@@ -208,38 +203,37 @@ type ParamQuestionBody = {
 }
 
 export function adminQuizQuestionCreate(authUserId: number, quizId: number, questionBody: ParamQuestionBody): { questionId: number } {
-  if(!isValidQuizId(quizId)) {
+  if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
-  if(!isQuizIdOwnedByUser(quizId, authUserId)) {
+  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
-  if(questionBody.question.length < 5 || questionBody.question.length > 50) {
+  if (questionBody.question.length < 5 || questionBody.question.length > 50) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
-  if(questionBody.answers.length < 2 || questionBody.answers.length > 6) {
+  if (questionBody.answers.length < 2 || questionBody.answers.length > 6) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
-  if(questionBody.duration <= 0) {
+  if (questionBody.duration <= 0) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
   const quiz = findQuizById(quizId);
-  if(quiz.questions.reduce((acc, question) => acc + question.duration, 0) + questionBody.duration > 180) {
+  if (quiz.questions.reduce((acc, question) => acc + question.duration, 0) + questionBody.duration > 180) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
-  if(questionBody.points < 1 || questionBody.points > 10) {
+  if (questionBody.points < 1 || questionBody.points > 10) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
-  if(questionBody.answers.some(answer => answer.answer.length < 1 || answer.answer.length > 30)) {
+  if (questionBody.answers.some(answer => answer.answer.length < 1 || answer.answer.length > 30)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
-  if(questionBody.answers.some(answer => questionBody.answers.filter(a => a.answer === answer.answer).length > 1)) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  } 
-  if(!questionBody.answers.some(answer => answer.correct)) {
+  if (questionBody.answers.some(answer => questionBody.answers.filter(a => a.answer === answer.answer).length > 1)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
-  const data = getData();
+  if (!questionBody.answers.some(answer => answer.correct)) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+  }
 
   // Generate a new question ID
   const questionId = getNewID('question');
@@ -257,7 +251,7 @@ export function adminQuizQuestionCreate(authUserId: number, quizId: number, ques
 
   setData();
 
-  return { questionId: questionId }; 
+  return { questionId: questionId };
 }
 
 export function adminQuizQuestionUpdate(authUserId: number, quizId: number, questionId: number, questionBody: ParamQuestionBody): EmptyObject {
