@@ -11,6 +11,8 @@ const ERROR_MESSAGES = {
   INVALID_DESCRIPTION: 'Invalid description format',
   // Quiz ID
   INVALID_QUIZ_ID: 'Invalid quizId',
+  // Question ID
+  INVALID_QUESTION_ID: 'Invalid questionId',
   // Not Authorized
   NOT_AUTHORIZED: 'Not authorized',
   // Auth User ID
@@ -21,12 +23,14 @@ const ERROR_MESSAGES = {
   WRONG_OLD_PASSWORD: 'Given old password is not correct.',
   NEW_PASSWORD_SAME_AS_OLD: 'New password cannot be the same as the old password.',
   PASSWORD_ALREADY_USED: 'New password cannot be the same as any of used passwords.',
-
   // Bad Request
   MISSING_REQUIRED_FIELDS: 'Request missing required fields',
   // Token
   MISSING_TOKEN: 'Request missing token',
   INVALID_TOKEN: 'Request token is invalid',
+  // Position
+  INVALID_POSITION: 'Position is out of range',
+  SAME_POSITION: 'Position is the same as the current position',
 };
 
 export { ERROR_MESSAGES };

@@ -1,5 +1,24 @@
 import request from 'sync-request-curl';
 import config from '../../src/config.json';
+import {
+  registerUser,
+  loginUser,
+  logoutUser,
+  getUserDetails,
+  updateUserDetails,
+  updateUserPassword,
+  getQuizList,
+  getQuizDetails,
+  createQuiz,
+  updateQuiz,
+  deleteQuiz,
+  updateQuizDescription,
+  getQuizTrash,
+  restoreQuiz,
+  clear,
+  moveQuestion,
+  createQuestion
+} from './apiTestHelpersV1'
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const ERROR = { error: expect.any(String) };
@@ -11,22 +30,15 @@ function parse(res: string | Buffer) {
 
 let token: string;
 beforeEach(() => {
-  request('DELETE', `${config.url}:${config.port}/v1/clear`);
+  clear();
   // Register a user and get the token
-  const res = request('POST', `${BASE_URL}/register`, {
-    json: {
-      email: 'test@example.com',
-      password: 'ValidPass123',
-      nameFirst: 'John',
-      nameLast: 'Doe'
-    }
-  });
+  const res = registerUser('test@example.com', 'ValidPass123', 'John', 'Doe');
   expect(res.statusCode).toBe(200);
-  token = parse(res.body).token;
+  token = res.body.token;
 });
 
 afterAll(() => {
-  request('DELETE', `${config.url}:${config.port}/v1/clear`);
+  clear();
 });
 
 describe('GET /v1/admin/quiz/list', () => {
@@ -84,7 +96,7 @@ describe('GET /v1/admin/quiz/list', () => {
   });
 });
 
-describe('POST /v1/admin/quiz',( ) => {
+describe('POST /v1/admin/quiz', () => {
   describe('valid cases', () => {
     test('successful quiz creation', () => {
       const res = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
@@ -160,7 +172,7 @@ describe('POST /v1/admin/quiz',( ) => {
       expect(parse(res2.body)).toStrictEqual(ERROR);
     });
   });
-});  
+});
 /*
  This is test for AQI
  */
@@ -264,7 +276,7 @@ describe('GET /v1/admin/quiz/:quizId', () => {
  */
 function requestAdminQuizNameUpdate(quizId: Number, token: String, name: String) {
   const res = request(
-    'PUT', 
+    'PUT',
     `${config.url}:${config.port}/v1/admin/quiz/${quizId}/name`,
     {
       json: {
@@ -378,7 +390,7 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
     });
 
     test('successful update last edit time', async () => {
-      await new Promise(resolve => setTimeout (resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       requestAdminQuizNameUpdate(quizId, token, "newName")
       const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
         qs: { token }
@@ -387,4 +399,119 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
       expect(parse(res.body).timeLastEdited).not.toStrictEqual(parse(res.body).timeCreated);
     });
   })
+});
+
+// ... existing code ...
+describe.skip('PUT /v1/admin/quiz/{quizid}/question/{questionid}/move', () => {
+  let quizId: number;
+  let questionId1: number;
+  let questionId2: number;
+
+  beforeEach(() => {
+    // Create a quiz
+    const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz', 60);
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = createQuizRes.body.quizId;
+
+    // Create two questions
+    const createQuestion1Res = createQuestion(token, quizId, {
+      question: 'Question 1',
+      duration: 10,
+      points: 5,
+      answers: [
+        { answer: 'A1', correct: true },
+        { answer: 'A2', correct: false }
+      ]
+    });
+    expect(createQuestion1Res.statusCode).toBe(200);
+    questionId1 = createQuestion1Res.body.questionId;
+
+    const createQuestion2Res = createQuestion(token, quizId, {
+      question: 'Question 2',
+      duration: 15,
+      points: 7,
+      answers: [
+        { answer: 'B1', correct: true },
+        { answer: 'B2', correct: false }
+      ]
+    });
+    expect(createQuestion2Res.statusCode).toBe(200);
+    questionId2 = createQuestion2Res.body.questionId;
+  });
+
+  describe('valid cases', () => {
+    test('successfully move question to a new position', () => {
+      const res = moveQuestion(token, quizId, questionId1, 1);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({});
+
+      // Verify the order of questions
+      const quizRes = getQuizDetails(token, quizId);
+      expect(quizRes.statusCode).toBe(200);
+      const quiz = quizRes.body;
+      expect(quiz.questions[0].questionId).toBe(questionId2);
+      expect(quiz.questions[1].questionId).toBe(questionId1);
+    });
+
+    test('move question to the same position (no change)', () => {
+      const res = moveQuestion(token, quizId, questionId1, 0);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({});
+
+      // Verify the order of questions remains unchanged
+      const quizRes = getQuizDetails(token, quizId);
+      expect(quizRes.statusCode).toBe(200);
+      const quiz = quizRes.body;
+      expect(quiz.questions[0].questionId).toBe(questionId1);
+      expect(quiz.questions[1].questionId).toBe(questionId2);
+    });
+  });
+
+  describe('invalid cases', () => {
+    test('invalid token', () => {
+      const res = moveQuestion('invalid_token', quizId, questionId1, 1);
+      expect(res.statusCode).toBe(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('user is not the owner of the quiz', () => {
+      const newUserRes = registerUser('newuser@example.com', 'Password123', 'New', 'User');
+      expect(newUserRes.statusCode).toBe(200);
+      const newToken = newUserRes.body.token;
+
+      const res = moveQuestion(newToken, quizId, questionId1, 1);
+      expect(res.statusCode).toBe(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('quiz does not exist', () => {
+      const res = moveQuestion(token, 999999, questionId1, 1);
+      expect(res.statusCode).toBe(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('question does not exist in the quiz', () => {
+      const res = moveQuestion(token, quizId, 999999, 1);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('new position is less than 0', () => {
+      const res = moveQuestion(token, quizId, questionId1, -1);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('new position is greater than n-1', () => {
+      const res = moveQuestion(token, quizId, questionId1, 2);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('new position is the same as the current position', () => {
+      const res = moveQuestion(token, quizId, questionId1, 0);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+  });
 });
