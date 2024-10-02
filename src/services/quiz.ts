@@ -208,8 +208,13 @@ export function adminQuizQuestionCreate(authUserId: number, quizId: number, ques
   if (questionBody.answers.some(answer => answer.answer.length < 1 || answer.answer.length > 30)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
-  if (questionBody.answers.some(answer => questionBody.answers.filter(a => a.answer === answer.answer).length > 1)) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+  // check duplicate answer
+  const answerSet = new Set();
+  for (const answer of questionBody.answers) {
+    if (answerSet.has(answer.answer)) {
+      throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+    }
+    answerSet.add(answer.answer);
   }
   if (!questionBody.answers.some(answer => answer.correct)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
