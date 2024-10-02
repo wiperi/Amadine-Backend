@@ -187,3 +187,31 @@ export function createQuestion(token: string, quizId: number, questionBody: obje
   });
   return parse(res);
 }
+
+/**
+ * function to help implement the request
+ *    - if no error, return the content
+ *    - if there is error, return the statusCode
+ * 
+ * @param quizId 
+ * @param token 
+ * @param name 
+ * @returns 
+ */
+export function requestAdminQuizNameUpdate(quizId: Number, token: String, name: String) {
+  const res = request(
+    'PUT',
+    `${config.url}:${config.port}/v1/admin/quiz/${quizId}/name`,
+    {
+      json: {
+        token,
+        name
+      }
+    }
+  );
+
+  if (res.statusCode === 200) {
+    return JSON.parse(res.body.toString());
+  }
+  return res.statusCode;
+}

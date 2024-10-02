@@ -17,7 +17,8 @@ import {
   restoreQuiz,
   clear,
   moveQuestion,
-  createQuestion
+  createQuestion,
+  requestAdminQuizNameUpdate
 } from './apiTestHelpersV1'
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
@@ -265,34 +266,6 @@ describe('GET /v1/admin/quiz/:quizId', () => {
 /////////////////////////////////////////////////////
 // Test for adminQuizNameUpdate /////////////////////
 /////////////////////////////////////////////////////
-
-/**
- * function to help implement the request
- *    - if no error, return the content
- *    - if there is error, return the statusCode
- * 
- * @param quizId 
- * @param token 
- * @param name 
- * @returns 
- */
-function requestAdminQuizNameUpdate(quizId: Number, token: String, name: String) {
-  const res = request(
-    'PUT',
-    `${config.url}:${config.port}/v1/admin/quiz/${quizId}/name`,
-    {
-      json: {
-        token,
-        name
-      }
-    }
-  );
-
-  if (res.statusCode === 200) {
-    return parse(res.body);
-  }
-  return res.statusCode;
-}
 
 describe('PUT /v1/admin/quiz/{quizid}/name', () => {
   let quizId: number;
