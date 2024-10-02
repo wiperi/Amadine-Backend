@@ -29,7 +29,7 @@ afterAll(() => {
   request('DELETE', `${config.url}:${config.port}/v1/clear`);
 });
 
-describe.skip('GET /v1/admin/quiz/list', () => {
+describe('GET /v1/admin/quiz/list', () => {
 
   describe('valid cases', () => {
     test('successful quiz list retrieval with no quizzes', () => {
@@ -367,7 +367,6 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
       const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
         qs: { token }
       });
-      console.log(parse(res.body)); // debug
       expect(res.statusCode).toBe(200);
       expect(parse(res.body)).toStrictEqual({
         quizId,

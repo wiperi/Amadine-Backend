@@ -1,15 +1,20 @@
 import { Router, Request, Response } from 'express';
-import { adminQuizCreate, adminQuizInfo, adminQuizNameUpdate } from '../quiz';
+import { adminQuizCreate, adminQuizInfo, adminQuizNameUpdate, adminQuizList } from '../quiz';
 export const quizRouter = Router();
-
-quizRouter.get('/', (req: Request, res: Response) => {
-  return res.status(200).json({ message: 'Quiz route' });
-});
 
 quizRouter.post('/', (req: Request, res: Response) => {
   const { authUserId, name, description } = req.body;
   try {
     return res.json(adminQuizCreate(authUserId, name, description));
+  } catch (error) {
+    return res.status(error.statusCode).json({ error: error.message });
+  }
+});
+
+quizRouter.get('/list', (req: Request, res: Response) => {
+  const { authUserId } = req.body;
+  try {
+    return res.json(adminQuizList(authUserId));
   } catch (error) {
     return res.status(error.statusCode).json({ error: error.message });
   }
