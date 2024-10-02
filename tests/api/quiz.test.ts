@@ -271,15 +271,9 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
   let quizId: number;
   beforeEach(() => {
     // create a quiz
-    const createQuizRes = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
-      json: {
-        token,
-        name: 'Test Quiz',
-        description: 'A test quiz'
-      }
-    });
+    const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz');
     expect(createQuizRes.statusCode).toBe(200);
-    quizId = parse(createQuizRes.body).quizId;
+    quizId = createQuizRes.body.quizId;
   });
 
   describe('invalid cases', () => {
@@ -299,13 +293,7 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
     });
 
     test('name is already used by the current logged in user for another quiz', () => {
-      const createQuizRes1 = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
-        json: {
-          token,
-          name: 'My Test Name',
-          description: 'Do not have the same name as mine!'
-        }
-      });
+      const createQuizRes1 = createQuiz(token, 'My Test Name', 'Do not have the same name as mine!');
       expect(createQuizRes1.statusCode).toStrictEqual(200);
       const res = requestAdminQuizNameUpdate(quizId, token, 'My Test Name');
       expect(res).toStrictEqual(400);
@@ -322,16 +310,9 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
     });
 
     test('user is not a owner of the quiz', () => {
-      const userRes = request('POST', `${BASE_URL}/register`, {
-        json: {
-          email: 'peter@example.com',
-          password: 'PumpkinEater123',
-          nameFirst: 'Peter',
-          nameLast: 'Griffin'
-        }
-      });
+      const userRes = registerUser('peter@example.com', 'PumpkinEater123', 'Peter', 'Griffin');
       expect(userRes.statusCode).toBe(200);
-      const token1 = parse(userRes.body).token;
+      const token1 = userRes.body.token;
 
       const res = requestAdminQuizNameUpdate(quizId, token1, "newName");
       expect(res).toStrictEqual(403);
@@ -351,11 +332,9 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
 
     test('successful update the quiz name', () => {
       requestAdminQuizNameUpdate(quizId, token, "newName");
-      const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
-        qs: { token }
-      });
+      const res = getQuizDetails(token, quizId);
       expect(res.statusCode).toBe(200);
-      expect(parse(res.body)).toStrictEqual({
+      expect(res.body).toStrictEqual({
         quizId,
         name: 'newName',
         description: 'A test quiz',
@@ -369,11 +348,9 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
     test('successful update last edit time', async () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       requestAdminQuizNameUpdate(quizId, token, "newName")
-      const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
-        qs: { token }
-      });
+      const res = getQuizDetails(token, quizId);
       expect(res.statusCode).toBe(200);
-      expect(parse(res.body).timeLastEdited).not.toStrictEqual(parse(res.body).timeCreated);
+      expect(res.body.timeLastEdited).not.toStrictEqual(res.body.timeCreated);
     });
   })
 });
