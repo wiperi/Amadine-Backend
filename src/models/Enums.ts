@@ -15,3 +15,13 @@ export enum PlayerAction {
   GO_TO_FINAL_RESULTS = 'GO_TO_FINAL_RESULTS',
   END = 'END',
 }
+
+export enum Colour {
+  RED = 'red',
+  BLUE = 'blue',
+  GREEN = 'green',
+  YELLOW = 'yellow',
+  PURPLE = 'purple',
+  BROWN = 'brown',
+  ORANGE = 'orange'
+}

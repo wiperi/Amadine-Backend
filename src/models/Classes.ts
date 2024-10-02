@@ -1,4 +1,4 @@
-import { QuizSessionState, PlayerAction } from './Enums';
+import { QuizSessionState, Colour } from './Enums';
 
 export class User {
   userId: number;
@@ -64,16 +64,6 @@ export class Question {
   points: number;
   answers: Answer[] = [];
 
-  private generateColour(): string {
-    return '#' + Math.floor(Math.random() * 16777215).toString(16);
-  }
-
-  addAnswer(answerId: number, answer: string, correct: boolean): Answer {
-    const newAnswer = new Answer(answerId, answer, this.generateColour(), correct);
-    this.answers.push(newAnswer);
-    return newAnswer;
-  }
-
   constructor(questionId: number, question: string, duration: number, points: number) {
     this.questionId = questionId;
     this.question = question;
@@ -86,18 +76,22 @@ class Answer {
   answerId: number;
 
   answer: string;
-  colour: string; // ramdomly generated when question is created
   correct: boolean;
 
-  constructor(answerId: number, answer: string, colour: string, correct: boolean) {
+  colour: Colour = this.getRandomColor(); // randomly generated when answer is created
+
+  private getRandomColor(): Colour {
+    const colors = Object.values(Colour);
+    const randomIndex = Math.floor(Math.random() * colors.length);
+    return colors[randomIndex];
+  }
+
+  constructor(answerId: number, answer: string, correct: boolean) {
     this.answerId = answerId;
     this.answer = answer;
     this.correct = correct;
-    this.colour = colour;
   }
 }
-
-
 
 export class QuizSession {
   sessionId: number;
