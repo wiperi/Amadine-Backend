@@ -90,7 +90,6 @@ export function adminQuizNameUpdate(authUserId: number, quizId: number, name: st
  * Creates a new quiz if the provided user ID, name, and description are valid.
  */
 export function adminQuizCreate(authUserId: number, name: string, description: string): { quizId: number } {
-
   if (!isValidQuizName(name)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_NAME);
   }
