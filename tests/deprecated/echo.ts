@@ -4,7 +4,7 @@
 // Note:: None of these tests access the dataStore - this is because black box tests can only access the specification
 // If you want to access information in the dataStore, you will have to do so via a function in the specification and not via direct variable access.
 
-import { echo } from '../../src/echo';
+import { echo } from '../../src/utils/echo';
 
 // Variables defined here are available in all tests and test blocks
 const testVar1 = '1';

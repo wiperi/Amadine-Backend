@@ -1,5 +1,8 @@
-import { getData, Quiz, setData, EmptyObject, HttpError } from './dataStore';
-import { ERROR_MESSAGES } from './errors';
+import { getData, setData } from '@/dataStore';
+import { HttpError } from '@/utils/HttpError';
+import { Quiz } from '@/models/Classes';
+import { EmptyObject } from '@/models/Types';
+import { ERROR_MESSAGES } from '@/utils/errors';
 import {
   getNewID,
   isQuizIdOwnedByUser,
@@ -8,7 +11,7 @@ import {
   isValidQuizName,
   isValidQuizDescription,
   recursiveFind
-} from './helper';
+} from '@/utils/helper';
 
 /**
  * Update the description of the relevant quiz.
@@ -139,22 +142,22 @@ export function adminQuizRemove(authUserId: number, quizId: number): Record<stri
   return {};
 }
 
-export function adminQuizTrashView(): { quizzes: Array<{ quizId: number, name: string }> } {
+export function adminQuizTrashView(authUserId: number): { quizzes: Array<{ quizId: number, name: string }> } {
   // TODO: Implement this function
   return { quizzes: [] };
 }
 
-export function adminQuizRestore(quizId: number): EmptyObject {
+export function adminQuizRestore(authUserId: number, quizId: number): EmptyObject {
   // TODO: Implement this function
   return {};
 }
 
-export function adminQuizTrashEmpty(quizIds: number[]): EmptyObject {
+export function adminQuizTrashEmpty(authUserId: number, quizIds: number[]): EmptyObject {
   // TODO: Implement this function
   return {};
 }
 
-export function adminQuizTransfer(quizId: number, userEmail: string): EmptyObject {
+export function adminQuizTransfer(authUserId: number, quizId: number, userEmail: string): EmptyObject {
   // TODO: Implement this function
   return {};
 }
@@ -165,7 +168,7 @@ type ParamQuestionBody = {
   points: number;
   answers: Array<{ answer: string, correct: boolean }>;
 }
-export function adminQuizQuestionCreate(quizId: number, questionBody: ParamQuestionBody): { questionId: number } {
+export function adminQuizQuestionCreate(authUserId: number, quizId: number, questionBody: ParamQuestionBody): { questionId: number } {
   // TODO: Implement this function
   if (!quizId || recursiveFind(questionBody, undefined)) {
     throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
@@ -173,7 +176,7 @@ export function adminQuizQuestionCreate(quizId: number, questionBody: ParamQuest
   return { questionId: 0 };
 }
 
-export function adminQuizQuestionUpdate(quizId: number, questionId: number, questionBody: ParamQuestionBody): EmptyObject {
+export function adminQuizQuestionUpdate(authUserId: number, quizId: number, questionId: number, questionBody: ParamQuestionBody): EmptyObject {
   // TODO: Implement this function
   if (!quizId || recursiveFind(questionBody, undefined)) {
     throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
@@ -181,17 +184,43 @@ export function adminQuizQuestionUpdate(quizId: number, questionId: number, ques
   return {};
 }
 
-export function adminQuizQuestionDelete(quizId: number, questionId: number): EmptyObject {
+export function adminQuizQuestionDelete(authUserId: number, quizId: number, questionId: number): EmptyObject {
   // TODO: Implement this function
   return {};
 }
 
-export function adminQuizQuestionMove(quizId: number, questionId: number, newPosition: number): EmptyObject {
-  // TODO: Implement this function
+export function adminQuizQuestionMove(authUserId: number, quizId: number, questionId: number, newPosition: number): EmptyObject {
+  // const quiz = findQuizById(quizId);
+  // if (!quiz) {
+  //   throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  // }
+
+  // if (quiz.authUserId !== authUserId) {
+  //   throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  // }
+
+  // if (newPosition < 0 || newPosition > (quiz.questions.length - 1)) {
+  //   throw new HttpError(400, ERROR_MESSAGES.INVALID_POSITION);
+  // }
+
+  // const question = quiz.questions.find(question => question.questionId === questionId);
+  // const currentPosition = quiz.questions.indexOf(question);
+
+  // if (!question) {
+  //   throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION_ID);
+  // }
+
+  // if (currentPosition === newPosition) {
+  //   throw new HttpError(400, ERROR_MESSAGES.SAME_POSITION);
+  // }
+
+  // quiz.questions.splice(currentPosition, 1);
+  // quiz.questions.splice(newPosition, 0, question);
+
   return {};
 }
 
-export function adminQuizQuestionDuplicate(quizId: number, questionId: number): { newQuestionId: number } {
+export function adminQuizQuestionDuplicate(authUserId: number, quizId: number, questionId: number): { newQuestionId: number } {
   // TODO: Implement this function
   return { newQuestionId: 0 };
 }

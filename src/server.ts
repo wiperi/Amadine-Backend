@@ -1,5 +1,5 @@
 import express, { json, Request, Response, NextFunction } from 'express';
-import { echo } from './newecho';
+import { echo } from './utils/newecho';
 import morgan from 'morgan';
 import config from './config.json';
 import cors from 'cors';
@@ -16,8 +16,8 @@ import { userRouter } from './routers/user';
 import { playerRouter } from './routers/player';
 
 import { loadData } from './dataStore';
-import { clear } from './other';
-import { authorizeToken } from './auth';
+import { clear } from './utils/other';
+import { authorizeToken } from './services/auth';
 
 // Set up web app
 const app = express();

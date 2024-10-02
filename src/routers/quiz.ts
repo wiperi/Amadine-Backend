@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { adminQuizCreate, adminQuizInfo, adminQuizNameUpdate, adminQuizList } from '../quiz';
+import { adminQuizCreate, adminQuizInfo, adminQuizNameUpdate, adminQuizList, adminQuizQuestionMove } from '@/services/quiz';
+
 export const quizRouter = Router();
 
 quizRouter.post('/', (req: Request, res: Response) => {
@@ -20,7 +21,7 @@ quizRouter.get('/list', (req: Request, res: Response) => {
   }
 });
 
-quizRouter.get('/:quizid', (req: Request, res: Response) => {
+quizRouter.get('/:quizid(\\d+)', (req: Request, res: Response) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId } = req.body;
   try {
@@ -30,11 +31,22 @@ quizRouter.get('/:quizid', (req: Request, res: Response) => {
   }
 });
 
-quizRouter.put('/:quizid/name', (req: Request, res: Response) => {
+quizRouter.put('/:quizid(\\d+)/name', (req: Request, res: Response) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId, name } = req.body;
   try {
     return res.json(adminQuizNameUpdate(authUserId, quizid, name));
+  } catch (error) {
+    return res.status(error.statusCode).json({ error: error.message });
+  }
+});
+
+quizRouter.put('/:quizid(\\d+)/question/:questionid(\\d+)/move', (req: Request, res: Response) => {
+  const quizid = parseInt(req.params.quizid);
+  const questionid = parseInt(req.params.questionid);
+  const { authUserId, newPosition } = req.body;
+  try {
+    return res.json(adminQuizQuestionMove(authUserId, quizid, questionid, newPosition));
   } catch (error) {
     return res.status(error.statusCode).json({ error: error.message });
   }

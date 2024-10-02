@@ -1,14 +1,17 @@
-import { getData, User, UserSession, setData, EmptyObject, HttpError } from './dataStore';
-import { ERROR_MESSAGES } from './errors';
+import { getData, setData } from '@/dataStore';
+import { HttpError } from '@/utils/HttpError';
+import { User, UserSession } from '@/models/Classes';
+import { EmptyObject } from '@/models/Types';
+import { ERROR_MESSAGES } from '@/utils/errors';
 import {
   getNewID,
   isUnusedEmail,
   isValidEmail,
   isValidPassword,
   isValidUserName,
-} from './helper';
+} from '../utils/helper';
 import jwt from 'jsonwebtoken';
-import config from './config.json';
+import config from '@/config.json';
 import { Request, Response, NextFunction } from 'express';
 
 export function authorizeToken(req: Request, res: Response, next: NextFunction) {
