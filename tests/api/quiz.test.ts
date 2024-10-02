@@ -367,7 +367,6 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
       const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
         qs: { token }
       });
-      console.log(parse(res.body)); // debug
       expect(res.statusCode).toBe(200);
       expect(parse(res.body)).toStrictEqual({
         quizId,
@@ -388,4 +387,111 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
       expect(parse(res.body).timeLastEdited).not.toStrictEqual(parse(res.body).timeCreated);
     });
   })
+});
+describe('PUT /v1/admin/quiz/:quizId/description', () => {
+  let quizId: Number;
+  beforeEach(() => {
+    const createQuizRes = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
+      json: {
+        token,
+        name: 'Fate',
+        description: 'Description'
+      }
+    });
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = parse(createQuizRes.body).quizId;
+  });
+  
+  describe('valid cases', () => {
+    test('should update the description of the quiz', () => {
+      
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/description`, {
+        json: {
+          token,
+          description: 'An updated test quiz'
+        }
+      });
+      expect(res.statusCode).toBe(200);
+      expect(parse(res.body)).toStrictEqual({});
+      const res1 = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
+        qs: { token }
+      });
+      expect(res1.statusCode).toBe(200);
+      expect(parse(res1.body)).toStrictEqual({
+        quizId,
+        name: 'Fate',
+        description: 'An updated test quiz',
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number)
+      });
+    });
+    test('successful update last edit time', async () => {
+      await new Promise(resolve => setTimeout (resolve, 1000));
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/description`, {
+        json: {
+          token,
+          description: 'An updated test quiz'
+        }
+      });
+      expect(res.statusCode).toBe(200);
+      expect(parse(res.body)).toStrictEqual({});
+      const res1 = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
+        qs: { token }
+      });
+      expect(res.statusCode).toBe(200);
+      expect(parse(res.body).timeLastEdited).not.toStrictEqual(parse(res1.body).timeCreated);
+    });
+  });
+
+  describe('invalid cases', () => {
+    test('invalid_token', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/description`, {
+        json: { 
+          token: 'invalid_token',
+          description: 'An updated test quiz'
+        }
+      });
+      expect(res.statusCode).toBe(401);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+    test('invalid quiz ID', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/0/description`, {
+        json: {
+          token,
+          description: 'An updated test quiz'
+        }
+      });
+      expect(res.statusCode).toBe(403);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+    test('Description is more than 100 characters in length', () => {
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/description`, {
+        json: {
+          token,
+          description: 'Description'.repeat(10)
+        }
+      });
+      expect(res.statusCode).toBe(400);
+      expect(parse(res.body)).toStrictEqual(ERROR);
+    });
+    test('user is not the owner of th quiz', () => {
+      const createUserRes = request('POST', `${BASE_URL}/register`, {
+        json: {
+          email: 'wick@example.com',
+          password: 'JohnWick123',
+          nameFirst: 'John',
+          nameLast: 'Wick'
+        }
+      });
+      expect(createUserRes.statusCode).toBe(200);
+      token = parse(createUserRes.body).token;
+      const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/description`, {
+        json: {
+          token,
+          description: 'An updated test quiz'
+        }
+      });
+      expect(res.statusCode).toBe(403);
+    });
+  });
 });
