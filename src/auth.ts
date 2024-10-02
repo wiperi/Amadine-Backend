@@ -5,7 +5,6 @@ import {
   isUnusedEmail,
   isValidEmail,
   isValidPassword,
-  isValidUserId,
   isValidUserName,
 } from './helper';
 import jwt from 'jsonwebtoken';
@@ -189,10 +188,6 @@ export function adminUserDetails(authUserId: number): {
 export function adminUserPasswordUpdate(authUserId: number, oldPassword: string, newPassword: string): EmptyObject {
   if (!authUserId || !oldPassword || !newPassword) {
     throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
-  }
-
-  if (!isValidUserId(authUserId)) {
-    throw new HttpError(400, ERROR_MESSAGES.UID_NOT_EXIST);
   }
 
   const user = getData().users.find(user => user.userId === authUserId);

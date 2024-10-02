@@ -18,7 +18,6 @@ tests:
   stage: checks
   only:
     - master
-    - debug2
     - merge_requests
   script:
     - SERVER_LOG=$(mktemp)

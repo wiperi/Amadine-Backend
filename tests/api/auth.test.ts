@@ -439,6 +439,7 @@ describe('POST /v1/admin/auth/login', () => {
     });
   });
 });
+
 describe('GET /v1/admin/auth/user/details', () => {
   // Valid cases:
   describe('adminUserDetails valid cases', () => {

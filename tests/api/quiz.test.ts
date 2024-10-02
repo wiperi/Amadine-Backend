@@ -29,7 +29,7 @@ afterAll(() => {
   request('DELETE', `${config.url}:${config.port}/v1/clear`);
 });
 
-describe.skip('GET /v1/admin/quiz/list', () => {
+describe('GET /v1/admin/quiz/list', () => {
 
   describe('valid cases', () => {
     test('successful quiz list retrieval with no quizzes', () => {
