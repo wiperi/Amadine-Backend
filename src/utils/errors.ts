@@ -13,6 +13,8 @@ const ERROR_MESSAGES = {
   INVALID_QUIZ_ID: 'Invalid quizId',
   // Question ID
   INVALID_QUESTION_ID: 'Invalid questionId',
+  // Question
+  INVALID_QUESTION: 'Invalid question format',
   // Not Authorized
   NOT_AUTHORIZED: 'Not authorized',
   // Auth User ID

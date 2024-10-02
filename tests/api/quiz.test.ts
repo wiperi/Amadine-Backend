@@ -198,7 +198,9 @@ describe('GET /v1/admin/quiz/:quizId', () => {
         name: 'Test Quiz',
         description: 'A test quiz',
         timeCreated: expect.any(Number),
-        timeLastEdited: expect.any(Number)
+        timeLastEdited: expect.any(Number),
+        numofQuestions: 0,
+        questions: []
       });
     });
   });
@@ -385,7 +387,9 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
         name: 'newName',
         description: 'A test quiz',
         timeCreated: expect.any(Number),
-        timeLastEdited: expect.any(Number)
+        timeLastEdited: expect.any(Number),
+        numofQuestions: 0,
+        questions: []
       });
     });
 
@@ -409,7 +413,7 @@ describe.skip('PUT /v1/admin/quiz/{quizid}/question/{questionid}/move', () => {
 
   beforeEach(() => {
     // Create a quiz
-    const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz', 60);
+    const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz');
     expect(createQuizRes.statusCode).toBe(200);
     quizId = createQuizRes.body.quizId;
 
@@ -547,7 +551,9 @@ describe('PUT /v1/admin/quiz/:quizId/description', () => {
         name: 'Fate',
         description: 'An updated test quiz',
         timeCreated: expect.any(Number),
-        timeLastEdited: expect.any(Number)
+        timeLastEdited: expect.any(Number),
+        numofQuestions: 0,
+        questions: []
       });
     });
     test('successful update last edit time', async () => {
@@ -625,7 +631,7 @@ describe('DELETE /v1/admin/quiz/:quizid', () => {
 
   beforeEach(() => {
     // Create a quiz before each test in this suite
-    const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz', 60);
+    const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz');
     expect(createQuizRes.statusCode).toBe(200);
     quizId = createQuizRes.body.quizId;
   });
@@ -675,3 +681,319 @@ describe('valid cases', () => {
     });
   });
 });
+
+///////////////////////////////////////////////////////////////////
+///test for adminQuizQuestionCreate
+///////////////////////////////////////////////////////////////////
+describe('POST /v1/admin/quiz/:quizId/question', () => {
+  let quizId: number;
+
+  beforeEach(() => {
+    // Create a quiz before each test using the helper function with duration
+    const quizResponse = createQuiz(token, 'Test Quiz', 'A test quiz');
+    expect(quizResponse.statusCode).toBe(200);
+    quizId = quizResponse.body.quizId;
+  });
+  describe('valid cases', () => {
+  test('successful question creation', () => {
+    const questionBody = {
+      question: 'What is the capital of France?',
+      duration: 60,
+      points: 5,
+      answers: [
+        { answer: 'Paris', correct: true },
+        { answer: 'Berlin', correct: false },
+        { answer: 'Rome', correct: false },
+      ],
+    };
+
+    const res = createQuestion(token, quizId, questionBody);
+    expect(res.body).toStrictEqual({ questionId: expect.any(Number) });
+    const getQuizRes = getQuizDetails(token, quizId);
+    expect(getQuizRes.statusCode).toBe(200);
+    const questions = getQuizRes.body.questions;
+    expect(questions).toBeDefined();
+    expect(questions.length).toBeGreaterThan(0);
+
+    // Optionally, verify that the question matches what was added
+    const addedQuestion = questions.find(
+      (q:any) => q.questionId === res.body.questionId
+    );
+    expect(addedQuestion).toBeDefined();
+    expect(addedQuestion.question).toBe(questionBody.question);
+    expect(addedQuestion.duration).toBe(questionBody.duration);
+    expect(addedQuestion.points).toBe(questionBody.points);
+    expect(addedQuestion.answers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ answer: 'Paris', correct: true }),
+        expect.objectContaining({ answer: 'Berlin', correct: false }),
+        expect.objectContaining({ answer: 'Rome', correct: false }),
+      ])
+    );
+  });
+  });
+  describe('invalid cases', () => {
+    test('invalid token', () => {
+      const questionBody = {
+        question: 'What is the capital of Germany?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Berlin', correct: true },
+          { answer: 'Munich', correct: false },
+        ],
+      };
+
+      const res = createQuestion('invalid_token', quizId, questionBody);
+      expect(res.statusCode).toBe(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('missing token', () => {
+      const questionBody = {
+        question: 'What is the capital of Germany?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Berlin', correct: true },
+          { answer: 'Munich', correct: false },
+        ],
+      };
+
+      const res = createQuestion('', quizId, questionBody);
+      expect(res.statusCode).toBe(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('user is not the owner of the quiz', () => {
+      // Register another user
+      const resRegister = registerUser('nice@unsw.edu.au', 'ValidPass123', 'Jane', 'Doe'); 
+      expect(resRegister.statusCode).toBe(200);
+      const otherToken = resRegister.body.token;
+
+      const questionBody = {
+        question: 'What is the capital of Italy?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Rome', correct: true },
+          { answer: 'Milan', correct: false },
+        ],
+      };
+
+      const res = createQuestion(otherToken, quizId, questionBody);
+      expect(res.statusCode).toBe(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('question string is less than 5 characters', () => {
+      const questionBody = {
+        question: 'Hi',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Yes', correct: true },
+          { answer: 'No', correct: false },
+        ],
+      };
+
+      const res = createQuestion(token, quizId, questionBody);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('question string is more than 50 characters', () => {
+      const longQuestion = 'A'.repeat(51);
+      const questionBody = {
+        question: longQuestion,
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Option A', correct: true },
+          { answer: 'Option B', correct: false },
+        ],
+      };
+
+      const res = createQuestion(token, quizId, questionBody);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('number of answers is less than 2', () => {
+      const questionBody = {
+        question: 'Is the sky blue?',
+        duration: 30,
+        points: 5,
+        answers: [{ answer: 'Yes', correct: true }],
+      };
+
+      const res = createQuestion(token, quizId, questionBody);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('number of answers is more than 6', () => {
+      const questionBody = {
+        question: 'Name all continents',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Asia', correct: true },
+          { answer: 'Africa', correct: true },
+          { answer: 'North America', correct: true },
+          { answer: 'South America', correct: true },
+          { answer: 'Antarctica', correct: true },
+          { answer: 'Europe', correct: true },
+          { answer: 'Australia', correct: true },
+        ],
+      };
+
+      const res = createQuestion(token, quizId, questionBody);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('question duration is not positive', () => {
+      const questionBody = {
+        question: 'What is 2 + 2?',
+        duration: 0,
+        points: 5,
+        answers: [
+          { answer: '4', correct: true },
+          { answer: '5', correct: false },
+        ],
+      };
+
+      const res = createQuestion(token, quizId, questionBody);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('sum of question durations exceeds quiz duration', () => {
+      const firstQuestionBody = {
+        question: 'First long question',
+        duration: 180,
+        points: 5,
+        answers: [
+          { answer: 'Option A', correct: true },
+          { answer: 'Option B', correct: false },
+        ],
+      };
+
+      const resFirst = createQuestion(token, quizId, firstQuestionBody);
+      expect(resFirst.body).toHaveProperty('questionId');
+
+      const secondQuestionBody = {
+        question: 'Second question',
+        duration: 1,
+        points: 5,
+        answers: [
+          { answer: 'Option A', correct: true },
+          { answer: 'Option B', correct: false },
+        ],
+      };
+
+      const resSecond = createQuestion(token, quizId, secondQuestionBody);
+      expect(resSecond.statusCode).toBe(400);
+      expect(resSecond.body).toStrictEqual(ERROR);
+    });
+
+    test('points awarded are less than 1', () => {
+      const questionBody = {
+        question: 'What is the speed of light?',
+        duration: 60,
+        points: 0,
+        answers: [
+          { answer: '299,792 km/s', correct: true },
+          { answer: '150,000 km/s', correct: false },
+        ],
+      };
+
+      const res = createQuestion(token, quizId, questionBody);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('points awarded are greater than 10', () => {
+      const questionBody = {
+        question: 'What is the speed of sound?',
+        duration: 60,
+        points: 11,
+        answers: [
+          { answer: '343 m/s', correct: true },
+          { answer: '150 m/s', correct: false },
+        ],
+      };
+
+      const res = createQuestion(token, quizId, questionBody);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('answer length shorter than 1 character', () => {
+      const questionBody = {
+        question: 'What does DNA stand for?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: '', correct: true },
+          { answer: 'Deoxyribonucleic Acid', correct: false },
+        ],
+      };
+
+      const res = createQuestion(token, quizId, questionBody);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('answer length longer than 30 characters', () => {
+      const longAnswer = 'A'.repeat(31);
+      const questionBody = {
+        question: 'What does DNA stand for?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: longAnswer, correct: true },
+          { answer: 'Deoxyribonucleic Acid', correct: false },
+        ],
+      };
+
+      const res = createQuestion(token, quizId, questionBody);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('duplicate answer strings within the same question', () => {
+      const questionBody = {
+        question: 'Which planet is known as the Red Planet?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Mars', correct: true },
+          { answer: 'Mars', correct: false },
+        ],
+      };
+
+      const res = createQuestion(token, quizId, questionBody);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('no correct answers provided', () => {
+      const questionBody = {
+        question: 'Which planet is known as the Blue Planet?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Mars', correct: false },
+          { answer: 'Venus', correct: false },
+        ],
+      };
+
+      const res = createQuestion(token, quizId, questionBody);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+  });
+});
+

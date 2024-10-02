@@ -1,6 +1,6 @@
 import { getData, setData } from '@/dataStore';
 import { HttpError } from '@/utils/HttpError';
-import { Quiz } from '@/models/Classes';
+import { Quiz, Question, Answer } from '@/models/Classes';
 import { EmptyObject } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import {
@@ -12,7 +12,6 @@ import {
   isValidQuizDescription,
   recursiveFind
 } from '@/utils/helper';
-
 /**
  * Update the description of the relevant quiz.
  */
@@ -40,12 +39,18 @@ export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, d
 /**
  * Get all of the relevant information about the current quiz.
  */
-export function adminQuizInfo(authUserId: number, quizId: number): {
+export function adminQuizInfo(
+  authUserId: number,
+  quizId: number
+):
+ {
   quizId: number;
   name: string;
   timeCreated: number;
   timeLastEdited: number;
   description: string;
+  numofQuestions: number;
+  questions: Question[]
 } {
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
@@ -54,13 +59,17 @@ export function adminQuizInfo(authUserId: number, quizId: number): {
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
+
   const quiz = findQuizById(quizId);
+
   return {
     quizId: quiz.quizId,
     name: quiz.name,
     timeCreated: quiz.timeCreated,
     timeLastEdited: quiz.timeLastEdited,
-    description: quiz.description
+    description: quiz.description,
+    numofQuestions: quiz.questions.length,
+    questions: quiz.questions, // Include the questions array
   };
 }
 
@@ -172,12 +181,57 @@ type ParamQuestionBody = {
   points: number;
   answers: Array<{ answer: string, correct: boolean }>;
 }
+
 export function adminQuizQuestionCreate(authUserId: number, quizId: number, questionBody: ParamQuestionBody): { questionId: number } {
-  // TODO: Implement this function
-  if (!quizId || recursiveFind(questionBody, undefined)) {
-    throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
+  if (!isValidQuizId(quizId)) {
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
-  return { questionId: 0 };
+  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
+  if (questionBody.question.length < 5 || questionBody.question.length > 50) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+  }
+  if (questionBody.answers.length < 2 || questionBody.answers.length > 6) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+  }
+  if (questionBody.duration <= 0) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+  }
+  const quiz = findQuizById(quizId);
+  if (quiz.questions.reduce((acc, question) => acc + question.duration, 0) + questionBody.duration > 180) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+  }
+  if (questionBody.points < 1 || questionBody.points > 10) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+  }
+  if (questionBody.answers.some(answer => answer.answer.length < 1 || answer.answer.length > 30)) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+  }
+  if (questionBody.answers.some(answer => questionBody.answers.filter(a => a.answer === answer.answer).length > 1)) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+  }
+  if (!questionBody.answers.some(answer => answer.correct)) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+  }
+
+  // Generate a new question ID
+  const questionId = getNewID('question');
+
+  // Create the Question instance with answers
+  const question = new Question(
+    questionId,
+    questionBody.question,
+    questionBody.duration,
+    questionBody.points,
+    questionBody.answers.map((answer, index) => new Answer(getNewID('answer'), answer.answer, answer.correct))
+  );
+
+  quiz.questions.push(question);
+  quiz.timeLastEdited = Math.floor(Date.now() / 1000);
+  setData();
+
+  return { questionId: questionId };
 }
 
 export function adminQuizQuestionUpdate(authUserId: number, quizId: number, questionId: number, questionBody: ParamQuestionBody): EmptyObject {
