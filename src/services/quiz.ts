@@ -72,20 +72,6 @@ export function adminQuizInfo(
 
   const quiz = findQuizById(quizId);
 
-  // Map the questions to include necessary properties
-  const questions = quiz.questions.map((question) => ({
-    questionId: question.questionId,
-    question: question.question,
-    duration: question.duration,
-    points: question.points,
-    answers: question.answers.map((answer) => ({
-      answerId: answer.answerId,
-      answer: answer.answer,
-      correct: answer.correct,
-      colour: answer.colour,
-    })),
-  }));
-
   return {
     quizId: quiz.quizId,
     name: quiz.name,
@@ -93,7 +79,7 @@ export function adminQuizInfo(
     timeLastEdited: quiz.timeLastEdited,
     description: quiz.description,
     numofQuestions: quiz.questions.length,
-    questions: questions, // Include the questions array
+    questions: quiz.questions, // Include the questions array
   };
 }
 

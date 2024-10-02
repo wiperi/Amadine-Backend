@@ -72,7 +72,7 @@ quizRouter.put('/:quizid(\\d+)/description', (req: Request, res: Response) => {
   }
 });
 
-quizRouter.post('/:quizId/question', (req, res) => {
+quizRouter.post('/:quizId(\\d+)/question', (req, res) => {
   const authUserId = req.body.authUserId;
   const quizId = Number(req.params.quizId);
   const questionBody = req.body.questionBody;
