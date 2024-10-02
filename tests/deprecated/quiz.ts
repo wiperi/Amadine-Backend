@@ -7,12 +7,12 @@ import {
   adminQuizDescriptionUpdate,
   adminQuizList,
   adminQuizRemove,
-} from '../../src/quiz';
-import { clear } from '../../src/other';
-import { adminAuthRegister } from '../../src/auth';
+} from '../../src/services/quiz';
+import { clear } from '../../src/utils/other';
+import { adminAuthRegister } from '../../src/services/auth';
 import { getData } from '../../src/dataStore';
 import { notStrictEqual } from 'assert';
-import { findQuizById } from '../../src/helper';
+import { findQuizById } from '../../src/utils/helper';
 
 const ERROR = { error: expect.any(String) };
 

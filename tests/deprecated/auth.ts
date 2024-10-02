@@ -1,7 +1,7 @@
 // @ts-nocheck
 // jest.ignore
-import * as auth from "../../src/auth";
-import { clear } from "../../src/other";
+import * as auth from "../../src/services/auth";
+import { clear } from "../../src/utils/other";
 
 /////////////////////////////////////////////////////////////////////
 // Example

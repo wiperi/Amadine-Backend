@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { adminAuthLogin, adminAuthRegister, adminAuthLogout, adminUserDetails } from '../auth';
+import { adminAuthLogin, adminAuthRegister, adminAuthLogout, adminUserDetails } from '../services/auth';
 
 export const authRouter = Router();
 
