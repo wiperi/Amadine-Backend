@@ -32,9 +32,7 @@ export function authorizeToken(req: Request, res: Response, next: NextFunction) 
     if (req.method === 'POST' || req.method === 'PUT') {
       token = req.body.token as string;
     }
-  }
-
-  if (req.url.startsWith('/v2')) {
+  } else if (req.url.startsWith('/v2')) {
     // Get token from header.token
     token = req.header('token') as string;
   }
