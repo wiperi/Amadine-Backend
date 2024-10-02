@@ -128,18 +128,22 @@ export function adminQuizList(authUserId: number): { quizzes: { quizId: number; 
  * Return an empty object if succeed
  */
 export function adminQuizRemove(authUserId: number, quizId: number): Record<string, never> | { error: string } {
+  const data = getData();
   if (!isValidQuizId(quizId)) {
-    return { error: ERROR_MESSAGES.INVALID_QUIZ_ID };
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
 
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
-    return { error: ERROR_MESSAGES.NOT_AUTHORIZED };
+    throw new HttpError(401, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
   const quiz = findQuizById(quizId);
   if (quiz) {
     quiz.active = false;
+    quiz.timeLastEdited = Math.floor(Date.now() / 1000);
+    setData(data);
+    return {};
   }
-  return {};
+  throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
 }
 
 export function adminQuizTrashView(authUserId: number): { quizzes: Array<{ quizId: number, name: string }> } {
