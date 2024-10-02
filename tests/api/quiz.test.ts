@@ -367,7 +367,6 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
       const res = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
         qs: { token }
       });
-      console.log(parse(res.body)); // debug
       expect(res.statusCode).toBe(200);
       expect(parse(res.body)).toStrictEqual({
         quizId,
