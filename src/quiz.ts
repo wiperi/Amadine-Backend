@@ -139,22 +139,22 @@ export function adminQuizRemove(authUserId: number, quizId: number): Record<stri
   return {};
 }
 
-export function adminQuizTrashView(): { quizzes: Array<{ quizId: number, name: string }> } {
+export function adminQuizTrashView(authUserId: number): { quizzes: Array<{ quizId: number, name: string }> } {
   // TODO: Implement this function
   return { quizzes: [] };
 }
 
-export function adminQuizRestore(quizId: number): EmptyObject {
+export function adminQuizRestore(authUserId: number, quizId: number): EmptyObject {
   // TODO: Implement this function
   return {};
 }
 
-export function adminQuizTrashEmpty(quizIds: number[]): EmptyObject {
+export function adminQuizTrashEmpty(authUserId: number, quizIds: number[]): EmptyObject {
   // TODO: Implement this function
   return {};
 }
 
-export function adminQuizTransfer(quizId: number, userEmail: string): EmptyObject {
+export function adminQuizTransfer(authUserId: number, quizId: number, userEmail: string): EmptyObject {
   // TODO: Implement this function
   return {};
 }
@@ -165,7 +165,7 @@ type ParamQuestionBody = {
   points: number;
   answers: Array<{ answer: string, correct: boolean }>;
 }
-export function adminQuizQuestionCreate(quizId: number, questionBody: ParamQuestionBody): { questionId: number } {
+export function adminQuizQuestionCreate(authUserId: number, quizId: number, questionBody: ParamQuestionBody): { questionId: number } {
   // TODO: Implement this function
   if (!quizId || recursiveFind(questionBody, undefined)) {
     throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
@@ -173,7 +173,7 @@ export function adminQuizQuestionCreate(quizId: number, questionBody: ParamQuest
   return { questionId: 0 };
 }
 
-export function adminQuizQuestionUpdate(quizId: number, questionId: number, questionBody: ParamQuestionBody): EmptyObject {
+export function adminQuizQuestionUpdate(authUserId: number, quizId: number, questionId: number, questionBody: ParamQuestionBody): EmptyObject {
   // TODO: Implement this function
   if (!quizId || recursiveFind(questionBody, undefined)) {
     throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
@@ -181,17 +181,17 @@ export function adminQuizQuestionUpdate(quizId: number, questionId: number, ques
   return {};
 }
 
-export function adminQuizQuestionDelete(quizId: number, questionId: number): EmptyObject {
+export function adminQuizQuestionDelete(authUserId: number, quizId: number, questionId: number): EmptyObject {
   // TODO: Implement this function
   return {};
 }
 
-export function adminQuizQuestionMove(quizId: number, questionId: number, newPosition: number): EmptyObject {
+export function adminQuizQuestionMove(authUserId: number, quizId: number, questionId: number, newPosition: number): EmptyObject {
   // TODO: Implement this function
   return {};
 }
 
-export function adminQuizQuestionDuplicate(quizId: number, questionId: number): { newQuestionId: number } {
+export function adminQuizQuestionDuplicate(authUserId: number, quizId: number, questionId: number): { newQuestionId: number } {
   // TODO: Implement this function
   return { newQuestionId: 0 };
 }
