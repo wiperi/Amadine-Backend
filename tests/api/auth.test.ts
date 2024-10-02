@@ -1,5 +1,22 @@
 import request from 'sync-request-curl';
 import config from '../../src/config.json';
+import {
+  registerUser,
+  loginUser,
+  logoutUser,
+  getUserDetails,
+  updateUserDetails,
+  updateUserPassword,
+  getQuizList,
+  getQuizDetails,
+  createQuiz,
+  updateQuiz,
+  deleteQuiz,
+  updateQuizDescription,
+  getQuizTrash,
+  restoreQuiz,
+  deleteQuizPermanently
+} from './apiTestHelpersV1';
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const ERROR = { error: expect.any(String) };
@@ -136,43 +153,22 @@ describe('POST /v1/admin/auth/register', () => {
       test.each(inputData)('%s', (data) => {
         let inputs = [...validInputs];
         inputs[paramIndex] = data;
-        
-        const res = request('POST', `${BASE_URL}/register`, {
-          json: {
-            email: inputs[0],
-            password: inputs[1],
-            nameFirst: inputs[2],
-            nameLast: inputs[3]
-          }
-        });
+
+        const res = registerUser(inputs[0], inputs[1], inputs[2], inputs[3]);
         expect(res.statusCode).toStrictEqual(expectOutput.statusCode);
-        expect(parse(res.body)).toStrictEqual(expectOutput.body);
+        expect(res.body).toStrictEqual(expectOutput.body);
       });
     });
   }
 
   test('Email is used', () => {
-    const res = request('POST', `${BASE_URL}/register`, {
-      json: {
-        email: validInputs[0],
-        password: validInputs[1],
-        nameFirst: validInputs[2],
-        nameLast: validInputs[3]
-      }
-    });
+    const res = registerUser(validInputs[0], validInputs[1], validInputs[2], validInputs[3]);
     expect(res.statusCode).toStrictEqual(200);
-    expect(parse(res.body)).toStrictEqual(CORRECT);
+    expect(res.body).toStrictEqual(CORRECT);
 
-    const res2 = request('POST', `${BASE_URL}/register`, {
-      json: {
-        email: validInputs[0],
-        password: validInputs[1],
-        nameFirst: validInputs[2],
-        nameLast: validInputs[3]
-      }
-    });
+    const res2 = registerUser(validInputs[0], validInputs[1], validInputs[2], validInputs[3]);
     expect(res2.statusCode).toStrictEqual(400);
-    expect(parse(res2.body)).toStrictEqual(ERROR);
+    expect(res2.body).toStrictEqual(ERROR);
   });
 
   runTestsForOneParam('Invalid emails', invalidEmails, 0, ERROR_RESPONSE);
@@ -193,16 +189,9 @@ describe('POST /v1/admin/auth/logout', () => {
   let token: string;
   beforeEach(() => {
     // Register a user and get the token
-    const res = request('POST', `${BASE_URL}/register`, {
-      json: {
-        email: 'test@example.com',
-        password: 'ValidPass123',
-        nameFirst: 'John',
-        nameLast: 'Doe'
-      }
-    });
+    const res = registerUser('test@example.com', 'ValidPass123', 'John', 'Doe');
     expect(res.statusCode).toBe(200);
-    token = parse(res.body).token;
+    token = res.body.token;
   });
 
   describe('valid cases', () => {
@@ -263,17 +252,9 @@ describe('PUT /v1/admin/user/password', () => {
   
   let token: string;
   beforeEach(() => {
-    // Register a user and get the token
-    const res = request('POST', `${BASE_URL}/register`, {
-      json: {
-        email: 'test@example.com',
-        password: 'OldPassword123',
-        nameFirst: 'John',
-        nameLast: 'Doe'
-      }
-    });
+    const res = registerUser('test@example.com', 'OldPassword123', 'John', 'Doe');
     expect(res.statusCode).toBe(200);
-    token = parse(res.body).token;
+    token = res.body.token;
   });
 
   describe('valid cases', () => {
@@ -390,15 +371,8 @@ describe('PUT /v1/admin/user/password', () => {
 describe('POST /v1/admin/auth/login', () => {
   let token: string;
   beforeEach(() => {
-    const res = request('POST', `${BASE_URL}/register`, {
-      json: {
-        email: 'goodemail@gmail.com',
-        password: 'GlenPassword123',
-        nameFirst: 'Glen',
-        nameLast: 'Quagmire'
-      }
-    });
-    token = parse(res.body).token;
+    const res = registerUser('goodemail@gmail.com', 'GlenPassword123', 'Glen', 'Quagmire');
+    token = res.body.token;
   });
 
   describe('invalid cases', () => {
@@ -432,9 +406,9 @@ describe('POST /v1/admin/auth/login', () => {
 
     test('different user return different id', () => {
       const res1 = request('POST', `${BASE_URL}/login`, { json: { email: 'goodemail@gmail.com', password: 'GlenPassword123' }});
-      const userRes = request('POST', `${BASE_URL}/register`, { json: { email: 'peter@gmail.com', password: 'PumpkinEater123', nameFirst: 'peter', nameLast: 'griffin' }});
+      const userRes = registerUser('peter@gmail.com', 'PumpkinEater123', 'peter', 'griffin');
       const res2 = request('POST', `${BASE_URL}/login`, { json: { email: 'peter@gmail.com', password: 'PumpkinEater123' }});
-      expect(parse(res2.body).token).toStrictEqual(parse(userRes.body).token);
+      expect(parse(res2.body).token).toStrictEqual(userRes.body.token);
       expect(parse(res1.body)).not.toStrictEqual(parse(res2.body));
     });
   });
@@ -444,16 +418,9 @@ describe('GET /v1/admin/auth/user/details', () => {
   // Valid cases:
   describe('adminUserDetails valid cases', () => {
     test('numFailedPasswordsSinceLastLogin increments correctly', () => {
-      const registerRes = request('POST', `${BASE_URL}/register`, {
-        json: {
-          email: 'wick@example.com',
-          password: 'JohnWick123',
-          nameFirst: 'John',
-          nameLast: 'Wick'
-        }
-      });
+      const registerRes = registerUser('wick@example.com', 'JohnWick123', 'John', 'Wick');
       expect(registerRes.statusCode).toBe(200);
-      const user = parse(registerRes.body);
+      const user = registerRes.body;
       const token = user.token;
 
       request('POST', `${BASE_URL}/login`, { json: { email: 'wick@example.com', password: 'JohnWick123' } });
@@ -480,15 +447,8 @@ describe('GET /v1/admin/auth/user/details', () => {
     });
 
     test('reset numFailedPasswordsSinceLastLogin', () => {
-      const registerRes = request('POST', `${BASE_URL}/register`, {
-        json: {
-          email: 'lucy@example.com',
-          password: 'Lucy12356',
-          nameFirst: 'Lucy',
-          nameLast: 'David'
-        }
-      });
-      const user = parse(registerRes.body);
+      const registerRes = registerUser('lucy@example.com', 'Lucy12356', 'Lucy', 'David');
+      const user = registerRes.body;
       const token = user.token;
 
       request('POST', `${BASE_URL}/login`, { json: { email: 'lucy@example.com', password: 'Lucy1234567' } });
@@ -513,15 +473,8 @@ describe('GET /v1/admin/auth/user/details', () => {
     });
 
     test('valid user details', () => {
-      const registerRes = request('POST', `${BASE_URL}/register`, {
-        json: {
-          email: 'artoria@example.com',
-          password: 'Artoria123',
-          nameFirst: 'Artoria',
-          nameLast: 'Pendragon'
-        }
-      });
-      const user = parse(registerRes.body);
+      const registerRes = registerUser('artoria@example.com', 'Artoria123', 'Artoria', 'Pendragon');
+      const user = registerRes.body;
       const token = user.token;
 
       request('POST', `${BASE_URL}/login`, { json: { email: 'artoria@example.com', password: 'Artoria123' } });
@@ -547,14 +500,7 @@ describe('GET /v1/admin/auth/user/details', () => {
   // Error cases:
   describe('adminUserDetails error cases', () => {
     test('User ID does not exist', () => {
-      request('POST', `${BASE_URL}/register`, {
-        json: {
-          email: 'test@example.com',
-          password: 'TestPassword123',
-          nameFirst: 'Test',
-          nameLast: 'User'
-        }
-      });
+      registerUser('test@example.com', 'TestPassword123', 'Test', 'User');
       const token = 11111;
       const detailsRes = request('GET', `${BASE_URL}/details`, {
         qs: {
@@ -575,16 +521,9 @@ describe('PUT /v1/admin/user/details', () => {
   let token: string;
   beforeEach(() => {
     // Register a user to get the token
-    const registerRes = request('POST', `${BASE_URL}/register`, {
-      json: {
-        email: 'handsomejim@example.com',
-        password: 'ValidPass123',
-        nameFirst: 'Jim',
-        nameLast: 'Hu'
-      }
-    });
+    const registerRes = registerUser('handsomejim@example.com', 'ValidPass123', 'Jim', 'Hu');
     expect(registerRes.statusCode).toBe(200);
-    token = parse(registerRes.body).token;
+    token = registerRes.body.token;
   });
   describe('valid case', () => {
     test('successful update of user details', () => {
@@ -645,14 +584,7 @@ describe('PUT /v1/admin/user/details', () => {
 
     test('error for used email', () => {
       // Register another user
-      request('POST', `${BASE_URL}/register`, {
-        json: {
-          email: 'otheruser@example.com',
-          password: 'ValidPass123',
-          nameFirst: 'Jane',
-          nameLast: 'Doe'
-        }
-      });
+      registerUser('otheruser@example.com', 'ValidPass123', 'Jane', 'Doe');
   
       // Attempt to update with the same email
       const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {

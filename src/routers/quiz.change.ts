@@ -1,7 +1,10 @@
 import { Router, Request, Response } from 'express';
-import { adminQuizCreate, adminQuizInfo, adminQuizNameUpdate, adminQuizList, adminQuizQuestionMove, adminQuizDescriptionUpdate } from '@/services/quiz';
-
+import { adminQuizCreate, adminQuizInfo, adminQuizNameUpdate, adminQuizDescriptionUpdate } from '../quiz';
 export const quizRouter = Router();
+
+quizRouter.get('/', (req: Request, res: Response) => {
+  return res.status(200).json({ message: 'Quiz route' });
+});
 
 quizRouter.post('/', (req: Request, res: Response) => {
   const { authUserId, name, description } = req.body;
@@ -12,16 +15,7 @@ quizRouter.post('/', (req: Request, res: Response) => {
   }
 });
 
-quizRouter.get('/list', (req: Request, res: Response) => {
-  const { authUserId } = req.body;
-  try {
-    return res.json(adminQuizList(authUserId));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
-});
-
-quizRouter.get('/:quizid(\\d+)', (req: Request, res: Response) => {
+quizRouter.get('/:quizid', (req: Request, res: Response) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId } = req.body;
   try {
@@ -31,7 +25,7 @@ quizRouter.get('/:quizid(\\d+)', (req: Request, res: Response) => {
   }
 });
 
-quizRouter.put('/:quizid(\\d+)/name', (req: Request, res: Response) => {
+quizRouter.put('/:quizid/name', (req: Request, res: Response) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId, name } = req.body;
   try {
@@ -40,19 +34,7 @@ quizRouter.put('/:quizid(\\d+)/name', (req: Request, res: Response) => {
     return res.status(error.statusCode).json({ error: error.message });
   }
 });
-
-quizRouter.put('/:quizid(\\d+)/question/:questionid(\\d+)/move', (req: Request, res: Response) => {
-  const quizid = parseInt(req.params.quizid);
-  const questionid = parseInt(req.params.questionid);
-  const { authUserId, newPosition } = req.body;
-  try {
-    return res.json(adminQuizQuestionMove(authUserId, quizid, questionid, newPosition));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
-});
-
-quizRouter.put('/:quizid(\\d+)/description', (req: Request, res: Response) => {
+quizRouter.put('/:quizid/description', (req: Request, res: Response) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId, description } = req.body;
   try {

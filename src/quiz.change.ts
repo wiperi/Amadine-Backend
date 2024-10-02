@@ -2,6 +2,7 @@ import { getData, Quiz, setData, EmptyObject, HttpError } from './dataStore';
 import { ERROR_MESSAGES } from './errors';
 import {
   getNewID,
+  isValidUserId,
   isQuizIdOwnedByUser,
   isValidQuizId,
   findQuizById,
@@ -13,7 +14,7 @@ import {
 /**
  * Update the description of the relevant quiz.
  */
-export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, description: string): EmptyObject {
+export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, description: string): Record<string, never> {
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -64,7 +65,7 @@ export function adminQuizInfo(authUserId: number, quizId: number): {
 /**
  * Update the name of the relevant quiz.
  */
-export function adminQuizNameUpdate(authUserId: number, quizId: number, name: string): EmptyObject {
+export function adminQuizNameUpdate(authUserId: number, quizId: number, name: string): Record<string, never> {
   if (!isValidQuizName(name)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_NAME);
   }
@@ -90,6 +91,9 @@ export function adminQuizNameUpdate(authUserId: number, quizId: number, name: st
  * Creates a new quiz if the provided user ID, name, and description are valid.
  */
 export function adminQuizCreate(authUserId: number, name: string, description: string): { quizId: number } {
+  if (!isValidUserId(authUserId)) {
+    throw new HttpError(401, ERROR_MESSAGES.USED_EMAIL);
+  }
   if (!isValidQuizName(name)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_NAME);
   }
@@ -110,6 +114,10 @@ export function adminQuizCreate(authUserId: number, name: string, description: s
  * if the user ID is valid. The quizzes are returned with their IDs and names.
  */
 export function adminQuizList(authUserId: number): { quizzes: { quizId: number; name: string }[] } | { error: string } {
+  if (!isValidUserId(authUserId)) {
+    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
+  }
+
   const quizzes = getData().quizzes
     .filter(quiz => quiz.authUserId === authUserId && quiz.active)
     .map(quiz => ({
@@ -125,6 +133,10 @@ export function adminQuizList(authUserId: number): { quizzes: { quizId: number; 
  * Return an empty object if succeed
  */
 export function adminQuizRemove(authUserId: number, quizId: number): Record<string, never> | { error: string } {
+  if (!isValidUserId(authUserId)) {
+    return { error: ERROR_MESSAGES.UID_NOT_EXIST };
+  }
+
   if (!isValidQuizId(quizId)) {
     return { error: ERROR_MESSAGES.INVALID_QUIZ_ID };
   }
