@@ -73,9 +73,8 @@ quizRouter.put('/:quizid(\\d+)/description', (req: Request, res: Response) => {
 });
 
 quizRouter.post('/:quizId(\\d+)/question', (req, res) => {
-  const authUserId = req.body.authUserId;
-  const quizId = Number(req.params.quizId);
-  const questionBody = req.body.questionBody;
+  const { authUserId, questionBody } = req.body;
+  const quizId = parseInt(req.params.quizId);
   try {
     return res.json(adminQuizQuestionCreate(authUserId, quizId, questionBody));
   } catch (error) {

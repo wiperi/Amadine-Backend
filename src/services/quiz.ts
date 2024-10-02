@@ -42,25 +42,15 @@ export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, d
 export function adminQuizInfo(
   authUserId: number,
   quizId: number
-): {
+):
+ {
   quizId: number;
   name: string;
   timeCreated: number;
   timeLastEdited: number;
   description: string;
   numofQuestions: number;
-  questions: Array<{
-    questionId: number;
-    question: string;
-    duration: number;
-    points: number;
-    answers: Array<{
-      answerId: number;
-      answer: string;
-      correct: boolean;
-      colour: string;
-    }>;
-  }>;
+  questions: Question[]
 } {
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
