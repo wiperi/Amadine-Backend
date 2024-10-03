@@ -1,4 +1,4 @@
-import { getData } from '@/dataStore';
+import { getData } from '../dataStore';
 import isEmail from 'validator/lib/isEmail';
 import { User, Quiz } from '@/models/Classes';
 import { ERROR_MESSAGES } from './errors';
