@@ -414,7 +414,7 @@ describe('POST /v1/admin/auth/login', () => {
   });
 });
 
-describe('GET /v1/admin/auth/user/details', () => {
+describe('GET /v1/admin/user/details', () => {
   // Valid cases:
   describe('adminUserDetails valid cases', () => {
     test('numFailedPasswordsSinceLastLogin increments correctly', () => {
@@ -422,19 +422,13 @@ describe('GET /v1/admin/auth/user/details', () => {
       expect(registerRes.statusCode).toBe(200);
       const user = registerRes.body;
       const token = user.token;
-
-      request('POST', `${BASE_URL}/login`, { json: { email: 'wick@example.com', password: 'JohnWick123' } });
-      request('POST', `${BASE_URL}/login`, { json: { email: 'wick@example.com', password: 'JohnWick12' } });
-      request('POST', `${BASE_URL}/login`, { json: { email: 'wick@example.com', password: 'JohnWick1234' } });
-
-      const detailsRes = request('GET', `${BASE_URL}/details`, {
-        qs: {
-          token
-        }
-      });
+      loginUser('wick@example.com', 'JohnWick123');
+      loginUser('wick@example.com', 'JohnWick12');
+      loginUser('wick@example.com', 'JohnWick1234');
+      const detailsRes = getUserDetails(token);
 
       expect(detailsRes.statusCode).toBe(200);
-      const details = parse(detailsRes.body);
+      const details = detailsRes.body;
       expect(details).toStrictEqual({
         user: {
           userId: expect.any(Number),
@@ -451,16 +445,13 @@ describe('GET /v1/admin/auth/user/details', () => {
       const user = registerRes.body;
       const token = user.token;
 
-      request('POST', `${BASE_URL}/login`, { json: { email: 'lucy@example.com', password: 'Lucy1234567' } });
-      request('POST', `${BASE_URL}/login`, { json: { email: 'lucy@example.com', password: 'Lucy1234567' } });
-      request('POST', `${BASE_URL}/login`, { json: { email: 'lucy@example.com', password: 'Lucy12356' } });
+      loginUser('lucy@example.com', 'Lucy123567');
+      loginUser('lucy@example.com', 'Lucy123567');
+      loginUser('lucy@example.com', 'Lucy12356');
 
-      const detailsRes = request('GET', `${BASE_URL}/details`, {
-        qs: {
-          token
-        }
-      });
-      const details = parse(detailsRes.body);
+      const detailsRes = getUserDetails(token);
+      expect(detailsRes.statusCode).toBe(200);
+      const details = detailsRes.body;
       expect(details).toStrictEqual({
         user: {
           userId: expect.any(Number),
@@ -476,15 +467,11 @@ describe('GET /v1/admin/auth/user/details', () => {
       const registerRes = registerUser('artoria@example.com', 'Artoria123', 'Artoria', 'Pendragon');
       const user = registerRes.body;
       const token = user.token;
+      loginUser('artoria@example.com', 'Artoria123');
 
-      request('POST', `${BASE_URL}/login`, { json: { email: 'artoria@example.com', password: 'Artoria123' } });
-
-      const detailsRes = request('GET', `${BASE_URL}/details`, {
-        qs: {
-          token
-        }
-      });
-      const details = parse(detailsRes.body);
+      const detailsRes = getUserDetails(token);
+      expect(detailsRes.statusCode).toBe(200);
+      const details = detailsRes.body;
       expect(details).toStrictEqual({
         user: {
           userId: expect.any(Number),
@@ -501,14 +488,10 @@ describe('GET /v1/admin/auth/user/details', () => {
   describe('adminUserDetails error cases', () => {
     test('User ID does not exist', () => {
       registerUser('test@example.com', 'TestPassword123', 'Test', 'User');
-      const token = 11111;
-      const detailsRes = request('GET', `${BASE_URL}/details`, {
-        qs: {
-          token
-        }
-      });
+      const token = '11111';
+      const detailsRes = getUserDetails(token);
       expect(detailsRes.statusCode).toBe(401);
-      expect(parse(detailsRes.body)).toStrictEqual(ERROR);
+      expect(detailsRes.body).toStrictEqual(ERROR);
     });
   });
 });

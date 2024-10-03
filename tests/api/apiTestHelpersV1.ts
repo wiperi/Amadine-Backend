@@ -3,6 +3,7 @@ import config from '../../src/config.json';
 
 const AUTH_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const QUIZ_URL = `${config.url}:${config.port}/v1/admin/quiz`;
+const USER_URL = `${config.url}:${config.port}/v1/admin/user`;
 
 type ParsedResponse = Omit<Response, 'body'> & { body: Record<string, any> };
 
@@ -50,18 +51,19 @@ export function logoutUser(token: string): ParsedResponse {
 }
 
 export function getUserDetails(token: string): ParsedResponse {
-  const res = request('GET', `${AUTH_URL}/user/details`, {
-    json: {
+  const res = request('GET', `${USER_URL}/details`, {
+    qs: {
       token
     }
   });
   return parse(res);
 }
 
-export function updateUserDetails(token: string, nameFirst: string, nameLast: string): ParsedResponse {
+export function updateUserDetails(token: string, email: string, nameFirst: string, nameLast: string): ParsedResponse {
   const res = request('PUT', `${AUTH_URL}/user/details`, {
     json: {
       token,
+      email,
       nameFirst,
       nameLast
     }
@@ -98,25 +100,23 @@ export function getQuizDetails(token: string, quizId: number): ParsedResponse {
   return parse(res);
 }
 
-export function createQuiz(token: string, name: string, description: string, duration: number): ParsedResponse {
+export function createQuiz(token: string, name: string, description: string): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}`, {
     json: {
       token,
       name,
       description,
-      duration
     }
   });
   return parse(res);
 }
 
-export function updateQuiz(token: string, quizId: number, name: string, description: string, duration: number): ParsedResponse {
+export function updateQuiz(token: string, quizId: number, name: string, description: string): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}`, {
     json: {
       token,
       name,
       description,
-      duration
     }
   });
   return parse(res);
@@ -125,14 +125,15 @@ export function updateQuiz(token: string, quizId: number, name: string, descript
 export function deleteQuiz(token: string, quizId: number): ParsedResponse {
   const res = request('DELETE', `${QUIZ_URL}/${quizId}`, {
     qs: {
-      token
+      token,
+      quizId
     }
   });
   return parse(res);
 }
 
 export function updateQuizDescription(token: string, quizId: number, description: string): ParsedResponse {
-  const res = request('PUT', `${QUIZ_URL}/${quizId}`, {
+  const res = request('PUT', `${QUIZ_URL}/${quizId}/description`, {
     json: {
       token,
       description
