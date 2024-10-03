@@ -12,7 +12,6 @@ import {
   isValidQuizDescription,
   recursiveFind
 } from '@/utils/helper';
-import { query } from 'express';
 /**
  * Update the description of the relevant quiz.
  */
@@ -172,7 +171,7 @@ export function adminQuizTrashEmpty(authUserId: number, quizIdsParam: string): E
   const data = getData();
 
   const quizIds = JSON.parse(quizIdsParam);
-  for(const quizId of quizIds) {
+  for (const quizId of quizIds) {
     const quiz = findQuizById(quizId);
     if (!quiz) {
       throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
@@ -180,12 +179,12 @@ export function adminQuizTrashEmpty(authUserId: number, quizIdsParam: string): E
     if (quiz.authUserId !== authUserId) {
       throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
     }
-    if(quiz.active){
+    if (quiz.active) {
       throw new HttpError(400, ERROR_MESSAGES.INVALID_QUIZ_ID);
     }
   }
   data.quizzes = data.quizzes.filter(quiz => !quizIds.includes(quiz.quizId));
-  setData(data); 
+  setData(data);
   return {};
 }
 

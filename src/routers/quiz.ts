@@ -83,8 +83,8 @@ quizRouter.post('/:quizId(\\d+)/question', (req, res) => {
 });
 
 quizRouter.delete('/trash/empty', (req, res) => {
-  const { authUserId} = req.body;
-  const quizIdsParam = req.query.quizIds as string
+  const { authUserId } = req.body;
+  const quizIdsParam = req.query.quizIds as string;
   try {
     return res.json(adminQuizTrashEmpty(authUserId, quizIdsParam));
   } catch (error) {
