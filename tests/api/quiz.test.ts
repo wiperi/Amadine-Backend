@@ -18,8 +18,12 @@ import {
   clear,
   moveQuestion,
   createQuestion,
-  requestAdminQuizNameUpdate
-} from './apiTestHelpersV1';
+  requestAdminQuizNameUpdate,
+  emptyTrash
+} from './apiTestHelpersV1'
+import { get } from 'http';
+import { findQuizById } from '../../src/utils/helper';
+import { json } from 'stream/consumers';
 
 const ERROR = { error: expect.any(String) };
 
@@ -137,7 +141,7 @@ describe('GET /v1/admin/quiz/:quizId', () => {
         description: 'A test quiz',
         timeCreated: expect.any(Number),
         timeLastEdited: expect.any(Number),
-        numofQuestions: 0,
+        numQuestions: 0,
         questions: [],
         duration: 0
       });
@@ -253,7 +257,7 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
         description: 'A test quiz',
         timeCreated: expect.any(Number),
         timeLastEdited: expect.any(Number),
-        numofQuestions: 0,
+        numQuestions: 0,
         questions: [],
         duration: 0
       });
@@ -407,7 +411,7 @@ describe('PUT /v1/admin/quiz/:quizId/description', () => {
         description: 'An updated test quiz',
         timeCreated: expect.any(Number),
         timeLastEdited: expect.any(Number),
-        numofQuestions: 0,
+        numQuestions: 0,
         questions: [],
         duration: 0
       });
@@ -848,6 +852,87 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
   });
 });
 
+//////////////////////////////////////////////////////////
+///////////this is test DELETE /v1/admin/quiz/trash/empty
+///////////////////////////////////////////////////////////
+describe('DELETE /v1/admin/quiz/trash/empty', () => {
+  let quizId1: number;
+  let quizId2: number;
+  beforeEach(() => {
+    // Create a quiz before each test in this suite
+    let createQuizRes = createQuiz(token, 'Test Quiz1', 'A test quiz1');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId1 = createQuizRes.body.quizId;
+
+    createQuizRes = createQuiz(token, 'Test Quiz2', 'A test quiz2');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId2 = createQuizRes.body.quizId;
+
+
+    // Delete the quiz
+    const deleteQuizRes = deleteQuiz(token, quizId1);
+    expect(deleteQuizRes.statusCode).toBe(200);
+  });
+
+  describe('valid cases', () => {
+    test('successful empty trash', () => {
+      const quizIdsParam = JSON.stringify([quizId1]);
+      const emptyRes = emptyTrash(token, quizIdsParam);
+      expect(emptyRes.statusCode).toBe(200);
+      expect(emptyRes.body).toStrictEqual({});
+      const quizListRes = getQuizList(token);
+      expect(quizListRes.statusCode).toBe(200);
+      expect(findQuizById(quizId1)).toBeUndefined();
+    });
+    test('successful empty trash with multiple quizzes', () => {
+      deleteQuiz(token, quizId2);
+      const quizIdsParam = JSON.stringify([quizId1, quizId2]);
+      const emptyRes = emptyTrash(token, quizIdsParam);
+      expect(emptyRes.statusCode).toBe(200);
+      expect(emptyRes.body).toStrictEqual({});
+      const quizListRes = getQuizList(token);
+      expect(quizListRes.statusCode).toBe(200);
+      expect(findQuizById(quizId1)).toBeUndefined();
+      expect(findQuizById(quizId2)).toBeUndefined
+    });
+  });
+
+  describe('invalid cases', () => {
+    test('invalid token', () => {
+      const quizIdsParam = JSON.stringify([quizId1]);
+      const emptyRes = emptyTrash('invalid_token', quizIdsParam); 
+      expect(emptyRes.statusCode).toBe(401);
+      expect(emptyRes.body).toStrictEqual(ERROR);
+    });
+
+    test('missing token', () => {
+      const emptyRes = emptyTrash('', JSON.stringify([quizId1])); 
+      expect(emptyRes.statusCode).toBe(401);
+      expect(emptyRes.body).toStrictEqual(ERROR);
+    });
+    
+    test('quiz ID does not exist', () => {
+      const emptyRes = emptyTrash(token, JSON.stringify([999999])); 
+      expect(emptyRes.statusCode).toBe(403);
+      expect(emptyRes.body).toStrictEqual(ERROR);
+    });
+
+    test('user is not the owner of the quiz', () => {
+      // Register another user
+      const resRegister = registerUser('nice@unsw.edu.au', 'ValidPass123', 'Cheong', 'Zhang');
+      const otherToken = resRegister.body.token;
+      expect(resRegister.statusCode).toBe(200);
+      const emptyRes = emptyTrash(otherToken, JSON.stringify([quizId1]));
+      expect(emptyRes.statusCode).toBe(403);
+      expect(emptyRes.body).toStrictEqual(ERROR);
+    });
+    test('Quiz is not in the trash',() => {
+      const emptyRes = emptyTrash(token, JSON.stringify([quizId2]));
+      expect(emptyRes.statusCode).toBe(400);
+      expect(emptyRes.body).toStrictEqual(ERROR);
+    }) 
+  });
+});
 /////////////////////////////////////////////////
 // Test for adminQuizTrashView //////////////////
 /////////////////////////////////////////////////
