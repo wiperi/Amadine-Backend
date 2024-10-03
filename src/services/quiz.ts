@@ -231,7 +231,7 @@ export function adminQuizQuestionCreate(authUserId: number, quizId: number, ques
     questionBody.question,
     questionBody.duration,
     questionBody.points,
-    questionBody.answers.map((answer, index) => new Answer(getNewID('answer'), answer.answer, answer.correct))
+    questionBody.answers.map(answer => new Answer(getNewID('answer'), answer.answer, answer.correct))
   );
 
   quiz.questions.push(question);

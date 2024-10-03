@@ -75,7 +75,7 @@ export function getNewID(type?: 'user' | 'quiz' | 'question' | 'answer' | 'user 
       dataSet = [];
       for (const quiz of data.quizzes) {
         for (const question of quiz.questions) {
-          for (const answer of question.answers) {
+          for (const answer of question.getAnswersSlice()) {
             dataSet.push(answer);
           }
         }

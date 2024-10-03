@@ -1,4 +1,4 @@
-import { QuizSessionState, Colour } from './Enums';
+import { QuizSessionState, Color } from './Enums';
 
 export class User {
   userId: number;
@@ -62,13 +62,54 @@ export class Question {
   question: string;
   duration: number;
   points: number;
-  answers: Answer[] = [];
+
+  private answers: Answer[] = [];
+  private unusedColors: Color[] = Object.values(Color); // used to assign unique colours to answers
+
+  private getRandomUniqueColor(): Color {
+    if (this.unusedColors.length <= 0) {
+      throw new Error(`Can not create more answers. Current number of answers: ${this.answers.length}`)
+    }
+    const randomIndex = Math.random() * this.unusedColors.length;
+    return this.unusedColors.splice(randomIndex, 1)[0];
+  }
+
+  /**
+   * Return a copy of seleciton of answers
+   * 
+   * @param start The beginning index of the specified portion of the array. If start is undefined, then the slice begins at index 0.
+   * @param end The end index of the specified portion of the array. This is exclusive of the element at the index 'end'. If end is undefined, then the slice extends to the end of the array.
+   * @returns 
+   */
+  getAnswersSlice(start?: number, end?: number): Answer[] {
+    return this.answers.slice(start, end);
+  }
+
+  setAnswers(answers: Answer[]): void {
+    answers.forEach(answer => {
+      answer.colour = this.getRandomUniqueColor();
+    });
+    this.answers = answers
+  }
+
+  addAnswer(answer: Answer): void {
+    answer.colour = this.getRandomUniqueColor();
+    this.answers.push(answer);
+  }
+
+  deleteAnswer(answerId: number): void {
+    this.answers = this.answers.filter(answer => answer.answerId !== answerId);
+  }
 
   constructor(questionId: number, question: string, duration: number, points: number, answers: Answer[]) {
     this.questionId = questionId;
     this.question = question;
     this.duration = duration;
     this.points = points;
+    
+    answers.forEach(answer => {
+      answer.colour = this.getRandomUniqueColor();
+    });
     this.answers = answers;
   }
 }
@@ -79,13 +120,7 @@ export class Answer {
   answer: string;
   correct: boolean;
 
-  colour: Colour = this.getRandomColor(); // randomly generated when answer is created
-
-  private getRandomColor(): Colour {
-    const colors = Object.values(Colour);
-    const randomIndex = Math.floor(Math.random() * colors.length);
-    return colors[randomIndex];
-  }
+  colour: Color;
 
   constructor(answerId: number, answer: string, correct: boolean) {
     this.answerId = answerId;
