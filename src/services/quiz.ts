@@ -168,7 +168,7 @@ export function adminQuizRestore(authUserId: number, quizId: number): EmptyObjec
 }
 
 export function adminQuizTrashEmpty(authUserId: number, quizIds: number[]): EmptyObject {
-  // TODO: Implement this function
+  
   return {};
 }
 

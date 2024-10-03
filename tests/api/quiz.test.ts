@@ -18,9 +18,11 @@ import {
   clear,
   moveQuestion,
   createQuestion,
-  requestAdminQuizNameUpdate
+  requestAdminQuizNameUpdate,
+  emptyTrash
 } from './apiTestHelpersV1'
 import { get } from 'http';
+import { findQuizById } from '@/utils/helper';
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const ERROR = { error: expect.any(String) };
@@ -940,3 +942,71 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
   });
 });
 
+//////////////////////////////////////////////////////////
+///////////this is test DELETE /v1/admin/quiz/trash/empty
+///////////////////////////////////////////////////////////
+describe('DELETE /v1/admin/quiz/trash/empty', () => {
+  let quizId1: number;
+  let quizId2: number;
+  beforeEach(() => {
+    // Create a quiz before each test in this suite
+    let createQuizRes = createQuiz(token, 'Test Quiz1', 'A test quiz1');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId1 = createQuizRes.body.quizId;
+
+    createQuizRes = createQuiz(token, 'Test Quiz2', 'A test quiz2');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId2 = createQuizRes.body.quizId;
+
+
+    // Delete the quiz
+    const deleteQuizRes = deleteQuiz(token, quizId1);
+    expect(deleteQuizRes.statusCode).toBe(200);
+  });
+
+  describe('valid cases', () => {
+    test('successful empty trash', () => {
+      const emptyRes = emptyTrash(token, [quizId1]);
+      expect(emptyRes.statusCode).toBe(200);
+      expect(emptyRes.body).toStrictEqual({});
+      const quizListRes = getQuizList(token);
+      expect(quizListRes.statusCode).toBe(200);
+      expect(findQuizById(quizId1)).toBeUndefined();
+    });
+  });
+
+  describe('invalid cases', () => {
+    test('invalid token', () => {
+      const emptyRes = emptyTrash('invalid_token', [quizId1]); 
+      expect(emptyRes.statusCode).toBe(401);
+      expect(emptyRes.statusCode).toStrictEqual(ERROR);
+    });
+
+    test('missing token', () => {
+      const emptyRes = emptyTrash('', [quizId1]); 
+      expect(emptyRes.statusCode).toBe(401);
+      expect(emptyRes.statusCode).toStrictEqual(ERROR);
+    });
+    
+    test('quiz ID does not exist', () => {
+      const emptyRes = emptyTrash(token, [999999]); 
+      expect(emptyRes.statusCode).toBe(403);
+      expect(emptyRes.statusCode).toStrictEqual(ERROR);
+    });
+
+    test('user is not the owner of the quiz', () => {
+      // Register another user
+      const resRegister = registerUser('nice@unsw.edu.au', 'ValidPass123', 'Cheong', 'Zhang');
+      const otherToken = resRegister.body.token;
+      expect(resRegister.statusCode).toBe(200);
+      const emptyRes = emptyTrash(otherToken, [quizId1]);
+      expect(emptyRes.statusCode).toBe(403);
+      expect(emptyRes.statusCode).toStrictEqual(ERROR);
+    });
+    test('Quiz is not in the trash',() => {
+      const emptyRes = emptyTrash(token, [quizId2]);
+      expect(emptyRes.statusCode).toBe(400);
+      expect(emptyRes.body).toStrictEqual(ERROR);
+    }) 
+  });
+});

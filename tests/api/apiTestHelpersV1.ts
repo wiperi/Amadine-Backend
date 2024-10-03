@@ -206,3 +206,13 @@ export function requestAdminQuizNameUpdate(quizId: Number, token: String, name: 
   }
   return res.statusCode;
 }
+
+export function emptyTrash(token: string, quizIds: number[]): ParsedResponse {
+  const res = request('DELETE', `${QUIZ_URL}/trash/empty`, {
+    json: {
+      token,
+      quizIds
+    }
+  });
+  return parse(res);
+}
