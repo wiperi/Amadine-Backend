@@ -1012,21 +1012,21 @@ describe('GET /v1/admin/quiz/trash', () => {
           }
         ]
       });
-
-      test('success view trash when there is multiple user', () => {
-        const registerRes = registerUser('peter@gmail.com', 'PumkinEater123', 'Peter', 'Griffin');
-        expect(registerRes.statusCode).toBe(200);
-        const deleteRes = deleteQuiz(token, quizId);
-        expect(deleteRes.statusCode).toStrictEqual(200);
-        const res = getQuizTrash(token);
-        expect(res.statusCode).toStrictEqual(200);
-        expect(res.body).toStrictEqual( { quizzes: [
-          {
-            quizId: quizId,
-            name: 'Test quiz'
-          }
-        ]});
-      });
     });
-  })
+
+    test('success view trash when there is multiple user', () => {
+      const registerRes = registerUser('peter@gmail.com', 'PumkinEater123', 'Peter', 'Griffin');
+      expect(registerRes.statusCode).toBe(200);
+      const deleteRes = deleteQuiz(token, quizId);
+      expect(deleteRes.statusCode).toStrictEqual(200);
+      const res = getQuizTrash(token);
+      expect(res.statusCode).toStrictEqual(200);
+      expect(res.body).toStrictEqual( { quizzes: [
+        {
+          quizId: quizId,
+          name: 'Test quiz'
+        }
+      ]});
+    });
+  });
 });
