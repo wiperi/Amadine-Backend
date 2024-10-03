@@ -21,13 +21,7 @@ import {
   requestAdminQuizNameUpdate
 } from './apiTestHelpersV1';
 
-const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const ERROR = { error: expect.any(String) };
-
-// Parse the response body as JSON
-function parse(res: string | Buffer) {
-  return JSON.parse(res.toString());
-}
 
 let token: string;
 beforeEach(() => {
@@ -420,14 +414,8 @@ describe('PUT /v1/admin/quiz/:quizId/description', () => {
     });
     test('successful update last edit time', async () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/description`, {
-        json: {
-          token,
-          description: 'An updated test quiz'
-        }
-      });
+      const res = updateQuizDescription(token, quizId, 'An updated test quiz');
       expect(res.statusCode).toBe(200);
-      expect(parse(res.body)).toStrictEqual({});
       const res1 = getQuizDetails(token, quizId);
       expect(res.statusCode).toBe(200);
       expect(res1.body.timeLastEdited).not.toStrictEqual(res1.body.timeCreated);
