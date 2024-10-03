@@ -206,3 +206,12 @@ export function requestAdminQuizNameUpdate(quizId: Number, token: String, name: 
   }
   return res.statusCode;
 }
+
+export function duplicateQuestion(token: string, quizId: number, questionId: number): ParsedResponse {
+  const res = request('POST', `${QUIZ_URL}/${quizId}/question/${questionId}/duplicate`, {
+    json: {
+      token
+    }
+  });
+  return parse(res);
+}
