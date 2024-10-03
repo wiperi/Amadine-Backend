@@ -204,7 +204,7 @@ describe('GET /v1/admin/quiz/:quizId', () => {
         description: 'A test quiz',
         timeCreated: expect.any(Number),
         timeLastEdited: expect.any(Number),
-        numofQuestions: 0,
+        numQuestions: 0,
         questions: [],
         duration: 0
       });
@@ -345,7 +345,7 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
         description: 'A test quiz',
         timeCreated: expect.any(Number),
         timeLastEdited: expect.any(Number),
-        numofQuestions: 0,
+        numQuestions: 0,
         questions: [],
         duration: 0
       });
@@ -496,7 +496,7 @@ describe('PUT /v1/admin/quiz/:quizId/description', () => {
         description: 'An updated test quiz',
         timeCreated: expect.any(Number),
         timeLastEdited: expect.any(Number),
-        numofQuestions: 0,
+        numQuestions: 0,
         questions: [],
         duration : 0
       });

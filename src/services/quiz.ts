@@ -49,7 +49,7 @@ export function adminQuizInfo(
   timeCreated: number;
   timeLastEdited: number;
   description: string;
-  numofQuestions: number;
+  numQuestions: number;
   questions: Question[]
   duration: number;
 } {
@@ -69,7 +69,7 @@ export function adminQuizInfo(
     timeCreated: quiz.timeCreated,
     timeLastEdited: quiz.timeLastEdited,
     description: quiz.description,
-    numofQuestions: quiz.questions.length,
+    numQuestions: quiz.questions.length,
     questions: quiz.questions, // Include the questions array
     duration: quiz.questions.reduce((acc, question) => acc + question.duration, 0)
   };
