@@ -164,7 +164,7 @@ export function adminQuizTrashView(authUserId: number): { quizzes: Array<AdminQu
   const data = getData();
   // return `authUserId: ${authUserId}, quizzes: ${data.quizzes}`;
   for (const quiz of data.quizzes) {
-    if (quiz.authUserId === authUserId && quiz.active === false) {
+    if (quiz.authUserId === authUserId && !quiz.active) {
       const quizView: AdminQuizTrashView = {
         quizId: quiz.quizId,
         name: quiz.name
