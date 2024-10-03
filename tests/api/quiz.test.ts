@@ -19,6 +19,7 @@ import {
   moveQuestion,
   createQuestion
 } from './apiTestHelpersV1'
+import { get } from 'http';
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const ERROR = { error: expect.any(String) };
@@ -522,31 +523,19 @@ describe.skip('PUT /v1/admin/quiz/{quizid}/question/{questionid}/move', () => {
 describe('PUT /v1/admin/quiz/:quizId/description', () => {
   let quizId: number;
   beforeEach(() => {
-    const createQuizRes = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
-      json: {
-        token,
-        name: 'Fate',
-        description: 'Description'
-      }
-    });
+    const createQuizRes = createQuiz(token, 'Fate', 'Description');
     expect(createQuizRes.statusCode).toBe(200);
-    quizId = parse(createQuizRes.body).quizId;
+    quizId = createQuizRes.body.quizId;
   });
+
   describe('valid cases', () => {
     test('should update the description of the quiz', () => {
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/description`, {
-        json: {
-          token,
-          description: 'An updated test quiz'
-        }
-      });
+      const res = updateQuizDescription(token, quizId, 'An updated test quiz');
       expect(res.statusCode).toBe(200);
-      expect(parse(res.body)).toStrictEqual({});
-      const res1 = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
-        qs: { token }
-      });
+      expect(res.body).toStrictEqual({});
+      const res1 = getQuizDetails(token, quizId);
       expect(res1.statusCode).toBe(200);
-      expect(parse(res1.body)).toStrictEqual({
+      expect(res1.body).toStrictEqual({
         quizId,
         name: 'Fate',
         description: 'An updated test quiz',
@@ -576,52 +565,26 @@ describe('PUT /v1/admin/quiz/:quizId/description', () => {
 
   describe('invalid cases', () => {
     test('invalid_token', () => {
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/description`, {
-        json: {
-          token: 'invalid_token',
-          description: 'An updated test quiz'
-        }
-      });
+      const res = updateQuizDescription('invalid_token', quizId, 'An updated test quiz');
+
       expect(res.statusCode).toBe(401);
-      expect(parse(res.body)).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
     test('invalid quiz ID', () => {
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/0/description`, {
-        json: {
-          token,
-          description: 'An updated test quiz'
-        }
-      });
+      const res = updateQuizDescription(token, 0, 'An updated test quiz');
       expect(res.statusCode).toBe(403);
-      expect(parse(res.body)).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
     test('Description is more than 100 characters in length', () => {
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/description`, {
-        json: {
-          token,
-          description: 'Description'.repeat(10)
-        }
-      });
+      const res = updateQuizDescription(token, quizId, 'Description'.repeat(10));
       expect(res.statusCode).toBe(400);
-      expect(parse(res.body)).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
     test('user is not the owner of th quiz', () => {
-      const createUserRes = request('POST', `${BASE_URL}/register`, {
-        json: {
-          email: 'wick@example.com',
-          password: 'JohnWick123',
-          nameFirst: 'John',
-          nameLast: 'Wick'
-        }
-      });
+      const createUserRes = registerUser('wick@example.com', 'JohnWick123', 'John', 'Wick');
       expect(createUserRes.statusCode).toBe(200);
-      token = parse(createUserRes.body).token;
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/description`, {
-        json: {
-          token,
-          description: 'An updated test quiz'
-        }
-      });
+      token = createUserRes.body.token;
+      const res = updateQuizDescription(token, quizId, 'An updated test quiz');
       expect(res.statusCode).toBe(403);
     });
   });

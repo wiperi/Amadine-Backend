@@ -133,7 +133,7 @@ export function deleteQuiz(token: string, quizId: number): ParsedResponse {
 }
 
 export function updateQuizDescription(token: string, quizId: number, description: string): ParsedResponse {
-  const res = request('PUT', `${QUIZ_URL}/${quizId}`, {
+  const res = request('PUT', `${QUIZ_URL}/${quizId}/description`, {
     json: {
       token,
       description
