@@ -1,7 +1,7 @@
 import { getData, setData } from '@/dataStore';
 import { HttpError } from '@/utils/HttpError';
 import { Quiz, Question, Answer } from '@/models/Classes';
-import { EmptyObject } from '@/models/Types';
+import { AdminQuizTrashView, EmptyObject } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import {
   getNewID,
@@ -79,6 +79,7 @@ export function adminQuizInfo(
  * Update the name of the relevant quiz.
  */
 export function adminQuizNameUpdate(authUserId: number, quizId: number, name: string): EmptyObject {
+  const data = getData();
   if (!isValidQuizName(name)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_NAME);
   }
@@ -95,6 +96,7 @@ export function adminQuizNameUpdate(authUserId: number, quizId: number, name: st
   if (quiz) {
     quiz.name = name;
     quiz.timeLastEdited = Math.floor(Date.now() / 1000);
+    setData(data);
   }
 
   return {};
@@ -157,9 +159,20 @@ export function adminQuizRemove(authUserId: number, quizId: number): EmptyObject
   throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
 }
 
-export function adminQuizTrashView(authUserId: number): { quizzes: Array<{ quizId: number, name: string }> } {
-  // TODO: Implement this function
-  return { quizzes: [] };
+export function adminQuizTrashView(authUserId: number): { quizzes: Array<AdminQuizTrashView> } | any {
+  const quizzesView: AdminQuizTrashView[] = [];
+  const data = getData();
+  // return `authUserId: ${authUserId}, quizzes: ${data.quizzes}`;
+  for (const quiz of data.quizzes) {
+    if (quiz.authUserId === authUserId && quiz.active === false) {
+      const quizView: AdminQuizTrashView = {
+        quizId: quiz.quizId,
+        name: quiz.name
+      };
+      quizzesView.push(quizView);
+    }
+  }
+  return { quizzes: quizzesView };
 }
 
 export function adminQuizRestore(authUserId: number, quizId: number): EmptyObject {

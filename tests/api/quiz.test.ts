@@ -1024,3 +1024,93 @@ describe('DELETE /v1/admin/quiz/trash/empty', () => {
     }) 
   });
 });
+/////////////////////////////////////////////////
+// Test for adminQuizTrashView //////////////////
+/////////////////////////////////////////////////
+describe('GET /v1/admin/quiz/trash', () => {
+  let quizId: number;
+  beforeEach(() => {
+    const res = createQuiz(token, 'Test quiz', 'description for test quiz');
+    expect(res.statusCode).toStrictEqual(200);
+    quizId = res.body.quizId;
+  })
+
+  describe('invalid cases', () => {
+    test('token is empty', () => {
+      const res = getQuizTrash('');
+      expect(res.statusCode).toStrictEqual(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('token does not refer to valid logged in user session', () => {
+      const res = getQuizTrash('invalid token');
+      expect(res.statusCode).toStrictEqual(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+  });
+
+  describe('valid cases', () => {
+    beforeEach(() => {
+      const loginRes = loginUser('test@example.com', 'ValidPass123');
+      expect(loginRes.statusCode).toStrictEqual(200);
+    });
+
+    test('success view trash for user with 0 quiz in trash', () => {
+      const res = getQuizTrash(token);
+      expect(res.statusCode).toStrictEqual(200);
+      expect(res.body).toStrictEqual({ quizzes: [] });
+    });
+
+    test('success view trash for user with 1 quiz in trash', () => {
+      const deleteRes = deleteQuiz(token, quizId);
+      expect(deleteRes.statusCode).toStrictEqual(200);
+      const res = getQuizTrash(token);
+      expect(res.statusCode).toStrictEqual(200);
+      expect(res.body).toStrictEqual( { quizzes: [
+        {
+          quizId: quizId,
+          name: 'Test quiz'
+        }
+      ]});
+    });
+
+    test('success view trash for user with multiple quizzes in trash', () => {
+      const createQuizRes = createQuiz(token, 'family guy', 'what is the dog name');
+      expect(createQuizRes.statusCode).toStrictEqual(200);
+      const quizId1 = createQuizRes.body.quizId;
+      const deleteRes1 = deleteQuiz(token, quizId);
+      expect(deleteRes1.statusCode).toStrictEqual(200);
+      const deleteRes2 = deleteQuiz(token, quizId1);
+      expect(deleteRes2.statusCode).toStrictEqual(200);
+      const res = getQuizTrash(token);
+      expect(res.statusCode).toStrictEqual(200);
+      expect(res.body).toStrictEqual({
+        quizzes: [
+          {
+            quizId: quizId,
+            name: 'Test quiz'
+          },
+          {
+            quizId: quizId1,
+            name: 'family guy'
+          }
+        ]
+      });
+    });
+
+    test('success view trash when there is multiple user', () => {
+      const registerRes = registerUser('peter@gmail.com', 'PumkinEater123', 'Peter', 'Griffin');
+      expect(registerRes.statusCode).toBe(200);
+      const deleteRes = deleteQuiz(token, quizId);
+      expect(deleteRes.statusCode).toStrictEqual(200);
+      const res = getQuizTrash(token);
+      expect(res.statusCode).toStrictEqual(200);
+      expect(res.body).toStrictEqual( { quizzes: [
+        {
+          quizId: quizId,
+          name: 'Test quiz'
+        }
+      ]});
+    });
+  });
+});

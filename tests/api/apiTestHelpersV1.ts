@@ -60,7 +60,7 @@ export function getUserDetails(token: string): ParsedResponse {
 }
 
 export function updateUserDetails(token: string, email: string, nameFirst: string, nameLast: string): ParsedResponse {
-  const res = request('PUT', `${AUTH_URL}/user/details`, {
+  const res = request('PUT', `${USER_URL}/details`, {
     json: {
       token,
       email,
@@ -72,7 +72,7 @@ export function updateUserDetails(token: string, email: string, nameFirst: strin
 }
 
 export function updateUserPassword(token: string, oldPassword: string, newPassword: string): ParsedResponse {
-  const res = request('PUT', `${AUTH_URL}/user/password`, {
+  const res = request('PUT', `${USER_URL}/password`, {
     json: {
       token,
       oldPassword,
