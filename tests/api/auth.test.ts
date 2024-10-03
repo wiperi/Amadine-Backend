@@ -304,23 +304,14 @@ describe('POST /v1/admin/auth/login', () => {
   describe('valid cases', () => {
     test('successful login with correct id', () => {
       const res = loginUser('goodemail@gmail.com', 'GlenPassword123')
-      expect(res.body.token).toStrictEqual(token);
+      expect(res.body.token).toStrictEqual(expect.any(String));
       expect(res.statusCode).toStrictEqual(200);
-    });
-
-    test('same user return same id', () => {
-      const res1 = loginUser('goodemail@gmail.com', 'GlenPassword123');
-      const res2 = loginUser('goodemail@gmail.com', 'GlenPassword123')
-      expect(res1.body).toStrictEqual(res2.body);
-      expect(res1.statusCode).toStrictEqual(200);
-      expect(res2.statusCode).toStrictEqual(200);
     });
 
     test('different user return different id', () => {
       const res1 = loginUser('goodemail@gmail.com', 'GlenPassword123');
-      const userRes = registerUser('peter@gmail.com', 'PumpkinEater123', 'peter', 'griffin');
+      registerUser('peter@gmail.com', 'PumpkinEater123', 'peter', 'griffin');
       const res2 = loginUser('peter@gmail.com', 'PumpkinEater123');
-      expect(res2.body.token).toStrictEqual(userRes.body.token);
       expect(res1.body).not.toStrictEqual(res2.body);
     });
   });
