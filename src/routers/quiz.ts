@@ -89,4 +89,4 @@ quizRouter.get('/trash', (req: Request, res: Response) => {
   } catch (error) {
     return res.status(error.statusCode).json({ error: error.message });
   }
-})
+});

@@ -162,13 +162,13 @@ export function adminQuizRemove(authUserId: number, quizId: number): EmptyObject
 export function adminQuizTrashView(authUserId: number): { quizzes: Array<AdminQuizTrashView> } | any {
   const quizzesView: AdminQuizTrashView[] = [];
   const data = getData();
-  //return `authUserId: ${authUserId}, quizzes: ${data.quizzes}`;
+  // return `authUserId: ${authUserId}, quizzes: ${data.quizzes}`;
   for (const quiz of data.quizzes) {
     if (quiz.authUserId === authUserId && quiz.active === false) {
       const quizView: AdminQuizTrashView = {
         quizId: quiz.quizId,
         name: quiz.name
-      }
+      };
       quizzesView.push(quizView);
     }
   }
