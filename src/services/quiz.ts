@@ -51,6 +51,7 @@ export function adminQuizInfo(
   description: string;
   numofQuestions: number;
   questions: Question[]
+  duration: number;
 } {
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
@@ -70,6 +71,7 @@ export function adminQuizInfo(
     description: quiz.description,
     numofQuestions: quiz.questions.length,
     questions: quiz.questions, // Include the questions array
+    duration: quiz.questions.reduce((acc, question) => acc + question.duration, 0)
   };
 }
 

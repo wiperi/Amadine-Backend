@@ -84,7 +84,7 @@ export function updateUserPassword(token: string, oldPassword: string, newPasswo
 
 export function getQuizList(token: string): ParsedResponse {
   const res = request('GET', `${QUIZ_URL}/list`, {
-    json: {
+    qs: {
       token
     }
   });
