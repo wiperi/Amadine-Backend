@@ -550,18 +550,14 @@ describe('DELETE /v1/admin/quiz/:quizid', () => {
 
 describe('valid cases', () => {
     test('successful quiz removal', () => {
-      const res = request('DELETE', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
-        qs: { token }
-      });
+      const res = deleteQuiz(token, quizId);
       expect(res.statusCode).toBe(200);
-      expect(JSON.parse(res.body.toString())).toStrictEqual({});
+      expect(res.body).toStrictEqual({});
 
-      // Verify the quiz is deleted
-      const resList = request('GET', `${config.url}:${config.port}/v1/admin/quiz/list`, {
-        qs: { token }
-      });
-      const body = JSON.parse(resList.body.toString());
-      expect(body.quizzes).not.toContainEqual(expect.objectContaining({ quizId }));
+      // Verify the quiz is deleted using getQuizList from apihelpertest
+      const resList = getQuizList(token);
+      expect(resList.statusCode).toBe(200);
+      expect(resList.body.quizzes).not.toContainEqual(expect.objectContaining({ quizId }));
     });
   });
 
