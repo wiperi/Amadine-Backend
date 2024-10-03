@@ -18,9 +18,11 @@ import {
   clear,
   moveQuestion,
   createQuestion,
-  requestAdminQuizNameUpdate
+  requestAdminQuizNameUpdate,
+  duplicateQuestion
 } from './apiTestHelpersV1'
 import { get } from 'http';
+import { Colour } from '@/models/Enums';
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const ERROR = { error: expect.any(String) };
@@ -1027,6 +1029,145 @@ describe('GET /v1/admin/quiz/trash', () => {
           name: 'Test quiz'
         }
       ]});
+    });
+  });
+});
+
+////////////////////////////////////////////////////
+// Test for adminQuizQuestionDuplicate /////////////
+////////////////////////////////////////////////////
+describe('POST /v1/admin/quiz/{quizid}/question/{questionid}/duplicate', () => {
+  let quizId: number;
+  let questionId: number;
+  beforeEach(() => {
+    const quizCreateRes = createQuiz(token, 'Test quiz', 'description for test quiz');
+    expect(quizCreateRes.statusCode).toStrictEqual(200);
+    quizId = quizCreateRes.body.quizId;
+    const questionBody = {
+      question: 'What is the name of the dog in family guy?',
+      duration: 60,
+      points: 5,
+      answers: [
+        { answer: 'Brian', correct: true },
+        { answer: 'Babe', correct: false },
+        { answer: 'Bart', correct: false },
+      ],
+    };
+    const questionCreateRes = createQuestion(token, quizId, questionBody);
+    expect(questionCreateRes.statusCode).toStrictEqual(200);
+    questionId = questionCreateRes.body.questionId;
+  });
+
+  describe('invalid cases', () => {
+    test('question id does not refer to a valid question within this quiz', () => {
+      const res = duplicateQuestion(token, quizId, 0);
+      expect(res.statusCode).toStrictEqual(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('token is invalid', () => {
+      const res = duplicateQuestion('invalid token', quizId, questionId);
+      expect(res.statusCode).toStrictEqual(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('user is not an owner of this quiz', () => {
+      const userRegisterRes = registerUser('peter@gmail.com', 'PumkinEater123', 'Peter', 'Griffin');
+      expect(userRegisterRes.statusCode).toStrictEqual(200);
+      const token1 = userRegisterRes.body.token;
+      const res = duplicateQuestion(token1, quizId, questionId);
+      expect(res.statusCode).toStrictEqual(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('quiz does not exist', () => {
+      const res = duplicateQuestion(token, 0, questionId);
+      expect(res.statusCode).toStrictEqual(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+  });
+
+  describe('valid cases', () => {
+    test('successfully duplicate the question', () => {
+      const res = duplicateQuestion(token, quizId, questionId);
+      expect(res.statusCode).toStrictEqual(200);
+      expect(res.body).toStrictEqual({ newQuestionId: expect.any(Number) });
+      const newQuestionId = res.body.newQuestionId;
+
+      // get quiz info
+      const detailRes = getQuizDetails(token, quizId);
+      expect(detailRes.statusCode).toStrictEqual(200);
+      expect(detailRes.body.numQuestions).toStrictEqual(2);
+      const questions = detailRes.body.questions;
+      expect(questions).toStrictEqual({
+        questions: [
+          {
+            questionId: questionId,
+            question: 'What is the name of the dog in family guy?',
+            duration: 60,
+            points: 5,
+            answers: [
+              {
+                answerId: expect.any(Number),
+                answer: 'Brian',
+                color: expect.any(String),
+                correct: true
+              },
+              {
+                answerId: expect.any(Number),
+                answer: 'Babe',
+                color: expect.any(String),
+                correct: false
+              },
+              {
+                answerId: expect.any(Number),
+                answer: 'Bart',
+                color: expect.any(String),
+                correct: false
+              }
+            ]
+          },
+          {
+            questionId: newQuestionId,
+            question: 'What is the name of the dog in family guy?',
+            duration: 60,
+            points: 5,
+            answers: [
+              {
+                answerId: expect.any(Number),
+                answer: 'Brian',
+                colour: expect.any(Colour),
+                correct: true
+              },
+              {
+                answerId: expect.any(Number),
+                answer: 'Babe',
+                colour: expect.any(Colour),
+                correct: false
+              },
+              {
+                answerId: expect.any(Number),
+                answer: 'Bart',
+                colour: expect.any(Colour),
+                correct: false
+              }
+            ]
+          }
+        ]
+      });
+    });
+
+    test('successfully update the timeLastEdit time', async () => {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const res = duplicateQuestion(token, quizId, questionId);
+      expect(res.statusCode).toStrictEqual(200);
+      expect(res.body).toStrictEqual({ newQuestionId: expect.any(Number) });
+
+      // get quiz info
+      const detailRes = getQuizDetails(token, quizId);
+      expect(detailRes.statusCode).toStrictEqual(200);
+      expect(detailRes.body.numQuestions).toStrictEqual(2);
+      expect(detailRes.body.timeLastEdited).not.toStrictEqual(detailRes.body.timeCreated);
     });
   });
 });
