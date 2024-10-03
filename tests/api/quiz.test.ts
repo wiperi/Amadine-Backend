@@ -20,6 +20,7 @@ import {
   createQuestion,
   requestAdminQuizNameUpdate
 } from './apiTestHelpersV1'
+import { get } from 'http';
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const ERROR = { error: expect.any(String) };
@@ -201,7 +202,8 @@ describe('GET /v1/admin/quiz/:quizId', () => {
         timeCreated: expect.any(Number),
         timeLastEdited: expect.any(Number),
         numofQuestions: 0,
-        questions: []
+        questions: [],
+        duration: 0
       });
     });
   });
@@ -341,7 +343,8 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
         timeCreated: expect.any(Number),
         timeLastEdited: expect.any(Number),
         numofQuestions: 0,
-        questions: []
+        questions: [],
+        duration: 0
       });
     });
 
@@ -491,7 +494,8 @@ describe('PUT /v1/admin/quiz/:quizId/description', () => {
         timeCreated: expect.any(Number),
         timeLastEdited: expect.any(Number),
         numofQuestions: 0,
-        questions: []
+        questions: [],
+        duration : 0
       });
     });
     test('successful update last edit time', async () => {
@@ -607,42 +611,73 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
     quizId = quizResponse.body.quizId;
   });
   describe('valid cases', () => {
-  test('successful question creation', () => {
-    const questionBody = {
-      question: 'What is the capital of France?',
-      duration: 60,
-      points: 5,
-      answers: [
-        { answer: 'Paris', correct: true },
-        { answer: 'Berlin', correct: false },
-        { answer: 'Rome', correct: false },
-      ],
-    };
+    test('successful question creation', () => {
+      const questionBody = {
+        question: 'What is the capital of France?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Paris', correct: true },
+          { answer: 'Berlin', correct: false },
+          { answer: 'Rome', correct: false },
+        ],
+      };
 
-    const res = createQuestion(token, quizId, questionBody);
-    expect(res.body).toStrictEqual({ questionId: expect.any(Number) });
-    const getQuizRes = getQuizDetails(token, quizId);
-    expect(getQuizRes.statusCode).toBe(200);
-    const questions = getQuizRes.body.questions;
-    expect(questions).toBeDefined();
-    expect(questions.length).toBeGreaterThan(0);
+      const res = createQuestion(token, quizId, questionBody);
+      expect(res.body).toStrictEqual({ questionId: expect.any(Number) });
+      const getQuizRes = getQuizDetails(token, quizId);
+      expect(getQuizRes.statusCode).toBe(200);
+      const questions = getQuizRes.body.questions;
+      expect(questions).toBeDefined();
+      expect(questions.length).toBeGreaterThan(0);
 
-    // Optionally, verify that the question matches what was added
-    const addedQuestion = questions.find(
-      (q:any) => q.questionId === res.body.questionId
-    );
-    expect(addedQuestion).toBeDefined();
-    expect(addedQuestion.question).toBe(questionBody.question);
-    expect(addedQuestion.duration).toBe(questionBody.duration);
-    expect(addedQuestion.points).toBe(questionBody.points);
-    expect(addedQuestion.answers).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ answer: 'Paris', correct: true }),
-        expect.objectContaining({ answer: 'Berlin', correct: false }),
-        expect.objectContaining({ answer: 'Rome', correct: false }),
-      ])
-    );
-  });
+      // Optionally, verify that the question matches what was added
+      const addedQuestion = questions.find(
+        (q:any) => q.questionId === res.body.questionId
+      );
+      expect(addedQuestion).toBeDefined();
+      expect(addedQuestion.question).toBe(questionBody.question);
+      expect(addedQuestion.duration).toBe(questionBody.duration);
+      expect(addedQuestion.points).toBe(questionBody.points);
+      expect(addedQuestion.answers).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ answer: 'Paris', correct: true }),
+          expect.objectContaining({ answer: 'Berlin', correct: false }),
+          expect.objectContaining({ answer: 'Rome', correct: false }),
+        ])
+      );
+      expect(getQuizRes.body.duration).toEqual(60);
+    });
+    test('seccussfully add muli-questions', ()=>{
+      const questionBody1 = {
+        question: 'What is the capital of France?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Paris', correct: true },
+          { answer: 'Berlin', correct: false },
+          { answer: 'Rome', correct: false },
+        ],
+      };
+      let res = createQuestion(token, quizId, questionBody1);
+      expect(res.body).toStrictEqual({ questionId: expect.any(Number) });
+      let getQuizRes = getQuizDetails(token, quizId);
+      expect(getQuizRes.statusCode).toBe(200);
+      const questionBody2 = {
+        question: 'who is the most powerful person in the world?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Cheong', correct: false },
+          { answer: 'Mao', correct: true },
+          { answer: 'Ting', correct: false },
+        ],
+      };
+      res = createQuestion(token, quizId, questionBody2);
+      getQuizRes = getQuizDetails(token,quizId);
+      expect(getQuizRes.statusCode).toBe(200);
+      expect(getQuizRes.body.duration).toEqual(120);
+    })
   });
   describe('invalid cases', () => {
     test('invalid token', () => {
