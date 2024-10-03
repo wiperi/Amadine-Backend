@@ -207,9 +207,9 @@ export function requestAdminQuizNameUpdate(quizId: Number, token: String, name: 
   return res.statusCode;
 }
 
-export function emptyTrash(token: string, quizIds: number[]): ParsedResponse {
+export function emptyTrash(token: string, quizIds: string ): ParsedResponse {
   const res = request('DELETE', `${QUIZ_URL}/trash/empty`, {
-    json: {
+    qs: {
       token,
       quizIds
     }

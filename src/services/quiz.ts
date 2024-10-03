@@ -12,6 +12,7 @@ import {
   isValidQuizDescription,
   recursiveFind
 } from '@/utils/helper';
+import { query } from 'express';
 /**
  * Update the description of the relevant quiz.
  */
@@ -167,8 +168,24 @@ export function adminQuizRestore(authUserId: number, quizId: number): EmptyObjec
   return {};
 }
 
-export function adminQuizTrashEmpty(authUserId: number, quizIds: number[]): EmptyObject {
-  
+export function adminQuizTrashEmpty(authUserId: number, quizIdsParam: string): EmptyObject {
+  const data = getData();
+
+  const quizIds = JSON.parse(quizIdsParam);
+  for(const quizId of quizIds) {
+    const quiz = findQuizById(quizId);
+    if (!quiz) {
+      throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+    }
+    if (quiz.authUserId !== authUserId) {
+      throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+    }
+    if(quiz.active){
+      throw new HttpError(400, ERROR_MESSAGES.INVALID_QUIZ_ID);
+    }
+  }
+  data.quizzes = data.quizzes.filter(quiz => !quizIds.includes(quiz.quizId));
+  setData(data); 
   return {};
 }
 
