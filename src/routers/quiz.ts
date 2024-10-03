@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { adminQuizCreate, adminQuizInfo, adminQuizNameUpdate, adminQuizList, adminQuizQuestionMove, adminQuizDescriptionUpdate, adminQuizRemove, adminQuizQuestionCreate } from '@/services/quiz';
+import { adminQuizCreate, adminQuizInfo, adminQuizNameUpdate, adminQuizList, adminQuizQuestionMove, adminQuizDescriptionUpdate, adminQuizRemove, adminQuizQuestionCreate, adminQuizTrashView } from '@/services/quiz';
 
 export const quizRouter = Router();
 
@@ -77,6 +77,15 @@ quizRouter.post('/:quizId(\\d+)/question', (req, res) => {
   const quizId = parseInt(req.params.quizId);
   try {
     return res.json(adminQuizQuestionCreate(authUserId, quizId, questionBody));
+  } catch (error) {
+    return res.status(error.statusCode).json({ error: error.message });
+  }
+});
+
+quizRouter.get('/trash', (req: Request, res: Response) => {
+  const { authUserId } = req.body;
+  try {
+    return res.json(adminQuizTrashView(authUserId));
   } catch (error) {
     return res.status(error.statusCode).json({ error: error.message });
   }
