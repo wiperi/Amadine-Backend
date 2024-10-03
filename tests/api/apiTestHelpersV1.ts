@@ -188,3 +188,21 @@ export function createQuestion(token: string, quizId: number, questionBody: obje
   });
   return parse(res);
 }
+
+export function requestAdminQuizNameUpdate(quizId: Number, token: String, name: String) {
+  const res = request(
+    'PUT',
+    `${config.url}:${config.port}/v1/admin/quiz/${quizId}/name`,
+    {
+      json: {
+        token,
+        name
+      }
+    }
+  );
+
+  if (res.statusCode === 200) {
+    return JSON.parse(res.body.toString());
+  }
+  return res.statusCode;
+}
