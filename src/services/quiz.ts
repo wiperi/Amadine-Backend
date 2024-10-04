@@ -33,6 +33,7 @@ export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, d
     quiz.description = description;
     quiz.timeLastEdited = Math.floor(Date.now() / 1000);
   }
+  setData();
   return {};
 }
 
@@ -49,7 +50,7 @@ export function adminQuizInfo(
   timeCreated: number;
   timeLastEdited: number;
   description: string;
-  numofQuestions: number;
+  numQuestions: number;
   questions: Question[]
   duration: number;
 } {
@@ -69,7 +70,7 @@ export function adminQuizInfo(
     timeCreated: quiz.timeCreated,
     timeLastEdited: quiz.timeLastEdited,
     description: quiz.description,
-    numofQuestions: quiz.questions.length,
+    numQuestions: quiz.questions.length,
     questions: quiz.questions, // Include the questions array
     duration: quiz.questions.reduce((acc, question) => acc + question.duration, 0)
   };
@@ -98,7 +99,7 @@ export function adminQuizNameUpdate(authUserId: number, quizId: number, name: st
     quiz.timeLastEdited = Math.floor(Date.now() / 1000);
     setData(data);
   }
-
+  setData();
   return {};
 }
 
@@ -180,8 +181,24 @@ export function adminQuizRestore(authUserId: number, quizId: number): EmptyObjec
   return {};
 }
 
-export function adminQuizTrashEmpty(authUserId: number, quizIds: number[]): EmptyObject {
-  // TODO: Implement this function
+export function adminQuizTrashEmpty(authUserId: number, quizIdsParam: string): EmptyObject {
+  const data = getData();
+
+  const quizIds = JSON.parse(quizIdsParam);
+  for (const quizId of quizIds) {
+    const quiz = findQuizById(quizId);
+    if (!quiz) {
+      throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+    }
+    if (quiz.authUserId !== authUserId) {
+      throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+    }
+    if (quiz.active) {
+      throw new HttpError(400, ERROR_MESSAGES.INVALID_QUIZ_ID);
+    }
+  }
+  data.quizzes = data.quizzes.filter(quiz => !quizIds.includes(quiz.quizId));
+  setData(data);
   return {};
 }
 
