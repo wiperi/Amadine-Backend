@@ -1,7 +1,7 @@
 import { getData, setData } from '@/dataStore';
 import { HttpError } from '@/utils/HttpError';
 import { Quiz, Question, Answer } from '@/models/Classes';
-import { AdminQuizTrashView, EmptyObject } from '@/models/Types';
+import { ReturnedQuizView, EmptyObject, ParamQuestionBody } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import {
   getNewID,
@@ -12,6 +12,7 @@ import {
   isValidQuizDescription,
   recursiveFind
 } from '@/utils/helper';
+
 /**
  * Update the description of the relevant quiz.
  */
@@ -29,11 +30,10 @@ export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, d
   }
 
   const quiz = findQuizById(quizId);
-  if (quiz) {
-    quiz.description = description;
-    quiz.timeLastEdited = Math.floor(Date.now() / 1000);
-  }
+  quiz.description = description;
+  quiz.timeLastEdited = Math.floor(Date.now() / 1000);
   setData();
+
   return {};
 }
 
@@ -43,8 +43,7 @@ export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, d
 export function adminQuizInfo(
   authUserId: number,
   quizId: number
-):
- {
+): {
   quizId: number;
   name: string;
   timeCreated: number;
@@ -80,7 +79,6 @@ export function adminQuizInfo(
  * Update the name of the relevant quiz.
  */
 export function adminQuizNameUpdate(authUserId: number, quizId: number, name: string): EmptyObject {
-  const data = getData();
   if (!isValidQuizName(name)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_NAME);
   }
@@ -94,12 +92,10 @@ export function adminQuizNameUpdate(authUserId: number, quizId: number, name: st
   }
 
   const quiz = findQuizById(quizId);
-  if (quiz) {
-    quiz.name = name;
-    quiz.timeLastEdited = Math.floor(Date.now() / 1000);
-    setData(data);
-  }
+  quiz.name = name;
+  quiz.timeLastEdited = Math.floor(Date.now() / 1000);
   setData();
+
   return {};
 }
 
@@ -126,7 +122,7 @@ export function adminQuizCreate(authUserId: number, name: string, description: s
  * Retrieves a list of quizzes created by a specific authenticated user,
  * if the user ID is valid. The quizzes are returned with their IDs and names.
  */
-export function adminQuizList(authUserId: number): { quizzes: { quizId: number; name: string }[] } | { error: string } {
+export function adminQuizList(authUserId: number): { quizzes: ReturnedQuizView[] } {
   const quizzes = getData().quizzes
     .filter(quiz => quiz.authUserId === authUserId && quiz.active)
     .map(quiz => ({
@@ -142,7 +138,6 @@ export function adminQuizList(authUserId: number): { quizzes: { quizId: number; 
  * Return an empty object if succeed
  */
 export function adminQuizRemove(authUserId: number, quizId: number): EmptyObject {
-  const data = getData();
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -150,30 +145,22 @@ export function adminQuizRemove(authUserId: number, quizId: number): EmptyObject
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
     throw new HttpError(401, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
+
   const quiz = findQuizById(quizId);
-  if (quiz) {
-    quiz.active = false;
-    quiz.timeLastEdited = Math.floor(Date.now() / 1000);
-    setData(data);
-    return {};
-  }
-  throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  quiz.active = false;
+  quiz.timeLastEdited = Math.floor(Date.now() / 1000);
+  setData();
+
+  return {};
 }
 
-export function adminQuizTrashView(authUserId: number): { quizzes: Array<AdminQuizTrashView> } {
-  const quizzesView: AdminQuizTrashView[] = [];
-  const data = getData();
-  // return `authUserId: ${authUserId}, quizzes: ${data.quizzes}`;
-  for (const quiz of data.quizzes) {
-    if (quiz.authUserId === authUserId && !quiz.active) {
-      const quizView: AdminQuizTrashView = {
-        quizId: quiz.quizId,
-        name: quiz.name
-      };
-      quizzesView.push(quizView);
-    }
-  }
-  return { quizzes: quizzesView };
+export function adminQuizTrashView(authUserId: number): { quizzes: ReturnedQuizView[] } {
+  const trash: ReturnedQuizView[] = getData().quizzes.filter(quiz => quiz.authUserId === authUserId && !quiz.active).map(quiz => ({
+    quizId: quiz.quizId,
+    name: quiz.name
+  }));
+
+  return { quizzes: trash };
 }
 
 export function adminQuizRestore(authUserId: number, quizId: number): EmptyObject {
@@ -181,10 +168,9 @@ export function adminQuizRestore(authUserId: number, quizId: number): EmptyObjec
   return {};
 }
 
-export function adminQuizTrashEmpty(authUserId: number, quizIdsParam: string): EmptyObject {
+export function adminQuizTrashEmpty(authUserId: number, quizIds: number[]): EmptyObject {
   const data = getData();
 
-  const quizIds = JSON.parse(quizIdsParam);
   for (const quizId of quizIds) {
     const quiz = findQuizById(quizId);
     if (!quiz) {
@@ -197,24 +183,26 @@ export function adminQuizTrashEmpty(authUserId: number, quizIdsParam: string): E
       throw new HttpError(400, ERROR_MESSAGES.INVALID_QUIZ_ID);
     }
   }
+
   data.quizzes = data.quizzes.filter(quiz => !quizIds.includes(quiz.quizId));
   setData(data);
+
   return {};
 }
 
 export function adminQuizTransfer(authUserId: number, quizId: number, userEmail: string): EmptyObject {
   // TODO: Implement this function
+
+  // const data = getData();
+  // const newAuthUserId = data.users.find(user => user.email === userEmail).userId;
+  // findQuizById(quizId).authUserId = newAuthUserId;
+
   return {};
 }
 
-type ParamQuestionBody = {
-  question: string;
-  duration: number;
-  points: number;
-  answers: Array<{ answer: string, correct: boolean }>;
-}
-
 export function adminQuizQuestionCreate(authUserId: number, quizId: number, questionBody: ParamQuestionBody): { questionId: number } {
+  // TODO: extract questionBody check to a helper function
+
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -261,7 +249,7 @@ export function adminQuizQuestionCreate(authUserId: number, quizId: number, ques
     questionBody.question,
     questionBody.duration,
     questionBody.points,
-    questionBody.answers.map((answer, index) => new Answer(getNewID('answer'), answer.answer, answer.correct))
+    questionBody.answers.map(answer => new Answer(getNewID('answer'), answer.answer, answer.correct))
   );
 
   quiz.questions.push(question);
@@ -276,11 +264,19 @@ export function adminQuizQuestionUpdate(authUserId: number, quizId: number, ques
   if (!quizId || recursiveFind(questionBody, undefined)) {
     throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
   }
+
+  // TODO: Implement this helper function
+  // if (!isValidQuestion(questionBody)) {};
+
   return {};
 }
 
 export function adminQuizQuestionDelete(authUserId: number, quizId: number, questionId: number): EmptyObject {
   // TODO: Implement this function
+
+  // const questions = findQuizById(quizId).questions;
+  // questions.splice(questions.findIndex(q => q.questionId === questionId), 1);
+
   return {};
 }
 
@@ -330,12 +326,12 @@ export function adminQuizQuestionDuplicate(authUserId: number, quizId: number, q
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION_ID);
   }
 
-  const newQuestionId = getNewID('question');
   quiz.timeLastEdited = Math.floor(Date.now() / 1000);
-  const index = quiz.questions.findIndex(question => question.questionId === questionId);
-  const newQuestion = Object.assign({}, question);
-  newQuestion.questionId = newQuestionId;
-  quiz.questions.splice(index + 1, 0, newQuestion);
+  const newQuestionId = getNewID('question');
+  const questions = findQuizById(quizId).questions;
+
+  const newQuestion = Object.assign({}, questions.find(q => q.questionId === questionId), { questionId: newQuestionId });
+  questions.splice(1 + questions.findIndex(q => q.questionId === questionId), 0, newQuestion);
 
   return { newQuestionId: newQuestionId };
 }

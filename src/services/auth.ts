@@ -86,7 +86,7 @@ export function adminAuthRegister(email: string, password: string, nameFirst: st
 
   data.users.push(new User(userId, email, password, nameFirst, nameLast));
 
-  const token = jwt.sign({ userId }, config.jwtSecretKey);
+  const token = jwt.sign({ payload: Math.random() }, config.jwtSecretKey);
 
   data.userSessions.push(new UserSession(getNewID('user session'), userId, token));
 
@@ -120,7 +120,7 @@ export function adminAuthLogin(email: string, password: string): { token: string
   user.numFailedPasswordsSinceLastLogin = 0;
   user.numSuccessfulLogins++;
 
-  const token = jwt.sign({ userId: user.userId }, config.jwtSecretKey);
+  const token = jwt.sign({ payload: Math.random() }, config.jwtSecretKey);
 
   data.userSessions.push(new UserSession(getNewID('user session'), user.userId, token));
 

@@ -1,5 +1,3 @@
-import request from 'sync-request-curl';
-import config from '../../src/config.json';
 import {
   registerUser,
   loginUser,
@@ -21,9 +19,7 @@ import {
   requestAdminQuizNameUpdate,
   emptyTrash,
   duplicateQuestion
-} from './apiTestHelpersV1'
-import { get } from 'http';
-import { json } from 'stream/consumers';
+} from './apiTestHelpersV1';
 
 const ERROR = { error: expect.any(String) };
 
