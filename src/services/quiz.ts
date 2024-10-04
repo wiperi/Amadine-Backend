@@ -165,7 +165,6 @@ export function adminQuizTrashView(authUserId: number): { quizzes: ReturnedQuizV
 
 export function adminQuizRestore(authUserId: number, quizId: number): EmptyObject {
   // TODO: Implement this function
-  
   return {};
 }
 
