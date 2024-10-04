@@ -23,7 +23,6 @@ import {
   duplicateQuestion
 } from './apiTestHelpersV1'
 import { get } from 'http';
-import { findQuizById } from '../../src/utils/helper';
 import { json } from 'stream/consumers';
 
 const ERROR = { error: expect.any(String) };
@@ -881,9 +880,9 @@ describe('DELETE /v1/admin/quiz/trash/empty', () => {
       const emptyRes = emptyTrash(token, quizIdsParam);
       expect(emptyRes.statusCode).toBe(200);
       expect(emptyRes.body).toStrictEqual({});
-      const quizListRes = getQuizList(token);
-      expect(quizListRes.statusCode).toBe(200);
-      expect(findQuizById(quizId1)).toBeUndefined();
+      const AdminQuizTrashViewRes = getQuizTrash(token);
+      expect(AdminQuizTrashViewRes.statusCode).toBe(200);
+      expect(AdminQuizTrashViewRes.body).toStrictEqual({ quizzes: [] });
     });
     test('successful empty trash with multiple quizzes', () => {
       deleteQuiz(token, quizId2);
@@ -891,10 +890,7 @@ describe('DELETE /v1/admin/quiz/trash/empty', () => {
       const emptyRes = emptyTrash(token, quizIdsParam);
       expect(emptyRes.statusCode).toBe(200);
       expect(emptyRes.body).toStrictEqual({});
-      const quizListRes = getQuizList(token);
-      expect(quizListRes.statusCode).toBe(200);
-      expect(findQuizById(quizId1)).toBeUndefined();
-      expect(findQuizById(quizId2)).toBeUndefined
+      expect(getQuizTrash(token).body).toStrictEqual({ quizzes: [] });
     });
   });
 
