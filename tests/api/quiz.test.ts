@@ -19,7 +19,8 @@ import {
   moveQuestion,
   createQuestion,
   requestAdminQuizNameUpdate,
-  emptyTrash
+  emptyTrash,
+  deleteQuestion
 } from './apiTestHelpersV1'
 import { get } from 'http';
 import { findQuizById } from '../../src/utils/helper';
@@ -1020,6 +1021,45 @@ describe('GET /v1/admin/quiz/trash', () => {
           name: 'Test quiz'
         }
       ]});
+    });
+  });
+});
+/*
+ This is test for AQQDelete
+ */
+describe('DELETE /v1/admin/quiz/:quizId/question/:questionId', () => {
+  describe('valid cases', () => {
+    let quizId: number;
+    let questionId: number;
+    beforeEach(() => {
+      // Create a quiz with a question before each test in this suite
+      const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz');
+      expect(createQuizRes.statusCode).toBe(200);
+      quizId = createQuizRes.body.quizId;
+
+      const createQuestionRes = createQuestion(token, quizId, {
+        question: 'What is the capital of France?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Paris', correct: true },
+          { answer: 'Berlin', correct: false },
+          { answer: 'Rome', correct: false },
+        ],
+      });
+      expect(createQuestionRes.statusCode).toBe(200);
+      questionId = createQuestionRes.body.questionId;
+    });
+
+    test('successful question deletion', () => {
+      const res = deleteQuestion(token, quizId, questionId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({});
+
+      // Verify the question is deleted using getQuizDetails from apihelpertest
+      const quizRes = getQuizDetails(token, quizId);
+      expect(quizRes.statusCode).toBe(200);
+      expect(quizRes.body.questions).not.toContainEqual(expect.objectContaining({ questionId }));
     });
   });
 });

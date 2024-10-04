@@ -160,9 +160,9 @@ export function restoreQuiz(token: string, quizId: number): ParsedResponse {
   return parse(res);
 }
 
-export function deleteQuizPermanently(token: string, quizId: number): ParsedResponse {
-  const res = request('DELETE', `${QUIZ_URL}/${quizId}`, {
-    qs: {
+export function deleteQuizPermanently(token: string, quizId: number, questionId: number): ParsedResponse {
+  const res = request('DELETE', `$${QUIZ_URL}/${quizId}/question/${questionId}`, {
+    json: {
       token
     }
   });
@@ -207,11 +207,19 @@ export function requestAdminQuizNameUpdate(quizId: Number, token: String, name: 
   return res.statusCode;
 }
 
-export function emptyTrash(token: string, quizIds: string ): ParsedResponse {
+export function emptyTrash(token: string, quizIds: string): ParsedResponse {
   const res = request('DELETE', `${QUIZ_URL}/trash/empty`, {
     qs: {
       token,
       quizIds
+    }
+  });
+  return parse(res);
+}
+export function deleteQuestion(token: string, quizId: number, questionId: number): ParsedResponse {
+  const res = request('DELETE', `${QUIZ_URL}/${quizId}/question/${questionId}`, {
+    qs: {
+      token,
     }
   });
   return parse(res);
