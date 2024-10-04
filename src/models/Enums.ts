@@ -16,7 +16,7 @@ export enum PlayerAction {
   END = 'END',
 }
 
-export enum Colour {
+export enum Color {
   RED = 'red',
   BLUE = 'blue',
   GREEN = 'green',
