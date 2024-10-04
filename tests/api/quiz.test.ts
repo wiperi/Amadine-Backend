@@ -1241,13 +1241,13 @@ describe('DELETE /v1/admin/quiz/:quizId/question/:questionId', () => {
     quizId = createQuizRes.body.quizId;
 
     const createQuestionRes = createQuestion(token, quizId, {
-      question: 'What is the capital of France?',
+      question: 'Are you my master?',
       duration: 60,
-      points: 5,
+      points: 6,
       answers: [
-        { answer: 'Paris', correct: true },
-        { answer: 'Berlin', correct: false },
-        { answer: 'Rome', correct: false },
+        { answer: 'Yes', correct: true },
+        { answer: 'No', correct: false },
+        { answer: 'Maybe', correct: false },
       ],
     });
     expect(createQuestionRes.statusCode).toBe(200);

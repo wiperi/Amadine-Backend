@@ -160,9 +160,10 @@ export function restoreQuiz(token: string, quizId: number): ParsedResponse {
   return parse(res);
 }
 
-export function deleteQuizPermanently(token: string, quizId: number, questionId: number): ParsedResponse {
-  const res = request('DELETE', `$${QUIZ_URL}/${quizId}/question/${questionId}`, {
-    json: {
+export function deleteQuizPermanently(token: string, quizId: number): ParsedResponse {
+  const res = request('DELETE', `${QUIZ_URL}/${quizId}`, {
+    qs: {
+
       token
     }
   });

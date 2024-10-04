@@ -302,7 +302,6 @@ export function adminQuizQuestionDelete(authUserId: number, quizId: number, ques
   if (!question) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION_ID);
   }
-  // quiz.questions = quiz.questions.filter(question => question.questionId !== questionId);
   const currentPosition = quiz.questions.indexOf(question);
   quiz.questions.splice(currentPosition, 1);
   quiz.timeLastEdited = Math.floor(Date.now() / 1000);
