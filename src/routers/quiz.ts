@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { adminQuizCreate, adminQuizInfo, adminQuizNameUpdate, adminQuizList, adminQuizQuestionMove, adminQuizDescriptionUpdate, adminQuizRemove, adminQuizQuestionCreate, adminQuizTrashView, adminQuizTrashEmpty } from '@/services/quiz';
+import { adminQuizCreate, adminQuizInfo, adminQuizNameUpdate, adminQuizList, adminQuizQuestionMove, adminQuizDescriptionUpdate, adminQuizRemove, adminQuizQuestionCreate, adminQuizTrashView, adminQuizTrashEmpty, adminQuizQuestionDuplicate } from '@/services/quiz';
 
 export const quizRouter = Router();
 
@@ -96,6 +96,17 @@ quizRouter.delete('/trash/empty', (req, res) => {
   const quizIds: number[] = JSON.parse(req.query.quizIds as string);
   try {
     return res.json(adminQuizTrashEmpty(authUserId, quizIds));
+  } catch (error) {
+    return res.status(error.statusCode).json({ error: error.message });
+  }
+});
+
+quizRouter.post('/:quizId(\\d+)/question/:questionId(\\d+)/duplicate', (req: Request, res: Response) => {
+  const { authUserId } = req.body;
+  const quizId = parseInt(req.params.quizId);
+  const questionId = parseInt(req.params.questionId);
+  try {
+    return res.json(adminQuizQuestionDuplicate(authUserId, quizId, questionId));
   } catch (error) {
     return res.status(error.statusCode).json({ error: error.message });
   }

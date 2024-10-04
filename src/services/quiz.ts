@@ -315,11 +315,26 @@ export function adminQuizQuestionMove(authUserId: number, quizId: number, questi
 }
 
 export function adminQuizQuestionDuplicate(authUserId: number, quizId: number, questionId: number): { newQuestionId: number } {
-  // TODO: Implement this function
+  const quiz = findQuizById(quizId);
+  if (!quiz || !quiz.active) {
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  }
 
-  // const questions = findQuizById(quizId).questions;
-  // const newQuestion = Object.assign({}, questions.find(q => q.questionId === questionId), { questionId: getNewID('question') });
-  // questions.splice(1 + questions.findIndex(q => q.questionId === questionId), 0, newQuestion);
+  if (quiz.authUserId !== authUserId) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
 
-  return { newQuestionId: 0 };
+  const question = quiz.questions.find(question => question.questionId === questionId);
+  if (!question) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION_ID);
+  }
+
+  quiz.timeLastEdited = Math.floor(Date.now() / 1000);
+  const newQuestionId = getNewID('question');
+  const questions = findQuizById(quizId).questions;
+
+  const newQuestion = Object.assign({}, questions.find(q => q.questionId === questionId), { questionId: newQuestionId });
+  questions.splice(1 + questions.findIndex(q => q.questionId === questionId), 0, newQuestion);
+
+  return { newQuestionId: newQuestionId };
 }
