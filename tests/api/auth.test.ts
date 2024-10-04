@@ -1,6 +1,7 @@
 import request from 'sync-request-curl';
 import config from '../../src/config.json';
 import {
+  clear,
   registerUser,
   loginUser,
   logoutUser,
@@ -15,7 +16,8 @@ import {
   updateQuizDescription,
   getQuizTrash,
   restoreQuiz,
-  deleteQuizPermanently
+  deleteQuizPermanently,
+  createQuestion
 } from './apiTestHelpersV1';
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
@@ -27,79 +29,54 @@ function parse(res: string | Buffer) {
 }
 
 beforeEach(() => {
-  request('DELETE', `${config.url}:${config.port}/v1/clear`);
+  clear();
 });
 
 afterAll(() => {
-  request('DELETE', `${config.url}:${config.port}/v1/clear`);
+  clear()
 });
 
 describe('DELETE /v1/clear', () => {
 
   test('correct return value', () => {
-    const res = request('DELETE', `${config.url}:${config.port}/v1/clear`);
+    const res = clear()
     expect(res.statusCode).toStrictEqual(200);
-    expect(parse(res.body)).toStrictEqual({});
+    expect(res.body).toStrictEqual({});
   });
 
   test.skip('correctly clears data', () => {
     // Register a user
-    const registerRes = request('POST', `${BASE_URL}/register`, {
-      json: {
-        email: 'test@example.com',
-        password: 'ValidPass123',
-        nameFirst: 'John',
-        nameLast: 'Doe'
-      }
-    });
+    const registerRes = registerUser('test@example.com', 'ValidPass123', 'John', 'Doe');
     expect(registerRes.statusCode).toBe(200);
-    const { token } = parse(registerRes.body);
+    const { token } = registerRes.body;
 
     // Create a quiz
-    const createQuizRes = request('POST', `${config.url}:${config.port}/v1/admin/quiz`, {
-      json: {
-        token,
-        name: 'Test Quiz',
-        description: 'A test quiz'
-      }
-    });
+    const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz');
     expect(createQuizRes.statusCode).toBe(200);
-    const { quizId } = parse(createQuizRes.body);
+    const { quizId } = createQuizRes.body;
 
     // Create a question
-    const createQuestionRes = request('POST', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/question`, {
-      json: {
-        token,
-        questionBody: {
-          question: 'Test question?',
-          duration: 30,
-          points: 5,
-          answers: [
-            { answer: 'Correct answer', correct: true },
-            { answer: 'Wrong answer', correct: false }
-          ]
-        }
-      }
+    const createQuestionRes = createQuestion(token, quizId, {
+      question: 'Test question?',
+      duration: 30,
+      points: 5,
+      answers: [
+        { answer: 'Correct answer', correct: true },
+        { answer: 'Wrong answer', correct: false }
+      ]
     });
     expect(createQuestionRes.statusCode).toBe(200);
 
     // Clear all data
-    const clearRes = request('DELETE', `${config.url}:${config.port}/v1/clear`);
+    const clearRes = clear();
     expect(clearRes.statusCode).toBe(200);
 
     // Check that user is cleared (try to login)
-    const loginRes = request('POST', `${BASE_URL}/login`, {
-      json: {
-        email: 'test@example.com',  
-        password: 'ValidPass123'
-      }
-    });
+    const loginRes = loginUser('test@example.com', 'ValidPass123');
     expect(loginRes.statusCode).toBe(400);
 
     // Check that quiz is cleared (try to get quiz info)
-    const getQuizRes = request('GET', `${config.url}:${config.port}/v1/admin/quiz/${quizId}`, {
-      qs: { token }
-    });
+    const getQuizRes = getQuizDetails(token, quizId);
     expect(getQuizRes.statusCode).toBe(401);
 
     // Note: We can't directly check if the question is cleared because there's no specific endpoint for that.
@@ -196,54 +173,41 @@ describe('POST /v1/admin/auth/logout', () => {
 
   describe('valid cases', () => {
     test('successful logout', async () => {
-      const res = request('POST', `${BASE_URL}/logout`, {
-        json: { token }
-      });
+      const res = logoutUser(token);
       expect(res.statusCode).toBe(200);
-      expect(parse(res.body)).toEqual({});
+      expect(res.body).toEqual({});
 
       // Verify that the token is no longer valid
       // - Since jet generation is based on time, we need to wait for a second to ensure the new token is different to old one
       await new Promise(resolve => setTimeout(resolve, 1000));
-      const loginRes = request('POST', `${BASE_URL}/login`, {
-        json: {
-          email: 'test@example.com',
-          password: 'ValidPass123'
-        }
-      });
+      const loginRes = loginUser('test@example.com', 'ValidPass123');
       expect(loginRes.statusCode).toBe(200);
-      expect(parse(loginRes.body)).toHaveProperty('token');
-      expect(parse(loginRes.body).token).not.toBe(token);
+      expect(loginRes.body).toHaveProperty('token');
+      expect(loginRes.body.token).not.toBe(token);
     });
   });
 
   describe('invalid cases', () => {
     test('invalid token', () => {
-      const res = request('POST', `${BASE_URL}/logout`, {
-        json: { token: 'invalid_token' }
-      });
+      const res = logoutUser('invalid_token');
       expect(res.statusCode).toBe(401);
-      expect(parse(res.body)).toEqual({ error: expect.any(String) });
+      expect(res.body).toEqual({ error: expect.any(String) });
     });
 
     test('missing token', () => {
-      const res = request('POST', `${BASE_URL}/logout`, {
-        json: {}
-      });
+      const res = logoutUser('');
       expect(res.statusCode).toBe(401);
-      expect(parse(res.body)).toEqual({ error: expect.any(String) });
+      expect(res.body).toEqual({ error: expect.any(String) });
     });
 
     test('already logged out token', () => {
       // Logout once
-      request('POST', `${BASE_URL}/logout`, { json: { token } });
+      logoutUser(token);
 
       // Try to logout again with the same token
-      const res = request('POST', `${BASE_URL}/logout`, {
-        json: { token }
-      });
+      const res = logoutUser(token);
       expect(res.statusCode).toBe(401);
-      expect(parse(res.body)).toEqual({ error: expect.any(String) });
+      expect(res.body).toEqual({ error: expect.any(String) });
     });
   });
 });
@@ -259,108 +223,56 @@ describe('PUT /v1/admin/user/password', () => {
 
   describe('valid cases', () => {
     test('successful password update', () => {
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/password`, {
-        json: {
-          token,
-          oldPassword: 'OldPassword123',
-          newPassword: 'NewPassword456'
-        }
-      });
+      const res = updateUserPassword(token, 'OldPassword123', 'NewPassword456');
       expect(res.statusCode).toBe(200);
-      expect(parse(res.body)).toStrictEqual({});
+      expect(res.body).toStrictEqual({});
 
       // Verify that the new password works for login
-      const loginRes = request('POST', `${BASE_URL}/login`, {
-        json: {
-          email: 'test@example.com',
-          password: 'NewPassword456'
-        }
-      });
+      const loginRes = loginUser('test@example.com', 'NewPassword456');
       expect(loginRes.statusCode).toBe(200);
-      expect(parse(loginRes.body)).toHaveProperty('token');
+      expect(loginRes.body).toHaveProperty('token');
     });
   });
 
   describe('invalid cases', () => {
     test('invalid token', () => {
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/password`, {
-        json: {
-          token: 'invalid_token',
-          oldPassword: 'OldPassword123',
-          newPassword: 'NewPassword456'
-        }
-      });
+      const res = updateUserPassword('invalid_token', 'OldPassword123', 'NewPassword456');
       expect(res.statusCode).toBe(401);
-      expect(parse(res.body)).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('missing token', () => {
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/password`, {
-        json: {
-          oldPassword: 'OldPassword123',
-          newPassword: 'NewPassword456'
-        }
-      });
+      const res = updateUserPassword('', 'OldPassword123', 'NewPassword456');
       expect(res.statusCode).toBe(401);
-      expect(parse(res.body)).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('incorrect old password', () => {
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/password`, {
-        json: {
-          token,
-          oldPassword: 'WrongOldPassword',
-          newPassword: 'NewPassword456'
-        }
-      });
+      const res = updateUserPassword(token, 'WrongOldPassword', 'NewPassword456');
       expect(res.statusCode).toBe(400);
-      expect(parse(res.body)).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('new password same as old password', () => {
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/password`, {
-        json: {
-          token,
-          oldPassword: 'OldPassword123',
-          newPassword: 'OldPassword123'
-        }
-      });
+      const res = updateUserPassword(token, 'OldPassword123', 'OldPassword123');
       expect(res.statusCode).toBe(400);
-      expect(parse(res.body)).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('new password has been used before', () => {
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/password`, {
-        json: {
-          token,
-          oldPassword: 'OldPassword123',
-          newPassword: 'NewPassword456'
-        }
-      });
+      const res = updateUserPassword(token, 'OldPassword123', 'NewPassword456');
       expect(res.statusCode).toBe(200);
-      expect(parse(res.body)).toStrictEqual({});
+      expect(res.body).toStrictEqual({});
 
-      const res2 = request('PUT', `${config.url}:${config.port}/v1/admin/user/password`, {
-        json: {
-          token,
-          oldPassword: 'NewPassword456',
-          newPassword: 'OldPassword123'
-        }
-      });
+      const res2 = updateUserPassword(token, 'NewPassword456', 'OldPassword123');
       expect(res2.statusCode).toBe(400);
-      expect(parse(res2.body)).toStrictEqual(ERROR);
+      expect(res2.body).toStrictEqual(ERROR);
     });
 
     test.each(invalidPasswords)('new password is invalid: %s', (password) => {
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/password`, {
-        json: {
-          token,
-          oldPassword: 'OldPassword123',
-          newPassword: password
-        }
-      });
+      const res = updateUserPassword(token, 'OldPassword123', password);
       expect(res.statusCode).toBe(400);
-      expect(parse(res.body)).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
   });
 });
@@ -392,23 +304,14 @@ describe('POST /v1/admin/auth/login', () => {
   describe('valid cases', () => {
     test('successful login with correct id', () => {
       const res = loginUser('goodemail@gmail.com', 'GlenPassword123')
-      expect(res.body.token).toStrictEqual(token);
+      expect(res.body.token).toStrictEqual(expect.any(String));
       expect(res.statusCode).toStrictEqual(200);
-    });
-
-    test('same user return same id', () => {
-      const res1 = loginUser('goodemail@gmail.com', 'GlenPassword123');
-      const res2 = loginUser('goodemail@gmail.com', 'GlenPassword123')
-      expect(res1.body).toStrictEqual(res2.body);
-      expect(res1.statusCode).toStrictEqual(200);
-      expect(res2.statusCode).toStrictEqual(200);
     });
 
     test('different user return different id', () => {
       const res1 = loginUser('goodemail@gmail.com', 'GlenPassword123');
-      const userRes = registerUser('peter@gmail.com', 'PumpkinEater123', 'peter', 'griffin');
+      registerUser('peter@gmail.com', 'PumpkinEater123', 'peter', 'griffin');
       const res2 = loginUser('peter@gmail.com', 'PumpkinEater123');
-      expect(res2.body.token).toStrictEqual(userRes.body.token);
       expect(res1.body).not.toStrictEqual(res2.body);
     });
   });
@@ -510,59 +413,31 @@ describe('PUT /v1/admin/user/details', () => {
   });
   describe('valid case', () => {
     test('successful update of user details', () => {
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
-        json: {
-          token,
-          email: 'newemail@example.com',
-          nameFirst: 'Johnny',
-          nameLast: 'Smith'
-        }
-      });
+      const res = updateUserDetails(token, 'newemail@example.com', 'Johnny', 'Smith');
       expect(res.statusCode).toBe(200);
-      expect(parse(res.body)).toStrictEqual({});
+      expect(res.body).toStrictEqual({});
     });
   })
 
   describe('check the token', () => {
     test('error for invalid token', () => {
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
-        json: {
-          token: 'invalid_token', 
-          email: 'testuser@example.com',
-          nameFirst: 'Johnny',
-          nameLast: 'Smith'
-        }
-      });
+      const res = updateUserDetails('invalid_token', 'testuser@example.com', 'Johnny', 'Smith');
       expect(res.statusCode).toBe(401); 
-      expect(parse(res.body)).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
   
     test('error for empty token', () => {
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
-        json: {
-          token: '',  // Empty token
-          email: 'newemail@example.com',
-          nameFirst: 'Johnny',
-          nameLast: 'Smith'
-        }
-      });
+      const res = updateUserDetails('', 'newemail@example.com', 'Johnny', 'Smith');
       expect(res.statusCode).toBe(401);  // Expect 401 for missing token
-      expect(parse(res.body)).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
   })
   
   describe('Invalid email cases and used email', () => {
     test.each(invalidEmails)('error for invalid email: %s', (invalidEmail) => {
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
-        json: {
-          token,
-          email: invalidEmail,  // Invalid email
-          nameFirst: 'Johnny',
-          nameLast: 'Smith'
-        }
-      });
+      const res = updateUserDetails(token, invalidEmail, 'Johnny', 'Smith');
       expect(res.statusCode).toBe(400);  // Expect 400 for invalid email
-      expect(parse(res.body)).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
 
     test('error for used email', () => {
@@ -570,46 +445,25 @@ describe('PUT /v1/admin/user/details', () => {
       registerUser('otheruser@example.com', 'ValidPass123', 'Jane', 'Doe');
   
       // Attempt to update with the same email
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
-        json: {
-          token,
-          email: 'otheruser@example.com',
-          nameFirst: 'Johnny',
-          nameLast: 'Smith'
-        }
-      });
+      const res =  updateUserDetails(token, 'otheruser@example.com', 'Johnny', 'Smith');
       expect(res.statusCode).toBe(400);
-      expect(parse(res.body)).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
   });
 
   describe('Invalid first name cases', () => {
     test.each(invalidNames)('error for invalid first name: %s', (invalidName) => {
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
-        json: {
-          token,
-          email: 'validemail@example.com',
-          nameFirst: invalidName,  // Invalid first name
-          nameLast: 'Smith'
-        }
-      });
+      const res = updateUserDetails(token, 'validemail@example.com', invalidName, 'Smith');
       expect(res.statusCode).toBe(400);
-      expect(parse(res.body)).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
   });
   
   describe('Invalid last name cases', () => {
     test.each(invalidNames)('error for invalid last name: %s', (invalidName) => {
-      const res = request('PUT', `${config.url}:${config.port}/v1/admin/user/details`, {
-        json: {
-          token,
-          email: 'validemail@example.com',
-          nameFirst: 'Johnny',
-          nameLast: invalidName  // Invalid last name
-        }
-      });
+      const res = updateUserDetails(token, 'validemail@example.com', 'Johnny', invalidName);
       expect(res.statusCode).toBe(400);  // Expect 400 for invalid name
-      expect(parse(res.body)).toStrictEqual(ERROR);
+      expect(res.body).toStrictEqual(ERROR);
     });
   });
 });

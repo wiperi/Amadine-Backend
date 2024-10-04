@@ -68,7 +68,7 @@ export class Question {
 
   private getRandomUniqueColor(): Color {
     if (this.unusedColors.length <= 0) {
-      throw new Error(`Can not create more answers. Current number of answers: ${this.answers.length}`)
+      throw new Error(`Can not create more answers. Current number of answers: ${this.answers.length}`);
     }
     const randomIndex = Math.random() * this.unusedColors.length;
     return this.unusedColors.splice(randomIndex, 1)[0];
@@ -76,10 +76,10 @@ export class Question {
 
   /**
    * Return a copy of seleciton of answers
-   * 
+   *
    * @param start The beginning index of the specified portion of the array. If start is undefined, then the slice begins at index 0.
    * @param end The end index of the specified portion of the array. This is exclusive of the element at the index 'end'. If end is undefined, then the slice extends to the end of the array.
-   * @returns 
+   * @returns
    */
   getAnswersSlice(start?: number, end?: number): Answer[] {
     return this.answers.slice(start, end);
@@ -89,7 +89,7 @@ export class Question {
     answers.forEach(answer => {
       answer.colour = this.getRandomUniqueColor();
     });
-    this.answers = answers
+    this.answers = answers;
   }
 
   addAnswer(answer: Answer): void {
@@ -106,7 +106,7 @@ export class Question {
     this.question = question;
     this.duration = duration;
     this.points = points;
-    
+
     answers.forEach(answer => {
       answer.colour = this.getRandomUniqueColor();
     });

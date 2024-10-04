@@ -1,7 +1,7 @@
 import { getData, setData } from '@/dataStore';
 import { HttpError } from '@/utils/HttpError';
 import { Quiz, Question, Answer } from '@/models/Classes';
-import { EmptyObject } from '@/models/Types';
+import { ReturnedQuizView, EmptyObject } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import {
   getNewID,
@@ -12,6 +12,7 @@ import {
   isValidQuizDescription,
   recursiveFind
 } from '@/utils/helper';
+
 /**
  * Update the description of the relevant quiz.
  */
@@ -29,10 +30,10 @@ export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, d
   }
 
   const quiz = findQuizById(quizId);
-  if (quiz) {
-    quiz.description = description;
-    quiz.timeLastEdited = Math.floor(Date.now() / 1000);
-  }
+  quiz.description = description;
+  quiz.timeLastEdited = Math.floor(Date.now() / 1000);
+  setData();
+
   return {};
 }
 
@@ -42,14 +43,13 @@ export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, d
 export function adminQuizInfo(
   authUserId: number,
   quizId: number
-):
- {
+): {
   quizId: number;
   name: string;
   timeCreated: number;
   timeLastEdited: number;
   description: string;
-  numofQuestions: number;
+  numQuestions: number;
   questions: Question[]
   duration: number;
 } {
@@ -69,7 +69,7 @@ export function adminQuizInfo(
     timeCreated: quiz.timeCreated,
     timeLastEdited: quiz.timeLastEdited,
     description: quiz.description,
-    numofQuestions: quiz.questions.length,
+    numQuestions: quiz.questions.length,
     questions: quiz.questions, // Include the questions array
     duration: quiz.questions.reduce((acc, question) => acc + question.duration, 0)
   };
@@ -92,10 +92,9 @@ export function adminQuizNameUpdate(authUserId: number, quizId: number, name: st
   }
 
   const quiz = findQuizById(quizId);
-  if (quiz) {
-    quiz.name = name;
-    quiz.timeLastEdited = Math.floor(Date.now() / 1000);
-  }
+  quiz.name = name;
+  quiz.timeLastEdited = Math.floor(Date.now() / 1000);
+  setData();
 
   return {};
 }
@@ -123,7 +122,7 @@ export function adminQuizCreate(authUserId: number, name: string, description: s
  * Retrieves a list of quizzes created by a specific authenticated user,
  * if the user ID is valid. The quizzes are returned with their IDs and names.
  */
-export function adminQuizList(authUserId: number): { quizzes: { quizId: number; name: string }[] } | { error: string } {
+export function adminQuizList(authUserId: number): { quizzes: ReturnedQuizView[] } {
   const quizzes = getData().quizzes
     .filter(quiz => quiz.authUserId === authUserId && quiz.active)
     .map(quiz => ({
@@ -139,7 +138,6 @@ export function adminQuizList(authUserId: number): { quizzes: { quizId: number; 
  * Return an empty object if succeed
  */
 export function adminQuizRemove(authUserId: number, quizId: number): EmptyObject {
-  const data = getData();
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -147,19 +145,22 @@ export function adminQuizRemove(authUserId: number, quizId: number): EmptyObject
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
     throw new HttpError(401, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
+
   const quiz = findQuizById(quizId);
-  if (quiz) {
-    quiz.active = false;
-    quiz.timeLastEdited = Math.floor(Date.now() / 1000);
-    setData(data);
-    return {};
-  }
-  throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  quiz.active = false;
+  quiz.timeLastEdited = Math.floor(Date.now() / 1000);
+  setData();
+
+  return {};
 }
 
-export function adminQuizTrashView(authUserId: number): { quizzes: Array<{ quizId: number, name: string }> } {
-  // TODO: Implement this function
-  return { quizzes: [] };
+export function adminQuizTrashView(authUserId: number): { quizzes: ReturnedQuizView[] } {
+  const trash: ReturnedQuizView[] = getData().quizzes.filter(quiz => quiz.authUserId === authUserId && !quiz.active).map(quiz => ({
+    quizId: quiz.quizId,
+    name: quiz.name
+  }));
+
+  return { quizzes: trash };
 }
 
 export function adminQuizRestore(authUserId: number, quizId: number): EmptyObject {
@@ -168,7 +169,24 @@ export function adminQuizRestore(authUserId: number, quizId: number): EmptyObjec
 }
 
 export function adminQuizTrashEmpty(authUserId: number, quizIds: number[]): EmptyObject {
-  // TODO: Implement this function
+  const data = getData();
+
+  for (const quizId of quizIds) {
+    const quiz = findQuizById(quizId);
+    if (!quiz) {
+      throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+    }
+    if (quiz.authUserId !== authUserId) {
+      throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+    }
+    if (quiz.active) {
+      throw new HttpError(400, ERROR_MESSAGES.INVALID_QUIZ_ID);
+    }
+  }
+
+  data.quizzes = data.quizzes.filter(quiz => !quizIds.includes(quiz.quizId));
+  setData(data);
+
   return {};
 }
 
