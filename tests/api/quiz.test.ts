@@ -1091,8 +1091,8 @@ describe('POST /v1/admin/quiz/{quizid}/question/{questionid}/duplicate', () => {
       expect(detailRes.statusCode).toStrictEqual(200);
       expect(detailRes.body.numQuestions).toStrictEqual(2);
       const questions = detailRes.body.questions;
-      expect(questions).toStrictEqual({
-        questions: [
+      expect(questions).toStrictEqual(
+        [
           {
             questionId: questionId,
             question: 'What is the name of the dog in family guy?',
@@ -1146,7 +1146,7 @@ describe('POST /v1/admin/quiz/{quizid}/question/{questionid}/duplicate', () => {
             ]
           }
         ]
-      });
+      );
     });
 
     test('successfully update the timeLastEdit time', async () => {

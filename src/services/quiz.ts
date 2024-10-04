@@ -334,7 +334,7 @@ export function adminQuizQuestionDuplicate(authUserId: number, quizId: number, q
   const newQuestionId = getNewID('question');
   quiz.timeLastEdited = Math.floor(Date.now() / 1000);
   const index = quiz.questions.findIndex(question => question.questionId === questionId);
-  const newQuestion = question;
+  const newQuestion = Object.assign({}, question);
   newQuestion.questionId = newQuestionId;
   quiz.questions.splice(index + 1, 0, newQuestion);
 
