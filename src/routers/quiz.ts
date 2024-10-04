@@ -9,7 +9,7 @@ import {
   adminQuizRemove,
   adminQuizQuestionCreate,
   adminQuizTrashView,
-  adminQuizTrashEmpty, 
+  adminQuizTrashEmpty,
   adminQuizQuestionDelete,
   adminQuizQuestionDuplicate,
   adminQuizRestore
@@ -136,7 +136,7 @@ quizRouter.post('/:quizId(\\d+)/question/:questionId(\\d+)/duplicate', (req: Req
   }
 });
 
-quizRouter.put('/:quizid(\\d+)/question/:questionid(\\d+)', (req: Request, res: Response) => {
+quizRouter.delete('/:quizid(\\d+)/question/:questionid(\\d+)', (req: Request, res: Response) => {
   const quizid = parseInt(req.params.quizid);
   const questionid = parseInt(req.params.questionid);
   const { authUserId } = req.body;

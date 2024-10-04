@@ -180,6 +180,7 @@ export function adminQuizRestore(authUserId: number, quizId: number): EmptyObjec
   }
   quiz.active = true;
   quiz.timeLastEdited = Math.floor(Date.now() / 1000);
+  setData();
   return {};
 }
 
@@ -287,18 +288,23 @@ export function adminQuizQuestionUpdate(authUserId: number, quizId: number, ques
 }
 
 export function adminQuizQuestionDelete(authUserId: number, quizId: number, questionId: number): EmptyObject {
-  if (!isValidQuizId(quizId)) {
+  getData();
+  const quiz = findQuizById(quizId);
+  if (!quiz || !quiz.active) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
-  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
+
+  if (quiz.authUserId !== authUserId) {
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
-  const quiz = findQuizById(quizId);
+
   const question = quiz.questions.find(question => question.questionId === questionId);
   if (!question) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION_ID);
   }
-  quiz.questions = quiz.questions.filter(question => question.questionId !== questionId);
+  // quiz.questions = quiz.questions.filter(question => question.questionId !== questionId);
+  const currentPosition = quiz.questions.indexOf(question);
+  quiz.questions.splice(currentPosition, 1);
   quiz.timeLastEdited = Math.floor(Date.now() / 1000);
   setData();
   return {};

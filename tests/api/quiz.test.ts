@@ -1233,38 +1233,73 @@ describe('POST /v1/admin/quiz/{quizid}/question/{questionid}/duplicate', () => {
  This is test for AQQDelete
  */
 describe('DELETE /v1/admin/quiz/:quizId/question/:questionId', () => {
-  describe('valid cases', () => {
-    let quizId: number;
-    let questionId: number;
-    beforeEach(() => {
-      // Create a quiz with a question before each test in this suite
-      const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz');
-      expect(createQuizRes.statusCode).toBe(200);
-      quizId = createQuizRes.body.quizId;
+  let quizId: number;
+  let questionId: number;
+  beforeEach(() => {
+    const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = createQuizRes.body.quizId;
 
-      const createQuestionRes = createQuestion(token, quizId, {
-        question: 'What is the capital of France?',
-        duration: 60,
-        points: 5,
-        answers: [
-          { answer: 'Paris', correct: true },
-          { answer: 'Berlin', correct: false },
-          { answer: 'Rome', correct: false },
-        ],
-      });
-      expect(createQuestionRes.statusCode).toBe(200);
-      questionId = createQuestionRes.body.questionId;
+    const createQuestionRes = createQuestion(token, quizId, {
+      question: 'What is the capital of France?',
+      duration: 60,
+      points: 5,
+      answers: [
+        { answer: 'Paris', correct: true },
+        { answer: 'Berlin', correct: false },
+        { answer: 'Rome', correct: false },
+      ],
     });
-
+    expect(createQuestionRes.statusCode).toBe(200);
+    questionId = createQuestionRes.body.questionId;
+  });
+  describe('valid cases', () => {
     test('successful question deletion', () => {
       const res = deleteQuestion(token, quizId, questionId);
       expect(res.statusCode).toBe(200);
       expect(res.body).toStrictEqual({});
 
-      // Verify the question is deleted using getQuizDetails from apihelpertest
       const quizRes = getQuizDetails(token, quizId);
       expect(quizRes.statusCode).toBe(200);
       expect(quizRes.body.questions).not.toContainEqual(expect.objectContaining({ questionId }));
+    });
+    test('successful update last edit time', async () => {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const res = deleteQuestion(token, quizId, questionId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({});
+      const quizRes = getQuizDetails(token, quizId);
+      expect(quizRes.statusCode).toBe(200);
+      expect(quizRes.body.timeLastEdited).not.toStrictEqual(quizRes.body.timeCreated);
+    });
+  });
+
+  describe('invalid cases', () => {
+    test('question id does not refer to a valid question within this quiz', () => {
+      const res = deleteQuestion(token, quizId, 0);
+      expect(res.statusCode).toStrictEqual(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('token is invalid', () => {
+      const res = deleteQuestion('invalid token', quizId, questionId);
+      expect(res.statusCode).toStrictEqual(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('user is not an owner of this quiz', () => {
+      const userRegisterRes = registerUser('wick@gmail.com', 'JohnWich123', 'John', 'Wick');
+      expect(userRegisterRes.statusCode).toStrictEqual(200);
+      const token1 = userRegisterRes.body.token;
+      const res = deleteQuestion(token1, quizId, questionId);
+      expect(res.statusCode).toStrictEqual(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('quiz does not exist', () => {
+      const res = deleteQuestion(token, 0, questionId);
+      expect(res.statusCode).toStrictEqual(403);
+      expect(res.body).toStrictEqual(ERROR);
     });
   });
 });
