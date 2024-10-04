@@ -160,12 +160,12 @@ export function adminQuizRemove(authUserId: number, quizId: number): EmptyObject
   throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
 }
 
-export function adminQuizTrashView(authUserId: number): { quizzes: Array<AdminQuizTrashView> } | any {
+export function adminQuizTrashView(authUserId: number): { quizzes: Array<AdminQuizTrashView> } {
   const quizzesView: AdminQuizTrashView[] = [];
   const data = getData();
   // return `authUserId: ${authUserId}, quizzes: ${data.quizzes}`;
   for (const quiz of data.quizzes) {
-    if (quiz.authUserId === authUserId && quiz.active === false) {
+    if (quiz.authUserId === authUserId && !quiz.active) {
       const quizView: AdminQuizTrashView = {
         quizId: quiz.quizId,
         name: quiz.name
@@ -316,6 +316,26 @@ export function adminQuizQuestionMove(authUserId: number, quizId: number, questi
 }
 
 export function adminQuizQuestionDuplicate(authUserId: number, quizId: number, questionId: number): { newQuestionId: number } {
-  // TODO: Implement this function
-  return { newQuestionId: 0 };
+  const quiz = findQuizById(quizId);
+  if (!quiz || !quiz.active) {
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  }
+
+  if (quiz.authUserId !== authUserId) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
+
+  const question = quiz.questions.find(question => question.questionId === questionId);
+  if (!question) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION_ID);
+  }
+
+  const newQuestionId = getNewID('question');
+  quiz.timeLastEdited = Math.floor(Date.now() / 1000);
+  const index = quiz.questions.findIndex(question => question.questionId === questionId);
+  const newQuestion = Object.assign({}, question);
+  newQuestion.questionId = newQuestionId;
+  quiz.questions.splice(index + 1, 0, newQuestion);
+
+  return { newQuestionId: newQuestionId };
 }
