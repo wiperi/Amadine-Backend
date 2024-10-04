@@ -64,14 +64,19 @@ export class Question {
   points: number;
 
   private answers: Answer[] = [];
-  private unusedColors: Color[] = Object.values(Color); // used to assign unique colours to answers
 
   private getRandomUniqueColor(): Color {
-    if (this.unusedColors.length <= 0) {
+    const unusedColor: Color[] = Object.values(Color);
+    for (const answer of this.answers) {
+      unusedColor.splice(unusedColor.indexOf(answer.colour), 1);
+    }
+
+    if (unusedColor.length <= 0) {
       throw new Error(`Can not create more answers. Current number of answers: ${this.answers.length}`);
     }
-    const randomIndex = Math.random() * this.unusedColors.length;
-    return this.unusedColors.splice(randomIndex, 1)[0];
+
+    const randomIndex = Math.floor(Math.random() * unusedColor.length);
+    return unusedColor[randomIndex];
   }
 
   /**
