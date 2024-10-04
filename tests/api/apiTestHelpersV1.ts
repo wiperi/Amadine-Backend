@@ -163,7 +163,6 @@ export function restoreQuiz(token: string, quizId: number): ParsedResponse {
 export function deleteQuizPermanently(token: string, quizId: number): ParsedResponse {
   const res = request('DELETE', `${QUIZ_URL}/${quizId}`, {
     qs: {
-
       token
     }
   });
