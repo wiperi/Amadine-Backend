@@ -22,7 +22,6 @@ import {
   duplicateQuestion
 } from './apiTestHelpersV1'
 import { get } from 'http';
-import { Colour } from '@/models/Enums';
 
 const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const ERROR = { error: expect.any(String) };
@@ -1110,19 +1109,19 @@ describe('POST /v1/admin/quiz/{quizid}/question/{questionid}/duplicate', () => {
               {
                 answerId: expect.any(Number),
                 answer: 'Brian',
-                color: expect.any(String),
+                colour: expect.any(String),
                 correct: true
               },
               {
                 answerId: expect.any(Number),
                 answer: 'Babe',
-                color: expect.any(String),
+                colour: expect.any(String),
                 correct: false
               },
               {
                 answerId: expect.any(Number),
                 answer: 'Bart',
-                color: expect.any(String),
+                colour: expect.any(String),
                 correct: false
               }
             ]
@@ -1136,19 +1135,19 @@ describe('POST /v1/admin/quiz/{quizid}/question/{questionid}/duplicate', () => {
               {
                 answerId: expect.any(Number),
                 answer: 'Brian',
-                colour: expect.any(Colour),
+                colour: expect.any(String),
                 correct: true
               },
               {
                 answerId: expect.any(Number),
                 answer: 'Babe',
-                colour: expect.any(Colour),
+                colour: expect.any(String),
                 correct: false
               },
               {
                 answerId: expect.any(Number),
                 answer: 'Bart',
-                colour: expect.any(Colour),
+                colour: expect.any(String),
                 correct: false
               }
             ]
