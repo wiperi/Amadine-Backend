@@ -1,7 +1,36 @@
 {
-  "users": [],
-  "quizzes": [],
-  "userSessions": [],
+  "users": [
+    {
+      "numSuccessfulLogins": 1,
+      "numFailedPasswordsSinceLastLogin": 0,
+      "oldPasswords": [],
+      "userId": 8651453008,
+      "email": "test@example.com",
+      "password": "ValidPass123",
+      "nameFirst": "John",
+      "nameLast": "Doe"
+    }
+  ],
+  "quizzes": [
+    {
+      "timeCreated": 1728009739,
+      "timeLastEdited": 1728009739,
+      "active": true,
+      "questions": [],
+      "thumbnailUrl": "",
+      "authUserId": 8651453008,
+      "quizId": 38583800226,
+      "name": "Fate",
+      "description": "Description"
+    }
+  ],
+  "userSessions": [
+    {
+      "sessionId": 529158307697,
+      "authUserId": 8651453008,
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjg2NTE0NTMwMDgsImlhdCI6MTcyODAwOTczOX0.17QTxCmfradVrgcMedfTiOHs22Gh54dAi-lF4Y7Lz68"
+    }
+  ],
   "quizSessions": [],
   "players": []
 }

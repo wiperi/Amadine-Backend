@@ -1,5 +1,3 @@
-import request from 'sync-request-curl';
-import config from '../../src/config.json';
 import {
   registerUser,
   loginUser,
@@ -20,11 +18,9 @@ import {
   createQuestion,
   requestAdminQuizNameUpdate,
   emptyTrash,
+  duplicateQuestion,
   deleteQuestion
-} from './apiTestHelpersV1'
-import { get } from 'http';
-import { findQuizById } from '../../src/utils/helper';
-import { json } from 'stream/consumers';
+} from './apiTestHelpersV1';
 
 const ERROR = { error: expect.any(String) };
 
@@ -421,6 +417,7 @@ describe('PUT /v1/admin/quiz/:quizId/description', () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       const res = updateQuizDescription(token, quizId, 'An updated test quiz');
       expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({});
       const res1 = getQuizDetails(token, quizId);
       expect(res.statusCode).toBe(200);
       expect(res1.body.timeLastEdited).not.toStrictEqual(res1.body.timeCreated);
@@ -852,6 +849,79 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
     });
   });
 });
+/*
+ This is test for AQRe
+ */
+describe('POST /v1/admin/quiz/:quizId/restore', () => {
+  let quizId: number;
+  beforeEach(() => {
+    const createQuizRes = createQuiz(token, 'Fate', 'Description');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = createQuizRes.body.quizId;
+  });
+  describe('valid cases', () => {
+    test('should restore quiz', () => {
+      deleteQuiz(token, quizId);
+      const res = restoreQuiz(token, quizId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({});
+      const res1 = getQuizDetails(token, quizId);
+      expect(res1.statusCode).toBe(200);
+      expect(res1.body).toStrictEqual({
+        quizId,
+        name: 'Fate',
+        description: 'Description',
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number),
+        numQuestions: 0,
+        questions: [],
+        duration: 0
+      });
+    });
+    test('successful update last edit time', async () => {
+      deleteQuiz(token, quizId);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const res = restoreQuiz(token, quizId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({});
+      const res1 = getQuizDetails(token, quizId);
+      expect(res.statusCode).toBe(200);
+      expect(res1.body.timeLastEdited).not.toStrictEqual(res1.body.timeCreated);
+    });
+  });
+  describe('invalid cases', () => {
+    test('invalid_token', () => {
+      const res = restoreQuiz('invalid_token', quizId);
+      expect(res.statusCode).toBe(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+    test('invalid quiz ID', () => {
+      const res = restoreQuiz(token, 0);
+      expect(res.statusCode).toBe(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+    test('user is not the owner of th quiz', () => {
+      const createUserRes = registerUser('wick@example.com', 'JohnWick123', 'John', 'Wick');
+      expect(createUserRes.statusCode).toBe(200);
+      token = createUserRes.body.token;
+      const res = restoreQuiz(token, quizId);
+      expect(res.statusCode).toBe(403);
+    });
+    test('quiz is not in trash', () => {
+      const res = restoreQuiz(token, quizId);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+    test('quiz name of the restored quiz is already used by the current logged in user for another quiz', () => {
+      deleteQuiz(token, quizId);
+      const createQuizRes = createQuiz(token, 'Fate', 'Are you my master?');
+      expect(createQuizRes.statusCode).toBe(200);
+      const res = restoreQuiz(token, quizId);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+  });
+});
 
 //////////////////////////////////////////////////////////
 ///////////this is test DELETE /v1/admin/quiz/trash/empty
@@ -869,7 +939,6 @@ describe('DELETE /v1/admin/quiz/trash/empty', () => {
     expect(createQuizRes.statusCode).toBe(200);
     quizId2 = createQuizRes.body.quizId;
 
-
     // Delete the quiz
     const deleteQuizRes = deleteQuiz(token, quizId1);
     expect(deleteQuizRes.statusCode).toBe(200);
@@ -881,9 +950,9 @@ describe('DELETE /v1/admin/quiz/trash/empty', () => {
       const emptyRes = emptyTrash(token, quizIdsParam);
       expect(emptyRes.statusCode).toBe(200);
       expect(emptyRes.body).toStrictEqual({});
-      const quizListRes = getQuizList(token);
-      expect(quizListRes.statusCode).toBe(200);
-      expect(findQuizById(quizId1)).toBeUndefined();
+      const AdminQuizTrashViewRes = getQuizTrash(token);
+      expect(AdminQuizTrashViewRes.statusCode).toBe(200);
+      expect(AdminQuizTrashViewRes.body).toStrictEqual({ quizzes: [] });
     });
     test('successful empty trash with multiple quizzes', () => {
       deleteQuiz(token, quizId2);
@@ -891,10 +960,7 @@ describe('DELETE /v1/admin/quiz/trash/empty', () => {
       const emptyRes = emptyTrash(token, quizIdsParam);
       expect(emptyRes.statusCode).toBe(200);
       expect(emptyRes.body).toStrictEqual({});
-      const quizListRes = getQuizList(token);
-      expect(quizListRes.statusCode).toBe(200);
-      expect(findQuizById(quizId1)).toBeUndefined();
-      expect(findQuizById(quizId2)).toBeUndefined
+      expect(getQuizTrash(token).body).toStrictEqual({ quizzes: [] });
     });
   });
 
@@ -1021,6 +1087,145 @@ describe('GET /v1/admin/quiz/trash', () => {
           name: 'Test quiz'
         }
       ]});
+    });
+  });
+});
+
+////////////////////////////////////////////////////
+// Test for adminQuizQuestionDuplicate /////////////
+////////////////////////////////////////////////////
+describe('POST /v1/admin/quiz/{quizid}/question/{questionid}/duplicate', () => {
+  let quizId: number;
+  let questionId: number;
+  beforeEach(() => {
+    const quizCreateRes = createQuiz(token, 'Test quiz', 'description for test quiz');
+    expect(quizCreateRes.statusCode).toStrictEqual(200);
+    quizId = quizCreateRes.body.quizId;
+    const questionBody = {
+      question: 'What is the name of the dog in family guy?',
+      duration: 60,
+      points: 5,
+      answers: [
+        { answer: 'Brian', correct: true },
+        { answer: 'Babe', correct: false },
+        { answer: 'Bart', correct: false },
+      ],
+    };
+    const questionCreateRes = createQuestion(token, quizId, questionBody);
+    expect(questionCreateRes.statusCode).toStrictEqual(200);
+    questionId = questionCreateRes.body.questionId;
+  });
+
+  describe('invalid cases', () => {
+    test('question id does not refer to a valid question within this quiz', () => {
+      const res = duplicateQuestion(token, quizId, 0);
+      expect(res.statusCode).toStrictEqual(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('token is invalid', () => {
+      const res = duplicateQuestion('invalid token', quizId, questionId);
+      expect(res.statusCode).toStrictEqual(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('user is not an owner of this quiz', () => {
+      const userRegisterRes = registerUser('peter@gmail.com', 'PumkinEater123', 'Peter', 'Griffin');
+      expect(userRegisterRes.statusCode).toStrictEqual(200);
+      const token1 = userRegisterRes.body.token;
+      const res = duplicateQuestion(token1, quizId, questionId);
+      expect(res.statusCode).toStrictEqual(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('quiz does not exist', () => {
+      const res = duplicateQuestion(token, 0, questionId);
+      expect(res.statusCode).toStrictEqual(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+  });
+
+  describe('valid cases', () => {
+    test('successfully duplicate the question', () => {
+      const res = duplicateQuestion(token, quizId, questionId);
+      expect(res.statusCode).toStrictEqual(200);
+      expect(res.body).toStrictEqual({ newQuestionId: expect.any(Number) });
+      const newQuestionId = res.body.newQuestionId;
+
+      // get quiz info
+      const detailRes = getQuizDetails(token, quizId);
+      expect(detailRes.statusCode).toStrictEqual(200);
+      expect(detailRes.body.numQuestions).toStrictEqual(2);
+      const questions = detailRes.body.questions;
+      expect(questions).toStrictEqual(
+        [
+          {
+            questionId: questionId,
+            question: 'What is the name of the dog in family guy?',
+            duration: 60,
+            points: 5,
+            answers: [
+              {
+                answerId: expect.any(Number),
+                answer: 'Brian',
+                colour: expect.any(String),
+                correct: true
+              },
+              {
+                answerId: expect.any(Number),
+                answer: 'Babe',
+                colour: expect.any(String),
+                correct: false
+              },
+              {
+                answerId: expect.any(Number),
+                answer: 'Bart',
+                colour: expect.any(String),
+                correct: false
+              }
+            ]
+          },
+          {
+            questionId: newQuestionId,
+            question: 'What is the name of the dog in family guy?',
+            duration: 60,
+            points: 5,
+            answers: [
+              {
+                answerId: expect.any(Number),
+                answer: 'Brian',
+                colour: expect.any(String),
+                correct: true
+              },
+              {
+                answerId: expect.any(Number),
+                answer: 'Babe',
+                colour: expect.any(String),
+                correct: false
+              },
+              {
+                answerId: expect.any(Number),
+                answer: 'Bart',
+                colour: expect.any(String),
+                correct: false
+              }
+            ]
+          }
+        ]
+      );
+    });
+
+    test('successfully update the timeLastEdit time', async () => {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const res = duplicateQuestion(token, quizId, questionId);
+      expect(res.statusCode).toStrictEqual(200);
+      expect(res.body).toStrictEqual({ newQuestionId: expect.any(Number) });
+
+      // get quiz info
+      const detailRes = getQuizDetails(token, quizId);
+      expect(detailRes.statusCode).toStrictEqual(200);
+      expect(detailRes.body.numQuestions).toStrictEqual(2);
+      expect(detailRes.body.timeLastEdited).not.toStrictEqual(detailRes.body.timeCreated);
     });
   });
 });
