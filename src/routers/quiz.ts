@@ -1,5 +1,17 @@
 import { Router, Request, Response } from 'express';
-import { adminQuizCreate, adminQuizInfo, adminQuizNameUpdate, adminQuizList, adminQuizQuestionMove, adminQuizDescriptionUpdate, adminQuizRemove, adminQuizQuestionCreate, adminQuizTrashView, adminQuizTrashEmpty, adminQuizQuestionDuplicate } from '@/services/quiz';
+import {
+  adminQuizCreate,
+  adminQuizInfo,
+  adminQuizNameUpdate,
+  adminQuizList,
+  adminQuizQuestionMove,
+  adminQuizDescriptionUpdate,
+  adminQuizRemove,
+  adminQuizQuestionCreate,
+  adminQuizTrashView,
+  adminQuizTrashEmpty,
+  adminQuizQuestionDuplicate
+} from '@/services/quiz';
 
 export const quizRouter = Router();
 
