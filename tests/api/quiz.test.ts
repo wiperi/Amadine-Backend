@@ -943,29 +943,25 @@ describe('DELETE /v1/admin/quiz/trash/empty', () => {
     expect(deleteQuizRes.statusCode).toBe(200);
   });
 
-  // NEED TO BE FIXED
-  // describe('valid cases', () => {
-  //   test('successful empty trash', () => {
-  //     const quizIdsParam = JSON.stringify([quizId1]);
-  //     const emptyRes = emptyTrash(token, quizIdsParam);
-  //     expect(emptyRes.statusCode).toBe(200);
-  //     expect(emptyRes.body).toStrictEqual({});
-  //     const quizListRes = getQuizList(token);
-  //     expect(quizListRes.statusCode).toBe(200);
-  //     expect(findQuizById(quizId1)).toBeUndefined();
-  //   });
-  //   test('successful empty trash with multiple quizzes', () => {
-  //     deleteQuiz(token, quizId2);
-  //     const quizIdsParam = JSON.stringify([quizId1, quizId2]);
-  //     const emptyRes = emptyTrash(token, quizIdsParam);
-  //     expect(emptyRes.statusCode).toBe(200);
-  //     expect(emptyRes.body).toStrictEqual({});
-  //     const quizListRes = getQuizList(token);
-  //     expect(quizListRes.statusCode).toBe(200);
-  //     expect(findQuizById(quizId1)).toBeUndefined();
-  //     expect(findQuizById(quizId2)).toBeUndefined
-  //   });
-  // });
+  describe('valid cases', () => {
+    test('successful empty trash', () => {
+      const quizIdsParam = JSON.stringify([quizId1]);
+      const emptyRes = emptyTrash(token, quizIdsParam);
+      expect(emptyRes.statusCode).toBe(200);
+      expect(emptyRes.body).toStrictEqual({});
+      const AdminQuizTrashViewRes = getQuizTrash(token);
+      expect(AdminQuizTrashViewRes.statusCode).toBe(200);
+      expect(AdminQuizTrashViewRes.body).toStrictEqual({ quizzes: [] });
+    });
+    test('successful empty trash with multiple quizzes', () => {
+      deleteQuiz(token, quizId2);
+      const quizIdsParam = JSON.stringify([quizId1, quizId2]);
+      const emptyRes = emptyTrash(token, quizIdsParam);
+      expect(emptyRes.statusCode).toBe(200);
+      expect(emptyRes.body).toStrictEqual({});
+      expect(getQuizTrash(token).body).toStrictEqual({ quizzes: [] });
+    });
+  });
 
   describe('invalid cases', () => {
     test('invalid token', () => {

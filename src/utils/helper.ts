@@ -1,7 +1,7 @@
 import { getData } from '@/dataStore';
 import isEmail from 'validator/lib/isEmail';
 import { User, Quiz } from '@/models/Classes';
-import { ERROR_MESSAGES } from './errors';
+import { ERROR_MESSAGES } from '@/utils/errors';
 
 /**
  * Recursively searches for a target value within an object or its nested properties.
