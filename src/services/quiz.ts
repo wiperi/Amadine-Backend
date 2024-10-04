@@ -33,6 +33,7 @@ export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, d
     quiz.description = description;
     quiz.timeLastEdited = Math.floor(Date.now() / 1000);
   }
+  setData();
   return {};
 }
 
@@ -98,7 +99,7 @@ export function adminQuizNameUpdate(authUserId: number, quizId: number, name: st
     quiz.timeLastEdited = Math.floor(Date.now() / 1000);
     setData(data);
   }
-
+  setData();
   return {};
 }
 
