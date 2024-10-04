@@ -288,7 +288,6 @@ export function adminQuizQuestionUpdate(authUserId: number, quizId: number, ques
 }
 
 export function adminQuizQuestionDelete(authUserId: number, quizId: number, questionId: number): EmptyObject {
-  getData();
   const quiz = findQuizById(quizId);
   if (!quiz || !quiz.active) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
