@@ -1,7 +1,7 @@
 import { getData, setData } from '@/dataStore';
 import { HttpError } from '@/utils/HttpError';
 import { Quiz, Question, Answer } from '@/models/Classes';
-import { ReturnedQuizView, EmptyObject } from '@/models/Types';
+import { ReturnedQuizView, EmptyObject, ParamQuestionBody } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import {
   getNewID,
@@ -165,6 +165,9 @@ export function adminQuizTrashView(authUserId: number): { quizzes: ReturnedQuizV
 
 export function adminQuizRestore(authUserId: number, quizId: number): EmptyObject {
   // TODO: Implement this function
+
+  // findQuizById(quizId).active = true;
+
   return {};
 }
 
@@ -192,17 +195,17 @@ export function adminQuizTrashEmpty(authUserId: number, quizIds: number[]): Empt
 
 export function adminQuizTransfer(authUserId: number, quizId: number, userEmail: string): EmptyObject {
   // TODO: Implement this function
+
+  // const data = getData();
+  // const newAuthUserId = data.users.find(user => user.email === userEmail).userId;
+  // findQuizById(quizId).authUserId = newAuthUserId;
+
   return {};
 }
 
-type ParamQuestionBody = {
-  question: string;
-  duration: number;
-  points: number;
-  answers: Array<{ answer: string, correct: boolean }>;
-}
-
 export function adminQuizQuestionCreate(authUserId: number, quizId: number, questionBody: ParamQuestionBody): { questionId: number } {
+  // TODO: extract questionBody check to a helper function
+
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -264,11 +267,19 @@ export function adminQuizQuestionUpdate(authUserId: number, quizId: number, ques
   if (!quizId || recursiveFind(questionBody, undefined)) {
     throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
   }
+
+  // TODO: Implement this helper function
+  // if (!isValidQuestion(questionBody)) {};
+
   return {};
 }
 
 export function adminQuizQuestionDelete(authUserId: number, quizId: number, questionId: number): EmptyObject {
   // TODO: Implement this function
+
+  // const questions = findQuizById(quizId).questions;
+  // questions.splice(questions.findIndex(q => q.questionId === questionId), 1);
+
   return {};
 }
 
@@ -305,5 +316,10 @@ export function adminQuizQuestionMove(authUserId: number, quizId: number, questi
 
 export function adminQuizQuestionDuplicate(authUserId: number, quizId: number, questionId: number): { newQuestionId: number } {
   // TODO: Implement this function
+
+  // const questions = findQuizById(quizId).questions;
+  // const newQuestion = Object.assign({}, questions.find(q => q.questionId === questionId), { questionId: getNewID('question') });
+  // questions.splice(1 + questions.findIndex(q => q.questionId === questionId), 0, newQuestion);
+
   return { newQuestionId: 0 };
 }
