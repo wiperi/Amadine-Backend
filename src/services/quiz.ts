@@ -160,7 +160,7 @@ export function adminQuizRemove(authUserId: number, quizId: number): EmptyObject
   throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
 }
 
-export function adminQuizTrashView(authUserId: number): { quizzes: Array<AdminQuizTrashView> } | any {
+export function adminQuizTrashView(authUserId: number): { quizzes: Array<AdminQuizTrashView> } {
   const quizzesView: AdminQuizTrashView[] = [];
   const data = getData();
   // return `authUserId: ${authUserId}, quizzes: ${data.quizzes}`;
@@ -315,8 +315,7 @@ export function adminQuizQuestionMove(authUserId: number, quizId: number, questi
   return {};
 }
 
-export function adminQuizQuestionDuplicate(authUserId: number, quizId: number, questionId: number): { newQuestionId: number } | any {
-  
+export function adminQuizQuestionDuplicate(authUserId: number, quizId: number, questionId: number): { newQuestionId: number } {
   const quiz = findQuizById(quizId);
   if (!quiz || !quiz.active) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
