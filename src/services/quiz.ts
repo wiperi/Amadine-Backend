@@ -10,7 +10,7 @@ import {
   findQuizById,
   isValidQuizName,
   isValidQuizDescription,
-  recursiveFind
+  recursiveFind,
 } from '@/utils/helper';
 /**
  * Update the description of the relevant quiz.
@@ -177,7 +177,25 @@ export function adminQuizTrashView(authUserId: number): { quizzes: Array<AdminQu
 }
 
 export function adminQuizRestore(authUserId: number, quizId: number): EmptyObject {
-  // TODO: Implement this function
+  const quiz = findQuizById(quizId);
+  if (!quiz) {
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  }
+  if (quiz.authUserId !== authUserId) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
+  if (quiz.active) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  }
+  const name = quiz.name;
+  if (!isValidQuizName(name)) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_NAME);
+  }
+
+  if (quiz) {
+    quiz.active = true;
+    quiz.timeLastEdited = Math.floor(Date.now() / 1000);
+  }
   return {};
 }
 
