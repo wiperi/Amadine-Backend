@@ -416,6 +416,7 @@ describe('PUT /v1/admin/quiz/:quizId/description', () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       const res = updateQuizDescription(token, quizId, 'An updated test quiz');
       expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({});
       const res1 = getQuizDetails(token, quizId);
       expect(res.statusCode).toBe(200);
       expect(res1.body.timeLastEdited).not.toStrictEqual(res1.body.timeCreated);
@@ -847,6 +848,79 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
     });
   });
 });
+/*
+ This is test for AQRe
+ */
+describe('POST /v1/admin/quiz/:quizId/restore', () => {
+  let quizId: number;
+  beforeEach(() => {
+    const createQuizRes = createQuiz(token, 'Fate', 'Description');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = createQuizRes.body.quizId;
+  });
+  describe('valid cases', () => {
+    test('should restore quiz', () => {
+      deleteQuiz(token, quizId);
+      const res = restoreQuiz(token, quizId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({});
+      const res1 = getQuizDetails(token, quizId);
+      expect(res1.statusCode).toBe(200);
+      expect(res1.body).toStrictEqual({
+        quizId,
+        name: 'Fate',
+        description: 'Description',
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number),
+        numQuestions: 0,
+        questions: [],
+        duration: 0
+      });
+    });
+    test('successful update last edit time', async () => {
+      deleteQuiz(token, quizId);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const res = restoreQuiz(token, quizId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({});
+      const res1 = getQuizDetails(token, quizId);
+      expect(res.statusCode).toBe(200);
+      expect(res1.body.timeLastEdited).not.toStrictEqual(res1.body.timeCreated);
+    });
+  });
+  describe('invalid cases', () => {
+    test('invalid_token', () => {
+      const res = restoreQuiz('invalid_token', quizId);
+      expect(res.statusCode).toBe(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+    test('invalid quiz ID', () => {
+      const res = restoreQuiz(token, 0);
+      expect(res.statusCode).toBe(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+    test('user is not the owner of th quiz', () => {
+      const createUserRes = registerUser('wick@example.com', 'JohnWick123', 'John', 'Wick');
+      expect(createUserRes.statusCode).toBe(200);
+      token = createUserRes.body.token;
+      const res = restoreQuiz(token, quizId);
+      expect(res.statusCode).toBe(403);
+    });
+    test('quiz is not in trash', () => {
+      const res = restoreQuiz(token, quizId);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+    test('quiz name of the restored quiz is already used by the current logged in user for another quiz', () => {
+      deleteQuiz(token, quizId);
+      const createQuizRes = createQuiz(token, 'Fate', 'Are you my master?');
+      expect(createQuizRes.statusCode).toBe(200);
+      const res = restoreQuiz(token, quizId);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+  });
+});
 
 //////////////////////////////////////////////////////////
 ///////////this is test DELETE /v1/admin/quiz/trash/empty
@@ -863,7 +937,6 @@ describe('DELETE /v1/admin/quiz/trash/empty', () => {
     createQuizRes = createQuiz(token, 'Test Quiz2', 'A test quiz2');
     expect(createQuizRes.statusCode).toBe(200);
     quizId2 = createQuizRes.body.quizId;
-
 
     // Delete the quiz
     const deleteQuizRes = deleteQuiz(token, quizId1);

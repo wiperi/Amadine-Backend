@@ -10,7 +10,8 @@ import {
   adminQuizQuestionCreate,
   adminQuizTrashView,
   adminQuizTrashEmpty,
-  adminQuizQuestionDuplicate
+  adminQuizQuestionDuplicate,
+  adminQuizRestore
 } from '@/services/quiz';
 
 export const quizRouter = Router();
@@ -108,6 +109,16 @@ quizRouter.delete('/trash/empty', (req, res) => {
   const quizIds: number[] = JSON.parse(req.query.quizIds as string);
   try {
     return res.json(adminQuizTrashEmpty(authUserId, quizIds));
+  } catch (error) {
+    return res.status(error.statusCode).json({ error: error.message });
+  }
+});
+
+quizRouter.post('/:quizId(\\d+)/restore', (req, res) => {
+  const { authUserId } = req.body;
+  const quizId = parseInt(req.params.quizId);
+  try {
+    return res.json(adminQuizRestore(authUserId, quizId));
   } catch (error) {
     return res.status(error.statusCode).json({ error: error.message });
   }
