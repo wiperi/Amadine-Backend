@@ -233,3 +233,14 @@ export function deleteQuestion(token: string, quizId: number, questionId: number
   });
   return parse(res);
 }
+
+export function transferQuiz(token: string, quizId: number, userEmail: string): ParsedResponse {
+  const res = request('POST', `${QUIZ_URL}/${quizId}/transfer`, {
+    json: {
+      token,
+      quizId,
+      userEmail
+    }
+  });
+  return parse(res);
+}

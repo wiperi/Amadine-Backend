@@ -19,7 +19,8 @@ import {
   requestAdminQuizNameUpdate,
   emptyTrash,
   duplicateQuestion,
-  deleteQuestion
+  deleteQuestion,
+  transferQuiz
 } from './apiTestHelpersV1';
 
 const ERROR = { error: expect.any(String) };
@@ -1311,6 +1312,93 @@ describe('DELETE /v1/admin/quiz/:quizId/question/:questionId', () => {
       const res = deleteQuestion(token, 0, questionId);
       expect(res.statusCode).toStrictEqual(403);
       expect(res.body).toStrictEqual(ERROR);
+    });
+  });
+});
+
+describe('POST /v1/admin/quiz/:quizid/transfer', () => {
+  let quizId: number;
+
+  beforeEach(() => {
+    // Create a quiz before each test
+    const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = createQuizRes.body.quizId; // Store quizId for reuse
+  });
+
+  describe('valid cases', () => {
+    test('successfully transfer quiz to another user', () => {
+      // Register another user to transfer the quiz to
+      const newUserRes = registerUser('newuser@example.com', 'ValidPass123', 'Jane', 'Smith');
+      expect(newUserRes.statusCode).toBe(200);
+
+      // Transfer the quiz to the new user
+      const transferRes = transferQuiz(token, quizId, 'newuser@example.com');
+      expect(transferRes.statusCode).toBe(200);
+      expect(transferRes.body).toStrictEqual({});
+
+      // Verify the new owner by checking quiz details
+      const newToken = newUserRes.body.token;
+      const quizDetails = getQuizDetails(newToken, quizId);
+      expect(quizDetails.statusCode).toBe(200);
+      expect(quizDetails.body.authUserId).toBe(newUserRes.body.userId);
+    });
+  });
+
+  describe('invalid cases', () => {
+    test('invalid token', () => {
+      const transferRes = transferQuiz('invalid_token', quizId, 'newuser@example.com');
+      expect(transferRes.statusCode).toBe(401);
+      expect(transferRes.body).toStrictEqual(ERROR);
+    });
+
+    test('missing token', () => {
+      const transferRes = transferQuiz('', quizId, 'newuser@example.com');
+      expect(transferRes.statusCode).toBe(401);
+      expect(transferRes.body).toStrictEqual(ERROR);
+    });
+
+    test('user does not exist', () => {
+      const transferRes = transferQuiz(token, quizId, 'nonexistent@example.com');
+      expect(transferRes.statusCode).toBe(400);
+      expect(transferRes.body).toStrictEqual(ERROR);
+    });
+
+    test('transferring to self', () => {
+      const transferRes = transferQuiz(token, quizId, 'owner@example.com');
+      expect(transferRes.statusCode).toBe(400);
+      expect(transferRes.body).toStrictEqual(ERROR);
+    });
+
+    test('user is not the owner of the quiz', () => {
+      const newUserRes = registerUser('random@example.com', 'ValidPass123', 'Random', 'User');
+      expect(newUserRes.statusCode).toBe(200);
+
+      const newToken = newUserRes.body.token;
+      const transferRes = transferQuiz(newToken, quizId, 'newuser@example.com');
+      expect(transferRes.statusCode).toBe(401);
+      expect(transferRes.body).toStrictEqual(ERROR);
+    });
+
+    test('quiz does not exist', () => {
+      const transferRes = transferQuiz(token, 999999, 'newuser@example.com'); // Non-existent quiz ID
+      expect(transferRes.statusCode).toBe(403);
+      expect(transferRes.body).toStrictEqual(ERROR);
+    });
+
+    test('target user already has a quiz with the same name', () => {
+      // Register the target user
+      const newUserRes = registerUser('newuser@example.com', 'ValidPass123', 'Jane', 'Smith');
+      expect(newUserRes.statusCode).toBe(200);
+      const newToken = newUserRes.body.token;
+      
+      // Create a quiz for the target user with the same name
+      const targetQuizRes = createQuiz(newToken, 'Test Quiz', 'Target user quiz with same name');
+      expect(targetQuizRes.statusCode).toBe(200);
+    
+      const transferRes = transferQuiz(token, quizId, 'newuser@example.com');
+      expect(transferRes.statusCode).toBe(400); 
+      expect(transferRes.body).toStrictEqual(ERROR);
     });
   });
 });
