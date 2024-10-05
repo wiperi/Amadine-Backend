@@ -79,7 +79,7 @@ export function adminQuizInfo(
  * Update the name of the relevant quiz.
  */
 export function adminQuizNameUpdate(authUserId: number, quizId: number, name: string): EmptyObject {
-  if (!isValidQuizName(name)) {
+  if (!isValidQuizName(name, authUserId)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_NAME);
   }
 
@@ -103,7 +103,7 @@ export function adminQuizNameUpdate(authUserId: number, quizId: number, name: st
  * Creates a new quiz if the provided user ID, name, and description are valid.
  */
 export function adminQuizCreate(authUserId: number, name: string, description: string): { quizId: number } {
-  if (!isValidQuizName(name)) {
+  if (!isValidQuizName(name, authUserId)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_NAME);
   }
   if (!isValidQuizDescription(description)) {
@@ -175,7 +175,7 @@ export function adminQuizRestore(authUserId: number, quizId: number): EmptyObjec
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
 
-  if (!isValidQuizName(quiz.name)) {
+  if (!isValidQuizName(quiz.name, authUserId)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_NAME);
   }
   quiz.active = true;
