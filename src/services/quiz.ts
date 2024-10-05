@@ -127,7 +127,7 @@ export function adminQuizList(authUserId: number): { quizzes: { quizId: number; 
  * Make a quiz be inactive if the user is the owner
  * Return an empty object if succeed
  */
-export function adminQuizRemove(authUserId: number, quizId: number): Record<string, never> | EmptyObject {
+export function adminQuizRemove(authUserId: number, quizId: number): EmptyObject {
   const data = getData();
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
