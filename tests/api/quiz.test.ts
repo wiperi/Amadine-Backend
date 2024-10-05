@@ -94,6 +94,17 @@ describe('POST /v1/admin/quiz', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toHaveProperty('quizId');
     });
+    test('two different user can create same quiz',() => {
+      const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz');
+      expect(createQuizRes.statusCode).toBe(200);
+      const { quizId: quizId1 } = createQuizRes.body;
+      const createUserRes = registerUser('admin@unsw.edu.au', 'ValidPass123', 'Admin', 'User');
+      expect(createUserRes.statusCode).toBe(200);
+      const token2 = createUserRes.body.token;
+      const res = createQuiz(token2, 'Test Quiz', 'A test quiz');
+      const {quizId: quizId2} = res.body;
+      expect(res.statusCode).toBe(200);
+    });
   });
   describe('invalid cases', () => {
     test('invalid token', () => {

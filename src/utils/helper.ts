@@ -155,7 +155,7 @@ export function isValidUserName(userName: string): boolean {
  * @param quizName
  * @returns return whether quiz name is valid
  */
-export function isValidQuizName(quizName: string): boolean {
+export function isValidQuizName(quizName: string, authUserId: number): boolean {
   // regex for alphanumeric and spaces
   const regex = /^[a-z0-9\s]+$/i;
   if (!regex.test(quizName)) {
@@ -167,7 +167,7 @@ export function isValidQuizName(quizName: string): boolean {
   }
 
   const quizList = getData().quizzes;
-  if (quizList.some((quiz) => quiz.name === quizName && quiz.active === true)) {
+  if (quizList.some((quiz) => quiz.name === quizName && quiz.active === true && quiz.authUserId === authUserId)) {
     return false;
   }
 
