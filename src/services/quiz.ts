@@ -221,7 +221,7 @@ export function adminQuizTransfer(authUserId: number, quizId: number, userEmail:
   if (!targetuser) {
     throw new HttpError(400, ERROR_MESSAGES.EMAIL_NOT_EXIST);
   }
-  if(targetuser.userId === authUserId) {
+  if (targetuser.userId === authUserId) {
     throw new HttpError(400, ERROR_MESSAGES.USED_EMAIL);
   }
   const quiz = findQuizById(quizId);
@@ -233,7 +233,6 @@ export function adminQuizTransfer(authUserId: number, quizId: number, userEmail:
   setData(data);
   return {};
 }
-
 
 export function adminQuizQuestionCreate(authUserId: number, quizId: number, questionBody: ParamQuestionBody): { questionId: number } {
   // TODO: extract questionBody check to a helper function

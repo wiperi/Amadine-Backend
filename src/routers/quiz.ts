@@ -150,7 +150,7 @@ quizRouter.delete('/:quizid(\\d+)/question/:questionid(\\d+)', (req: Request, re
 
 quizRouter.post('/:quizid(\\d+)/transfer', (req: Request, res: Response) => {
   const quizid = parseInt(req.params.quizid);
-  const { authUserId, userEmail } = req.body; 
+  const { authUserId, userEmail } = req.body;
   try {
     return res.json(adminQuizTransfer(authUserId, quizid, userEmail));
   } catch (error) {
