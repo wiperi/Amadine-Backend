@@ -1381,7 +1381,7 @@ describe('POST /v1/admin/quiz/:quizid/transfer', () => {
     });
 
     test('quiz does not exist', () => {
-      const transferRes = transferQuiz(token, 999999, 'newuser@example.com'); // Non-existent quiz ID
+      const transferRes = transferQuiz(token, 999999, 'newuser@example.com');
       expect(transferRes.statusCode).toBe(403);
       expect(transferRes.body).toStrictEqual(ERROR);
     });
@@ -1402,3 +1402,4 @@ describe('POST /v1/admin/quiz/:quizid/transfer', () => {
     });
   });
 });
+
