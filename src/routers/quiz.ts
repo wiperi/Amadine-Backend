@@ -10,6 +10,7 @@ import {
   adminQuizQuestionCreate,
   adminQuizTrashView,
   adminQuizTrashEmpty,
+  adminQuizQuestionDelete,
   adminQuizQuestionDuplicate,
   adminQuizRestore
 } from '@/services/quiz';
@@ -130,6 +131,17 @@ quizRouter.post('/:quizId(\\d+)/question/:questionId(\\d+)/duplicate', (req: Req
   const questionId = parseInt(req.params.questionId);
   try {
     return res.json(adminQuizQuestionDuplicate(authUserId, quizId, questionId));
+  } catch (error) {
+    return res.status(error.statusCode).json({ error: error.message });
+  }
+});
+
+quizRouter.delete('/:quizid(\\d+)/question/:questionid(\\d+)', (req: Request, res: Response) => {
+  const quizid = parseInt(req.params.quizid);
+  const questionid = parseInt(req.params.questionid);
+  const { authUserId } = req.body;
+  try {
+    return res.json(adminQuizQuestionDelete(authUserId, quizid, questionid));
   } catch (error) {
     return res.status(error.statusCode).json({ error: error.message });
   }
