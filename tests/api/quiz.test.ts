@@ -1365,7 +1365,7 @@ describe('POST /v1/admin/quiz/:quizid/transfer', () => {
     });
 
     test('transferring to self', () => {
-      const transferRes = transferQuiz(token, quizId, 'owner@example.com');
+      const transferRes = transferQuiz(token, quizId, 'test@example.com');
       expect(transferRes.statusCode).toBe(400);
       expect(transferRes.body).toStrictEqual(ERROR);
     });
@@ -1376,7 +1376,7 @@ describe('POST /v1/admin/quiz/:quizid/transfer', () => {
 
       const newToken = newUserRes.body.token;
       const transferRes = transferQuiz(newToken, quizId, 'newuser@example.com');
-      expect(transferRes.statusCode).toBe(401);
+      expect(transferRes.statusCode).toBe(403);
       expect(transferRes.body).toStrictEqual(ERROR);
     });
 

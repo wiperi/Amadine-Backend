@@ -214,7 +214,7 @@ export function adminQuizTransfer(authUserId: number, quizId: number, userEmail:
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
-    throw new HttpError(401, ERROR_MESSAGES.NOT_AUTHORIZED);
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
   const data = getData();
   const targetuser = data.users.find(user => user.email === userEmail);
