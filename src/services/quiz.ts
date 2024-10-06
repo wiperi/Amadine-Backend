@@ -366,7 +366,6 @@ export function adminQuizQuestionUpdate(authUserId: number, quizId: number, ques
   return {};
 }
 
-
 export function adminQuizQuestionDelete(authUserId: number, quizId: number, questionId: number): EmptyObject {
   const quiz = findQuizById(quizId);
   if (!quiz || !quiz.active) {
