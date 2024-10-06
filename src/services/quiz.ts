@@ -298,12 +298,74 @@ export function adminQuizQuestionUpdate(authUserId: number, quizId: number, ques
   if (!quizId || recursiveFind(questionBody, undefined)) {
     throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
   }
+  if (!isValidQuizId(quizId)) {
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  }
 
+  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
+
+  const quiz = findQuizById(quizId);
+  if (!quiz) {
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  }
+
+  const question = quiz.questions.find(q => q.questionId === questionId);
+  if (!question) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION_ID);
+  }
   // TODO: Implement this helper function
   // if (!isValidQuestion(questionBody)) {};
+  if (questionBody.question.length < 5 || questionBody.question.length > 50) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+  }
+  if (questionBody.answers.length < 2 || questionBody.answers.length > 6) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+  }
+  if (questionBody.duration <= 0) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+  }
+  if (questionBody.points < 1 || questionBody.points > 10) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+  }
+  if (questionBody.answers.some(answer => answer.answer.length < 1 || answer.answer.length > 30)) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+  }
+  const answerSet = new Set();
+  for (const answer of questionBody.answers) {
+    if (answerSet.has(answer.answer)) {
+      throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+    }
+    answerSet.add(answer.answer);
+  }
+  if (!questionBody.answers.some(answer => answer.correct)) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
+  }
+
+  const totalDuration = quiz.questions.reduce((accumulator, question) => {
+    if (question.questionId === questionId) {
+      return accumulator + questionBody.duration;
+    }
+    return accumulator + question.duration;
+  }, 0);
+
+  if (totalDuration > 180) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_DURATION);
+  }
+  question.question = questionBody.question;
+  question.duration = questionBody.duration;
+  question.points = questionBody.points;
+
+  question.setAnswers(
+    questionBody.answers.map(answer => new Answer(getNewID('answer'), answer.answer, answer.correct))
+  );
+  quiz.timeLastEdited = Math.floor(Date.now() / 1000);
+  setData();
 
   return {};
 }
+
 
 export function adminQuizQuestionDelete(authUserId: number, quizId: number, questionId: number): EmptyObject {
   const quiz = findQuizById(quizId);
