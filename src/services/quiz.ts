@@ -208,11 +208,29 @@ export function adminQuizTrashEmpty(authUserId: number, quizIds: number[]): Empt
 
 export function adminQuizTransfer(authUserId: number, quizId: number, userEmail: string): EmptyObject {
   // TODO: Implement this function
-
-  // const data = getData();
   // const newAuthUserId = data.users.find(user => user.email === userEmail).userId;
   // findQuizById(quizId).authUserId = newAuthUserId;
-
+  if (!isValidQuizId(quizId)) {
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  }
+  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
+  const data = getData();
+  const targetuser = data.users.find(user => user.email === userEmail);
+  if (!targetuser) {
+    throw new HttpError(400, ERROR_MESSAGES.EMAIL_NOT_EXIST);
+  }
+  if (targetuser.userId === authUserId) {
+    throw new HttpError(400, ERROR_MESSAGES.USED_EMAIL);
+  }
+  const quiz = findQuizById(quizId);
+  const hasSameName = data.quizzes.some(q => q.authUserId === targetuser.userId && q.name === quiz.name);
+  if (hasSameName) {
+    throw new HttpError(400, ERROR_MESSAGES.QUIZ_NAME_CONFLICT);
+  }
+  quiz.authUserId = targetuser.userId;
+  setData(data);
   return {};
 }
 

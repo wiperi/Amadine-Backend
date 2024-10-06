@@ -12,7 +12,8 @@ import {
   adminQuizTrashEmpty,
   adminQuizQuestionDelete,
   adminQuizQuestionDuplicate,
-  adminQuizRestore
+  adminQuizRestore,
+  adminQuizTransfer
 } from '@/services/quiz';
 
 export const quizRouter = Router();
@@ -142,6 +143,16 @@ quizRouter.delete('/:quizid(\\d+)/question/:questionid(\\d+)', (req: Request, re
   const { authUserId } = req.body;
   try {
     return res.json(adminQuizQuestionDelete(authUserId, quizid, questionid));
+  } catch (error) {
+    return res.status(error.statusCode).json({ error: error.message });
+  }
+});
+
+quizRouter.post('/:quizid(\\d+)/transfer', (req: Request, res: Response) => {
+  const quizid = parseInt(req.params.quizid);
+  const { authUserId, userEmail } = req.body;
+  try {
+    return res.json(adminQuizTransfer(authUserId, quizid, userEmail));
   } catch (error) {
     return res.status(error.statusCode).json({ error: error.message });
   }
