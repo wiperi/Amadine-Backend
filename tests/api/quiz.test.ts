@@ -20,7 +20,8 @@ import {
   emptyTrash,
   duplicateQuestion,
   deleteQuestion,
-  transferQuiz
+  transferQuiz,
+  updateQuestion
 } from './apiTestHelpersV1';
 
 const ERROR = { error: expect.any(String) };
@@ -1403,3 +1404,238 @@ describe('POST /v1/admin/quiz/:quizid/transfer', () => {
   });
 });
 
+describe('PUT /v1/admin/quiz/:quizid/question/:questionid', () => {
+  let quizId: number;
+  let questionId: number;
+
+  beforeEach(() => {
+    // Create a quiz
+    const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = createQuizRes.body.quizId;
+
+    // Create a question
+    const questionBody = {
+      question: 'What is the capital of France?',
+      duration: 60,
+      points: 5,
+      answers: [
+        { answer: 'Paris', correct: true },
+        { answer: 'Berlin', correct: false },
+      ],
+    };
+    const createQuestionRes = createQuestion(token, quizId, questionBody);
+    expect(createQuestionRes.statusCode).toBe(200);
+    questionId = createQuestionRes.body.questionId;
+  });
+
+  describe('Valid Cases', () => {
+    test('successfully update the quiz question', () => {
+      const updatedQuestionBody = {
+        question: 'What is the largest country in the world?',
+        duration: 120,
+        points: 7,
+        answers: [
+          { answer: 'Russia', correct: true },
+          { answer: 'Canada', correct: false },
+        ],
+      };
+      const res = updateQuestion(token, quizId, questionId, updatedQuestionBody);
+      expect(res.statusCode).toBe(200);
+
+      const quizDetailsRes = getQuizDetails(token, quizId);
+      expect(quizDetailsRes.statusCode).toBe(200);
+      const updatedQuestion = quizDetailsRes.body.questions.find((q:any) => q.questionId === questionId);
+      expect(updatedQuestion).toBeDefined();
+      expect(updatedQuestion.question).toBe(updatedQuestionBody.question);
+      expect(updatedQuestion.duration).toBe(updatedQuestionBody.duration);
+      expect(updatedQuestion.points).toBe(updatedQuestionBody.points);
+    });
+
+    test('successful update should change last edited time', async () => {
+      // Get initial quiz details
+      const quizDetailsRes = getQuizDetails(token, quizId);
+      expect(quizDetailsRes.statusCode).toBe(200);
+      const initialTimeLastEdited = quizDetailsRes.body.timeLastEdited;
+  
+      await new Promise(resolve => setTimeout(resolve, 1000));
+  
+      const updatedQuestionBody = {
+        question: 'What is the largest country in the world?',
+        duration: 120,
+        points: 7,
+        answers: [
+          { answer: 'Russia', correct: true },
+          { answer: 'Canada', correct: false },
+        ],
+      };
+      const updateRes = updateQuestion(token, quizId, questionId, updatedQuestionBody);
+      expect(updateRes.statusCode).toBe(200);
+
+      const updatedQuizDetailsRes = getQuizDetails(token, quizId);
+      expect(updatedQuizDetailsRes.statusCode).toBe(200);
+      const updatedTimeLastEdited = updatedQuizDetailsRes.body.timeLastEdited;
+      expect(updatedTimeLastEdited).not.toBe(initialTimeLastEdited);
+    });
+  });
+
+  describe('Error Cases', () => {
+    test('Invalid questionId does not refer to a valid question within this quiz', () => {
+      const updatedQuestionBody = {
+        question: 'What is the largest country in the world?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Russia', correct: true },
+          { answer: 'Canada', correct: false },
+        ],
+      };
+      // Attempting to update with an invalid questionId
+      const res = updateQuestion(token, quizId, 99999, updatedQuestionBody);
+      expect(res.statusCode).toBe(400);  // Expect a 400 status code
+    });
+
+    test('Invalid token', () => {
+      const updatedQuestionBody = {
+        question: 'What is the largest country in the world?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Russia', correct: true },
+          { answer: 'Canada', correct: false },
+        ],
+      };
+      const res = updateQuestion('invalid_token', quizId, questionId, updatedQuestionBody);
+      expect(res.statusCode).toBe(401);
+    });
+
+    test('Not owner of the quiz (valid token but not the quiz owner)', () => {
+      const updatedQuestionBody = {
+        question: 'Valid question?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Paris', correct: true },
+          { answer: 'Berlin', correct: false },
+        ],
+      };
+      // Assuming we have another token from a different user who doesn't own this quiz
+      const registerOtherUserRes = registerUser('otheruser@example.com', 'OtherValidPass123', 'Jane', 'Doe');
+      expect(registerOtherUserRes.statusCode).toBe(200);
+      const otherUserToken = registerOtherUserRes.body.token;
+      const res = updateQuestion(otherUserToken, quizId, questionId, updatedQuestionBody);
+      expect(res.statusCode).toBe(403);  
+    });
+
+    test('Invalid question string length (less than 5 or more than 50 characters)', () => {
+      const updatedQuestionBody = {
+        question: 'Hi',  // Invalid length (less than 5 characters)
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Paris', correct: true },
+          { answer: 'Berlin', correct: false },
+        ],
+      };
+      const res = updateQuestion(token, quizId, questionId, updatedQuestionBody);
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('Invalid number of answers (less than 2 or more than 6)', () => {
+      const updatedQuestionBody = {
+        question: 'Valid question?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Paris', correct: true },  // Only 1 answer (less than 2)
+        ],
+      };
+      const res = updateQuestion(token, quizId, questionId, updatedQuestionBody);
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('Invalid question duration (not a positive number)', () => {
+      const updatedQuestionBody = {
+        question: 'Valid question?',
+        duration: -1,  // Invalid duration (negative)
+        points: 5,
+        answers: [
+          { answer: 'Paris', correct: true },
+          { answer: 'Berlin', correct: false },
+        ],
+      };
+      const res = updateQuestion(token, quizId, questionId, updatedQuestionBody);
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('Total duration exceeds 3 minutes (180 seconds)', () => {
+      const updatedQuestionBody = {
+        question: 'Valid question?',
+        duration: 181,  // Invalid duration (exceeds limit)
+        points: 5,
+        answers: [
+          { answer: 'Paris', correct: true },
+          { answer: 'Berlin', correct: false },
+        ],
+      };
+      const res = updateQuestion(token, quizId, questionId, updatedQuestionBody);
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('Invalid points awarded (less than 1 or greater than 10)', () => {
+      const updatedQuestionBody = {
+        question: 'Valid question?',
+        duration: 60,
+        points: 0,  // Invalid points (less than 1)
+        answers: [
+          { answer: 'Paris', correct: true },
+          { answer: 'Berlin', correct: false },
+        ],
+      };
+      const res = updateQuestion(token, quizId, questionId, updatedQuestionBody);
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('Answer string length (shorter than 1 character or longer than 30 characters)', () => {
+      const updatedQuestionBody = {
+        question: 'Valid question?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: '', correct: true },  // Invalid answer (empty string)
+          { answer: 'Berlin', correct: false },
+        ],
+      };
+      const res = updateQuestion(token, quizId, questionId, updatedQuestionBody);
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('Duplicate answers in the same question', () => {
+      const updatedQuestionBody = {
+        question: 'Valid question?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Paris', correct: true },
+          { answer: 'Paris', correct: false },  // Duplicate answers
+        ],
+      };
+      const res = updateQuestion(token, quizId, questionId, updatedQuestionBody);
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('No correct answers provided', () => {
+      const updatedQuestionBody = {
+        question: 'Valid question?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Paris', correct: false },
+          { answer: 'Berlin', correct: false },  // No correct answer
+        ],
+      };
+      const res = updateQuestion(token, quizId, questionId, updatedQuestionBody);
+      expect(res.statusCode).toBe(400);
+    });
+  });
+});
