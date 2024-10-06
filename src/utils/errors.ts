@@ -35,7 +35,7 @@ const ERROR_MESSAGES = {
   INVALID_POSITION: 'Position is out of range',
   SAME_POSITION: 'Position is the same as the current position',
   // Duration
-  INVALID_DURATION: 'If this question were to be updated, the sum of the question durations in the quiz exceeds 3 minutes'
+  INVALID_DURATION: 'sum of the question durations in the quiz exceeds 3 minutes'
 };
 
 export { ERROR_MESSAGES };

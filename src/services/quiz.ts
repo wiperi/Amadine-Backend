@@ -307,9 +307,6 @@ export function adminQuizQuestionUpdate(authUserId: number, quizId: number, ques
   }
 
   const quiz = findQuizById(quizId);
-  if (!quiz) {
-    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
-  }
 
   const question = quiz.questions.find(q => q.questionId === questionId);
   if (!question) {

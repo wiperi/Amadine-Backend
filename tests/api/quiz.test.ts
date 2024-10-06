@@ -1451,6 +1451,32 @@ describe('PUT /v1/admin/quiz/:quizid/question/:questionid', () => {
       expect(updatedQuestion.duration).toBe(updatedQuestionBody.duration);
       expect(updatedQuestion.points).toBe(updatedQuestionBody.points);
     });
+
+    test('successful update should change last edited time', async () => {
+      // Get initial quiz details
+      const quizDetailsRes = getQuizDetails(token, quizId);
+      expect(quizDetailsRes.statusCode).toBe(200);
+      const initialTimeLastEdited = quizDetailsRes.body.timeLastEdited;
+  
+      await new Promise(resolve => setTimeout(resolve, 1000));
+  
+      const updatedQuestionBody = {
+        question: 'What is the largest country in the world?',
+        duration: 120,
+        points: 7,
+        answers: [
+          { answer: 'Russia', correct: true },
+          { answer: 'Canada', correct: false },
+        ],
+      };
+      const updateRes = updateQuestion(token, quizId, questionId, updatedQuestionBody);
+      expect(updateRes.statusCode).toBe(200);
+
+      const updatedQuizDetailsRes = getQuizDetails(token, quizId);
+      expect(updatedQuizDetailsRes.statusCode).toBe(200);
+      const updatedTimeLastEdited = updatedQuizDetailsRes.body.timeLastEdited;
+      expect(updatedTimeLastEdited).not.toBe(initialTimeLastEdited);
+    });
   });
 
   describe('Error Cases', () => {
