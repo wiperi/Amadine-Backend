@@ -1,5 +1,3 @@
-import request from 'sync-request-curl';
-import config from '../../src/config.json';
 import {
   clear,
   registerUser,
@@ -20,13 +18,7 @@ import {
   createQuestion
 } from './apiTestHelpersV1';
 
-const BASE_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const ERROR = { error: expect.any(String) };
-
-// Parse the response body as JSON
-function parse(res: string | Buffer) {
-  return JSON.parse(res.toString());
-}
 
 beforeEach(() => {
   clear();
@@ -44,7 +36,7 @@ describe('DELETE /v1/clear', () => {
     expect(res.body).toStrictEqual({});
   });
 
-  test.skip('correctly clears data', () => {
+  test('correctly clears data', () => {
     // Register a user
     const registerRes = registerUser('test@example.com', 'ValidPass123', 'John', 'Doe');
     expect(registerRes.statusCode).toBe(200);
