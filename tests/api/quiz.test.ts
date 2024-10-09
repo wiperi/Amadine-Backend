@@ -1,14 +1,9 @@
 import {
   registerUser,
   loginUser,
-  logoutUser,
-  getUserDetails,
-  updateUserDetails,
-  updateUserPassword,
   getQuizList,
   getQuizDetails,
   createQuiz,
-  updateQuiz,
   deleteQuiz,
   updateQuizDescription,
   getQuizTrash,
@@ -283,8 +278,7 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
   });
 });
 
-// ... existing code ...
-describe.skip('PUT /v1/admin/quiz/{quizid}/question/{questionid}/move', () => {
+describe('PUT /v1/admin/quiz/{quizid}/question/{questionid}/move', () => {
   let quizId: number;
   let questionId1: number;
   let questionId2: number;
@@ -334,19 +328,6 @@ describe.skip('PUT /v1/admin/quiz/{quizid}/question/{questionid}/move', () => {
       expect(quiz.questions[0].questionId).toBe(questionId2);
       expect(quiz.questions[1].questionId).toBe(questionId1);
     });
-
-    test('move question to the same position (no change)', () => {
-      const res = moveQuestion(token, quizId, questionId1, 0);
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toStrictEqual({});
-
-      // Verify the order of questions remains unchanged
-      const quizRes = getQuizDetails(token, quizId);
-      expect(quizRes.statusCode).toBe(200);
-      const quiz = quizRes.body;
-      expect(quiz.questions[0].questionId).toBe(questionId1);
-      expect(quiz.questions[1].questionId).toBe(questionId2);
-    });
   });
 
   describe('invalid cases', () => {
@@ -391,6 +372,12 @@ describe.skip('PUT /v1/admin/quiz/{quizid}/question/{questionid}/move', () => {
     });
 
     test('new position is the same as the current position', () => {
+      const res = moveQuestion(token, quizId, questionId1, 0);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('move question to the same position (no change)', () => {
       const res = moveQuestion(token, quizId, questionId1, 0);
       expect(res.statusCode).toBe(400);
       expect(res.body).toStrictEqual(ERROR);
