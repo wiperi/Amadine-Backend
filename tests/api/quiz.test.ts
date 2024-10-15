@@ -505,7 +505,7 @@ describe('DELETE /v1/admin/quiz/:quizid', () => {
 
       // Attempt to delete with the new user's token
       const res = deleteQuiz(newToken, quizId);
-      expect(res.statusCode).toBe(401);
+      expect(res.statusCode).toBe(403);
       expect(res.body).toStrictEqual(ERROR);
     });
   });
