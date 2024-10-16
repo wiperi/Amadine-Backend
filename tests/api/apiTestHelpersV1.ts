@@ -126,7 +126,6 @@ export function deleteQuiz(token: string, quizId: number): ParsedResponse {
   const res = request('DELETE', `${QUIZ_URL}/${quizId}`, {
     qs: {
       token,
-      quizId
     }
   });
   return parse(res);
