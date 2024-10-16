@@ -1,11 +1,11 @@
-package-lock.json
+*.json
+!package.json
 node_modules
 build
 .DS_store
 coverage/
 .nyc_output
 results/
-docs/knowledgeBase
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -164,7 +164,6 @@ bower_components
 # Editors
 .idea
 *.iml
-.vscode/
 
 # OS metadata
 .DS_Store
@@ -172,3 +171,4 @@ Thumbs.db
 
 # Ignore built ts files
 dist/**/*
+
