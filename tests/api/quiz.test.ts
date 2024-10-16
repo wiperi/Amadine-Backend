@@ -382,6 +382,12 @@ describe('PUT /v1/admin/quiz/{quizid}/question/{questionid}/move', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body).toStrictEqual(ERROR);
     });
+    test('questionId is invalid', () => {
+      const questionId = -100;
+      const res = moveQuestion(token, quizId, questionId, 1);
+      expect(res.statusCode).toStrictEqual(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
   });
 });
 /*
@@ -499,7 +505,7 @@ describe('DELETE /v1/admin/quiz/:quizid', () => {
 
       // Attempt to delete with the new user's token
       const res = deleteQuiz(newToken, quizId);
-      expect(res.statusCode).toBe(401);
+      expect(res.statusCode).toBe(403);
       expect(res.body).toStrictEqual(ERROR);
     });
   });
@@ -1143,6 +1149,12 @@ describe('POST /v1/admin/quiz/{quizid}/question/{questionid}/duplicate', () => {
       expect(res.statusCode).toStrictEqual(403);
       expect(res.body).toStrictEqual(ERROR);
     });
+    test('questionId is invalid', () => {
+      const questionId = -100;
+      const res = duplicateQuestion(token, quizId, questionId);
+      expect(res.statusCode).toStrictEqual(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
   });
 
   describe('valid cases', () => {
@@ -1299,6 +1311,12 @@ describe('DELETE /v1/admin/quiz/:quizId/question/:questionId', () => {
     test('quiz does not exist', () => {
       const res = deleteQuestion(token, 0, questionId);
       expect(res.statusCode).toStrictEqual(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+    test('questionId is invalid', () => {
+      const questionId = -100;
+      const res = deleteQuestion(token, quizId, questionId);
+      expect(res.statusCode).toStrictEqual(400);
       expect(res.body).toStrictEqual(ERROR);
     });
   });

@@ -143,7 +143,7 @@ export function adminQuizRemove(authUserId: number, quizId: number): EmptyObject
   }
 
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
-    throw new HttpError(401, ERROR_MESSAGES.NOT_AUTHORIZED);
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
 
   const quiz = findQuizById(quizId);

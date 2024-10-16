@@ -37,7 +37,7 @@ quizRouter.get('/list', (req: Request, res: Response) => {
   }
 });
 
-quizRouter.get('/:quizid(\\d+)', (req: Request, res: Response) => {
+quizRouter.get('/:quizid(-?\\d+)', (req: Request, res: Response) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId } = req.body;
   try {
@@ -47,7 +47,7 @@ quizRouter.get('/:quizid(\\d+)', (req: Request, res: Response) => {
   }
 });
 
-quizRouter.put('/:quizid(\\d+)/name', (req: Request, res: Response) => {
+quizRouter.put('/:quizid(-?\\d+)/name', (req: Request, res: Response) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId, name } = req.body;
   try {
@@ -57,7 +57,7 @@ quizRouter.put('/:quizid(\\d+)/name', (req: Request, res: Response) => {
   }
 });
 
-quizRouter.put('/:quizid(\\d+)/question/:questionid(\\d+)/move', (req: Request, res: Response) => {
+quizRouter.put('/:quizid(-?\\d+)/question/:questionid(-?\\d+)/move', (req: Request, res: Response) => {
   const quizid = parseInt(req.params.quizid);
   const questionid = parseInt(req.params.questionid);
   const { authUserId, newPosition } = req.body;
@@ -68,7 +68,7 @@ quizRouter.put('/:quizid(\\d+)/question/:questionid(\\d+)/move', (req: Request, 
   }
 });
 
-quizRouter.delete('/:quizid(\\d+)', (req: Request, res: Response) => {
+quizRouter.delete('/:quizid(-?\\d+)', (req: Request, res: Response) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId } = req.body;
   try {
@@ -78,7 +78,7 @@ quizRouter.delete('/:quizid(\\d+)', (req: Request, res: Response) => {
   }
 });
 
-quizRouter.put('/:quizid(\\d+)/description', (req: Request, res: Response) => {
+quizRouter.put('/:quizid(-?\\d+)/description', (req: Request, res: Response) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId, description } = req.body;
   try {
@@ -88,7 +88,7 @@ quizRouter.put('/:quizid(\\d+)/description', (req: Request, res: Response) => {
   }
 });
 
-quizRouter.post('/:quizId(\\d+)/question', (req, res) => {
+quizRouter.post('/:quizId(-?\\d+)/question', (req, res) => {
   const { authUserId, questionBody } = req.body;
   const quizId = parseInt(req.params.quizId);
   try {
@@ -117,7 +117,7 @@ quizRouter.delete('/trash/empty', (req, res) => {
   }
 });
 
-quizRouter.post('/:quizId(\\d+)/restore', (req, res) => {
+quizRouter.post('/:quizId(-?\\d+)/restore', (req, res) => {
   const { authUserId } = req.body;
   const quizId = parseInt(req.params.quizId);
   try {
@@ -127,7 +127,7 @@ quizRouter.post('/:quizId(\\d+)/restore', (req, res) => {
   }
 });
 
-quizRouter.post('/:quizId(\\d+)/question/:questionId(\\d+)/duplicate', (req: Request, res: Response) => {
+quizRouter.post('/:quizId(-?\\d+)/question/:questionId(-?\\d+)/duplicate', (req: Request, res: Response) => {
   const { authUserId } = req.body;
   const quizId = parseInt(req.params.quizId);
   const questionId = parseInt(req.params.questionId);
@@ -138,7 +138,7 @@ quizRouter.post('/:quizId(\\d+)/question/:questionId(\\d+)/duplicate', (req: Req
   }
 });
 
-quizRouter.delete('/:quizid(\\d+)/question/:questionid(\\d+)', (req: Request, res: Response) => {
+quizRouter.delete('/:quizid(-?\\d+)/question/:questionid(-?\\d+)', (req: Request, res: Response) => {
   const quizid = parseInt(req.params.quizid);
   const questionid = parseInt(req.params.questionid);
   const { authUserId } = req.body;
@@ -149,7 +149,7 @@ quizRouter.delete('/:quizid(\\d+)/question/:questionid(\\d+)', (req: Request, re
   }
 });
 
-quizRouter.post('/:quizid(\\d+)/transfer', (req: Request, res: Response) => {
+quizRouter.post('/:quizid(-?\\d+)/transfer', (req: Request, res: Response) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId, userEmail } = req.body;
   try {
@@ -159,7 +159,7 @@ quizRouter.post('/:quizid(\\d+)/transfer', (req: Request, res: Response) => {
   }
 });
 
-quizRouter.put('/:quizid(\\d+)/question/:questionid(\\d+)', (req: Request, res: Response) => {
+quizRouter.put('/:quizid(-?\\d+)/question/:questionid(-?\\d+)', (req: Request, res: Response) => {
   const quizId = parseInt(req.params.quizid);
   const questionId = parseInt(req.params.questionid);
   const { authUserId, questionBody } = req.body;
