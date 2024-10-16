@@ -58,14 +58,14 @@ function setData(newData?: DataStore): void {
  * Load data from json file.
  */
 function loadData(): void {
-  let rawData: any = JSON.parse(fs.readFileSync(DATA_FILE_PATH, 'utf8'));
+  const rawData: any = JSON.parse(fs.readFileSync(DATA_FILE_PATH, 'utf8'));
 
   // Reconstruct the objects
   rawData.users.forEach((u: any) => Object.setPrototypeOf(u, User.prototype));
   rawData.userSessions.forEach((us: any) => Object.setPrototypeOf(us, UserSession.prototype));
-  rawData.quizzes.forEach((q: any) => Object.setPrototypeOf(q, Quiz.prototype)
-    && q.questions.forEach((q: any) => Object.setPrototypeOf(q, Question.prototype)
-      && q.answers.forEach((a: any) => Object.setPrototypeOf(a, Answer.prototype))));
+  rawData.quizzes.forEach((q: any) => Object.setPrototypeOf(q, Quiz.prototype) &&
+    q.questions.forEach((q: any) => Object.setPrototypeOf(q, Question.prototype) &&
+      q.answers.forEach((a: any) => Object.setPrototypeOf(a, Answer.prototype))));
   rawData.quizSessions.forEach((qs: any) => Object.setPrototypeOf(qs, QuizSession.prototype));
   rawData.players.forEach((p: any) => Object.setPrototypeOf(p, Player.prototype));
 

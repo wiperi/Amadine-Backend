@@ -154,7 +154,7 @@ export function isValidUserName(userName: string): boolean {
  * - The name must be alphanumeric and can include spaces.
  * - The name length must be between 3 and 30 characters.
  * - The name must be unique for the authenticated user, considering active quizzes.
- * 
+ *
  * @param authUserId - The ID of the authenticated user.
  * @param name - The name of the quiz to validate.
  * @param quizId - (Optional) The ID of the quiz being edited, to exclude it from uniqueness check.
