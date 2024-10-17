@@ -150,24 +150,31 @@ export function isValidUserName(userName: string): boolean {
 }
 
 /**
- * check if the provided quiz name is in a valid format
+ * Validates the quiz name based on several criteria:
+ * - The name must be alphanumeric and can include spaces.
+ * - The name length must be between 3 and 30 characters.
+ * - The name must be unique for the authenticated user, considering active quizzes.
  *
- * @param quizName
- * @returns return whether quiz name is valid
+ * @param authUserId - The ID of the authenticated user.
+ * @param name - The name of the quiz to validate.
+ * @param quizId - (Optional) The ID of the quiz being edited, to exclude it from uniqueness check.
+ * @returns `true` if the quiz name is valid, otherwise `false`.
  */
-export function isValidQuizName(quizName: string, authUserId: number): boolean {
+export function isValidQuizName(authUserId: number, name: string, quizId: number | undefined): boolean {
   // regex for alphanumeric and spaces
   const regex = /^[a-z0-9\s]+$/i;
-  if (!regex.test(quizName)) {
+  if (!regex.test(name)) {
     return false;
   }
 
-  if (quizName.length < 3 || quizName.length > 30) {
+  if (name.length < 3 || name.length > 30) {
     return false;
   }
 
-  const quizList = getData().quizzes;
-  if (quizList.some((quiz) => quiz.name === quizName && quiz.active === true && quiz.authUserId === authUserId)) {
+  const quizzes = getData().quizzes;
+  if (quizId && quizzes.some((q) => q.name === name && q.active === true && q.authUserId === authUserId && q.quizId !== quizId)) {
+    return false;
+  } else if (!quizId && quizzes.some((q) => q.name === name && q.active === true && q.authUserId === authUserId)) {
     return false;
   }
 
