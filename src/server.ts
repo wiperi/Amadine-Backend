@@ -12,16 +12,14 @@ import os from 'os';
 import http from 'http';
 
 // Import routers
-import { authRouter } from './routers/auth';
-import { quizRouter } from './routers/quiz';
-import { userRouter } from './routers/user';
-import { playerRouter } from './routers/player';
+import router from './routes';
 
 import { loadData } from './dataStore';
-import { clear } from './utils/other';
 import { authorizeToken } from './services/auth';
 import { HttpError } from './utils/HttpError';
 import { cleanupLogsWeekly } from './utils/logCleanup';
+
+// Import winston logger for error logging
 import logger from './utils/logger';
 
 const LOG_PATH = config.logPath;
@@ -60,22 +58,17 @@ const HOST: string = process.env.IP || '127.0.0.1';
 //  ================= WORK IS DONE BELOW THIS LINE ===================
 // ====================================================================
 
-// Load data on very first request
-let dataLoaded = false;
-app.use((req: Request, res: Response, next: NextFunction) => {
-  if (!dataLoaded) {
-    loadData();
-    console.log('📊 Data loaded');
-    dataLoaded = true;
-  }
-  next();
-});
+// Load data on server start
+(() => {
+  loadData();
+  console.log('📊 Server data loaded');
+})();
 
 // Example get request
-app.get('/echo', (req: Request, res: Response) => {
+app.get('/echo', (req: Request, res: Response, next: NextFunction) => {
   const result = echo(req.query.echo as string);
   if ('error' in result) {
-    res.status(400);
+    return next(new HttpError(400, result.error));
   }
 
   return res.json(result);
@@ -83,14 +76,8 @@ app.get('/echo', (req: Request, res: Response) => {
 
 app.use(authorizeToken);
 
-app.use('/v1/admin/auth', authRouter);
-app.use('/v1/admin/quiz', quizRouter);
-app.use('/v1/admin/user', userRouter);
-app.use('/v1/player', playerRouter);
-
-app.delete('/v1/clear', (req: Request, res: Response) => {
-  return res.status(200).json(clear());
-});
+// Pass all requests to the router
+app.use('/', router);
 
 app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
   const statusCode = err.statusCode || 500;
@@ -142,7 +129,7 @@ app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
 //  ================= WORK IS DONE ABOVE THIS LINE ===================
 // ====================================================================
 
-app.use((req: Request, res: Response) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   const error = `
     Route not found - This could be because:
       0. You have defined routes below (not above) this middleware in server.ts
@@ -154,7 +141,7 @@ app.use((req: Request, res: Response) => {
       4. You've forgotten a leading slash (/), e.g. you have posts/list instead
          of /posts/list in your server.ts or test file
   `;
-  res.status(404).json({ error });
+  return next(new HttpError(404, error));
 });
 
 // start server

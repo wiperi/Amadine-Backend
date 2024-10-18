@@ -40,13 +40,13 @@ export function authorizeToken(req: Request, res: Response, next: NextFunction) 
   }
 
   if (!token) {
-    return res.status(401).json({ error: ERROR_MESSAGES.MISSING_TOKEN });
+    return next(new HttpError(401, ERROR_MESSAGES.MISSING_TOKEN));
   }
 
   // Check if token is valid
   const userSession = getData().userSessions.find((session) => session.token === token);
   if (!userSession) {
-    return res.status(401).json({ error: ERROR_MESSAGES.INVALID_TOKEN });
+    return next(new HttpError(401, ERROR_MESSAGES.INVALID_TOKEN));
   }
 
   // Set authUserId in request

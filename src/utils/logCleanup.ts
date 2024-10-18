@@ -27,7 +27,7 @@ function cleanupLogs() {
 
         if (stats.mtimeMs < oneWeekAgo) {
           fs.writeFile(filePath, '', err => {
-            if (err) { 
+            if (err) {
               console.error(`Error emptying file ${file}:`, err);
             } else {
               console.log(`🧹 Emptied old log file: ${file}`);

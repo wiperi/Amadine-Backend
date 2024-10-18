@@ -1,6 +1,6 @@
-import winston from "winston";
-import path from "path";
-import config from "@/config";
+import winston from 'winston';
+import path from 'path';
+import config from '@/config';
 
 const LOG_PATH = config.logPath;
 
@@ -13,7 +13,7 @@ const consoleFormat = winston.format.printf((logObj) => {
   const message = {
     req: req,
     res: res
-  }
+  };
   return JSON.stringify(message, null, 2);
 });
 
