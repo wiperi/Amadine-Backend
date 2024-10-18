@@ -2,6 +2,26 @@ import { getData } from '@/dataStore';
 import isEmail from 'validator/lib/isEmail';
 import { User, Quiz } from '@/models/Classes';
 import { ERROR_MESSAGES } from '@/utils/errors';
+import { NextFunction, Request, Response } from 'express';
+
+/**
+ * Executes a function, if success, return the response
+ * if error, catch it and pass to next middleware
+ * 
+ * @param fn - The function to execute.
+ * @param req - The Express request object.
+ * @param res - The Express response object.
+ * @param next - The Express next function.
+ * @returns The JSON response if the function executes successfully.
+ * @throws Passes any caught error to the next middleware.
+ */
+export function tryCatch(fn: Function, req: Request, res: Response, next: NextFunction) {
+  try {
+    return res.json(fn());
+  } catch (error) {
+    next(error);
+  }
+}
 
 /**
  * Recursively searches for a target value within an object or its nested properties.

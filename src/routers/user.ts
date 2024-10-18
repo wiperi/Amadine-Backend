@@ -1,36 +1,22 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { adminUserPasswordUpdate, adminUserDetailsUpdate, adminUserDetails } from '@/services/auth';
+import { tryCatch } from '@/utils/helper';
+
 export const userRouter = Router();
 
-userRouter.get('/', (req: Request, res: Response) => {
-  return res.status(200).json({ message: 'User route' });
-});
-
-userRouter.put('/password', (req: Request, res: Response) => {
+userRouter.put('/password', (req: Request, res: Response, next: NextFunction) => {
   const { oldPassword, newPassword } = req.body;
   const authUserId = req.body.authUserId;
-  try {
-    return res.json(adminUserPasswordUpdate(authUserId, oldPassword, newPassword));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminUserPasswordUpdate(authUserId, oldPassword, newPassword), req, res, next);
 });
 
-userRouter.put('/details', (req: Request, res: Response) => {
+userRouter.put('/details', (req: Request, res: Response, next: NextFunction) => {
   const { email, nameFirst, nameLast } = req.body;
   const authUserId = req.body.authUserId;
-  try {
-    return res.json(adminUserDetailsUpdate(authUserId, email, nameFirst, nameLast));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminUserDetailsUpdate(authUserId, email, nameFirst, nameLast), req, res, next);
 });
 
-userRouter.get('/details', (req: Request, res: Response) => {
+userRouter.get('/details', (req: Request, res: Response, next: NextFunction) => {
   const { authUserId } = req.body;
-  try {
-    return res.json(adminUserDetails(authUserId));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminUserDetails(authUserId), req, res, next);
 });

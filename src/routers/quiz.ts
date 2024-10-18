@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import {
   adminQuizCreate,
   adminQuizInfo,
@@ -16,157 +16,97 @@ import {
   adminQuizTransfer,
   adminQuizQuestionUpdate
 } from '@/services/quiz';
+import { tryCatch } from '@/utils/helper';
 
 export const quizRouter = Router();
 
-quizRouter.post('/', (req: Request, res: Response) => {
+quizRouter.post('/', (req: Request, res: Response, next: NextFunction) => {
   const { authUserId, name, description } = req.body;
-  try {
-    return res.json(adminQuizCreate(authUserId, name, description));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminQuizCreate(authUserId, name, description), req, res, next);
 });
 
-quizRouter.get('/list', (req: Request, res: Response) => {
+quizRouter.get('/list', (req: Request, res: Response, next: NextFunction) => {
   const { authUserId } = req.body;
-  try {
-    return res.json(adminQuizList(authUserId));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminQuizList(authUserId), req, res, next);
 });
 
-quizRouter.get('/:quizid(-?\\d+)', (req: Request, res: Response) => {
+quizRouter.get('/:quizid(-?\\d+)', (req: Request, res: Response, next: NextFunction) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId } = req.body;
-  try {
-    return res.json(adminQuizInfo(authUserId, quizid));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminQuizInfo(authUserId, quizid), req, res, next);
 });
 
-quizRouter.put('/:quizid(-?\\d+)/name', (req: Request, res: Response) => {
+quizRouter.put('/:quizid(-?\\d+)/name', (req: Request, res: Response, next: NextFunction) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId, name } = req.body;
-  try {
-    return res.json(adminQuizNameUpdate(authUserId, quizid, name));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminQuizNameUpdate(authUserId, quizid, name), req, res, next);
 });
 
-quizRouter.put('/:quizid(-?\\d+)/question/:questionid(-?\\d+)/move', (req: Request, res: Response) => {
+quizRouter.put('/:quizid(-?\\d+)/question/:questionid(-?\\d+)/move', (req: Request, res: Response, next: NextFunction) => {
   const quizid = parseInt(req.params.quizid);
   const questionid = parseInt(req.params.questionid);
   const { authUserId, newPosition } = req.body;
-  try {
-    return res.json(adminQuizQuestionMove(authUserId, quizid, questionid, newPosition));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminQuizQuestionMove(authUserId, quizid, questionid, newPosition), req, res, next);
 });
 
-quizRouter.delete('/:quizid(-?\\d+)', (req: Request, res: Response) => {
+quizRouter.delete('/:quizid(-?\\d+)', (req: Request, res: Response, next: NextFunction) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId } = req.body;
-  try {
-    return res.json(adminQuizRemove(authUserId, quizid));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminQuizRemove(authUserId, quizid), req, res, next);
 });
 
-quizRouter.put('/:quizid(-?\\d+)/description', (req: Request, res: Response) => {
+quizRouter.put('/:quizid(-?\\d+)/description', (req: Request, res: Response, next: NextFunction) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId, description } = req.body;
-  try {
-    return res.json(adminQuizDescriptionUpdate(authUserId, quizid, description));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminQuizDescriptionUpdate(authUserId, quizid, description), req, res, next);
 });
 
-quizRouter.post('/:quizId(-?\\d+)/question', (req, res) => {
+quizRouter.post('/:quizId(-?\\d+)/question', (req: Request, res: Response, next: NextFunction) => {
   const { authUserId, questionBody } = req.body;
   const quizId = parseInt(req.params.quizId);
-  try {
-    return res.json(adminQuizQuestionCreate(authUserId, quizId, questionBody));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminQuizQuestionCreate(authUserId, quizId, questionBody), req, res, next);
 });
 
-quizRouter.get('/trash', (req: Request, res: Response) => {
+quizRouter.get('/trash', (req: Request, res: Response, next: NextFunction) => {
   const { authUserId } = req.body;
-  try {
-    return res.json(adminQuizTrashView(authUserId));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminQuizTrashView(authUserId), req, res, next);
 });
 
-quizRouter.delete('/trash/empty', (req, res) => {
+quizRouter.delete('/trash/empty', (req: Request, res: Response, next: NextFunction) => {
   const { authUserId } = req.body;
   const quizIds: number[] = JSON.parse(req.query.quizIds as string);
-  try {
-    return res.json(adminQuizTrashEmpty(authUserId, quizIds));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminQuizTrashEmpty(authUserId, quizIds), req, res, next);
 });
 
-quizRouter.post('/:quizId(-?\\d+)/restore', (req, res) => {
+quizRouter.post('/:quizId(-?\\d+)/restore', (req: Request, res: Response, next: NextFunction) => {
   const { authUserId } = req.body;
   const quizId = parseInt(req.params.quizId);
-  try {
-    return res.json(adminQuizRestore(authUserId, quizId));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminQuizRestore(authUserId, quizId), req, res, next);
 });
 
-quizRouter.post('/:quizId(-?\\d+)/question/:questionId(-?\\d+)/duplicate', (req: Request, res: Response) => {
+quizRouter.post('/:quizId(-?\\d+)/question/:questionId(-?\\d+)/duplicate', (req: Request, res: Response, next: NextFunction) => {
   const { authUserId } = req.body;
   const quizId = parseInt(req.params.quizId);
   const questionId = parseInt(req.params.questionId);
-  try {
-    return res.json(adminQuizQuestionDuplicate(authUserId, quizId, questionId));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminQuizQuestionDuplicate(authUserId, quizId, questionId), req, res, next);
 });
 
-quizRouter.delete('/:quizid(-?\\d+)/question/:questionid(-?\\d+)', (req: Request, res: Response) => {
+quizRouter.delete('/:quizid(-?\\d+)/question/:questionid(-?\\d+)', (req: Request, res: Response, next: NextFunction) => {
   const quizid = parseInt(req.params.quizid);
   const questionid = parseInt(req.params.questionid);
   const { authUserId } = req.body;
-  try {
-    return res.json(adminQuizQuestionDelete(authUserId, quizid, questionid));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminQuizQuestionDelete(authUserId, quizid, questionid), req, res, next);
 });
 
-quizRouter.post('/:quizid(-?\\d+)/transfer', (req: Request, res: Response) => {
+quizRouter.post('/:quizid(-?\\d+)/transfer', (req: Request, res: Response, next: NextFunction) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId, userEmail } = req.body;
-  try {
-    return res.json(adminQuizTransfer(authUserId, quizid, userEmail));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminQuizTransfer(authUserId, quizid, userEmail), req, res, next);
 });
 
-quizRouter.put('/:quizid(-?\\d+)/question/:questionid(-?\\d+)', (req: Request, res: Response) => {
+quizRouter.put('/:quizid(-?\\d+)/question/:questionid(-?\\d+)', (req: Request, res: Response, next: NextFunction) => {
   const quizId = parseInt(req.params.quizid);
   const questionId = parseInt(req.params.questionid);
   const { authUserId, questionBody } = req.body;
-
-  try {
-    return res.json(adminQuizQuestionUpdate(authUserId, quizId, questionId, questionBody));
-  } catch (error) {
-    return res.status(error.statusCode).json({ error: error.message });
-  }
+  tryCatch(() => adminQuizQuestionUpdate(authUserId, quizId, questionId, questionBody), req, res, next);
 });

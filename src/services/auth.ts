@@ -11,7 +11,7 @@ import {
   isValidUserName,
 } from '../utils/helper';
 import jwt from 'jsonwebtoken';
-import config from '@/config.json';
+import config from '@/config';
 import { Request, Response, NextFunction } from 'express';
 
 export function authorizeToken(req: Request, res: Response, next: NextFunction) {
