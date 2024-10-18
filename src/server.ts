@@ -1,13 +1,15 @@
 import express, { json, Request, Response, NextFunction } from 'express';
 import { echo } from './utils/newecho';
 import morgan from 'morgan';
-import config from './config.json';
+import config from './config';
 import cors from 'cors';
 import YAML from 'yaml';
 import sui from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
 import process from 'process';
+import os from 'os';
+import http from 'http';
 
 // Import routers
 import { authRouter } from './routers/auth';
@@ -18,6 +20,11 @@ import { playerRouter } from './routers/player';
 import { loadData } from './dataStore';
 import { clear } from './utils/other';
 import { authorizeToken } from './services/auth';
+import { HttpError } from './utils/HttpError';
+import { cleanupLogsWeekly } from './utils/logCleanup';
+import logger from './utils/logger';
+
+const LOG_PATH = config.logPath;
 
 // Set up web app
 const app = express();
@@ -26,13 +33,17 @@ app.use(json());
 // Use middleware that allows for access from other domains
 app.use(cors());
 
+// Setup log log cleanup
+cleanupLogsWeekly();
+
 // for logging requests (print to file)
-const logStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
+const logStream = fs.createWriteStream(path.join(LOG_PATH, 'access.log'), { flags: 'a' });
 // - self-defined token for morgan formatting
 morgan.token('query', (req: Request) => JSON.stringify(req.query, null, 2));
+morgan.token('params', (req: Request) => JSON.stringify(req.params, null, 2));
 morgan.token('body', (req: Request) => JSON.stringify(req.body, null, 2));
 // - morgan logging format, using combined format plus query and body
-app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"\nquery: :query\nbody: :body\n', { stream: logStream }));
+app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"\nquery: :query\nparams: :params\nbody: :body\n', { stream: logStream }));
 
 // for logging errors (print to terminal)
 app.use(morgan('dev'));
@@ -79,6 +90,52 @@ app.use('/v1/player', playerRouter);
 
 app.delete('/v1/clear', (req: Request, res: Response) => {
   return res.status(200).json(clear());
+});
+
+app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 'Internal Server Error';
+
+  res.status(statusCode);
+  res.json({ error: message });
+
+  // winston log error response
+  logger.error({
+    timestamp: Date.now(),
+    date: new Date().toUTCString(),
+    req: {
+      httpVersion: req.httpVersion,
+      headers: req.headers,
+      originalUrl: req.originalUrl,
+      url: req.url,
+      method: req.method,
+      query: req.query,
+      params: req.params,
+      body: req.body
+    },
+    res: {
+      statusCode: statusCode,
+      error: http.STATUS_CODES[statusCode],
+      message: message
+    },
+    stack: err.stack?.split('\n'),
+    process: {
+      pid: process.pid,
+      uid: process.getuid?.(),
+      gid: process.getgid?.(),
+      cwd: process.cwd(),
+      execPath: process.execPath,
+      version: process.version,
+      argv: process.argv,
+      memoryUsage: process.memoryUsage()
+    },
+    os: {
+      name: process.platform,
+      version: process.version,
+      uptime: process.uptime(),
+      loadavg: os.loadavg()
+    },
+  });
 });
 
 // ====================================================================
