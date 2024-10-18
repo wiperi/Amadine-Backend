@@ -16,7 +16,8 @@ import {
   duplicateQuestion,
   deleteQuestion,
   transferQuiz,
-  updateQuestion
+  updateQuestion,
+  createQuizSession
 } from './apiTestHelpersV1';
 
 const ERROR = { error: expect.any(String) };
@@ -1641,6 +1642,84 @@ describe('PUT /v1/admin/quiz/:quizid/question/:questionid', () => {
       };
       const res = updateQuestion(token, quizId, questionId, updatedQuestionBody);
       expect(res.statusCode).toBe(400);
+    });
+  });
+});
+
+describe('POST /v1/admin/quiz/:quizId/session/start', () => {
+  let quizId: number;
+  beforeEach(() => {
+    const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = createQuizRes.body.quizId;
+
+    const createQuestionRes = createQuestion(token, quizId, {
+      question: 'Are you my master?',
+      duration: 60,
+      points: 6,
+      answers: [
+        { answer: 'Yes', correct: true },
+        { answer: 'No', correct: false },
+        { answer: 'Maybe', correct: false },
+      ],
+    });
+    expect(createQuestionRes.statusCode).toBe(200);
+  });
+  describe('invalid cases', () => {
+    test('token is invalid', () => {
+      const res = createQuizSession('invalid token', quizId, 2);
+      expect(res.statusCode).toStrictEqual(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+    test('user is not an owner of this quiz', () => {
+      const userRegisterRes = registerUser('wick@gmail.com', 'JohnWich123', 'John', 'Wick');
+      expect(userRegisterRes.statusCode).toStrictEqual(200);
+      const token1 = userRegisterRes.body.token;
+      const res = createQuizSession(token1, quizId, 2);
+      expect(res.statusCode).toStrictEqual(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+    test('quiz does not exist', () => {
+      const res = createQuizSession(token, 0, 2);
+      expect(res.statusCode).toStrictEqual(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+    test('invalid number of questions', () => {
+      const res = createQuizSession(token, quizId, 0);
+      expect(res.statusCode).toStrictEqual(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+    test('autoStartNum is a number greater than 50', () => {
+      const res = createQuizSession(token, quizId, 51);
+      expect(res.statusCode).toStrictEqual(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+    test('autoStartNum is a number less than 1', () => {
+      const res = createQuizSession(token, quizId, 0);
+      expect(res.statusCode).toStrictEqual(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+    test('more than 10 sessions that are not in END state currently exist for this quiz', () => {
+      for (let i = 0; i < 10; i++) {
+        const res = createQuizSession(token, quizId, 2);
+        expect(res.statusCode).toStrictEqual(200);
+      }
+      const res = createQuizSession(token, quizId, 2);
+      expect(res.statusCode).toStrictEqual(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+    test('quiz is in trash', () => {
+      deleteQuiz(token, quizId);
+      const res = createQuizSession(token, quizId, 2);
+      expect(res.statusCode).toStrictEqual(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+  });
+  describe('valid cases', () => {
+    test('successfully create quiz session', () => {
+      const res = createQuizSession(token, quizId, 2);
+      expect(res.statusCode).toStrictEqual(200);
+      expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
     });
   });
 });

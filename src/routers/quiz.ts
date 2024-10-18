@@ -14,7 +14,8 @@ import {
   adminQuizQuestionDuplicate,
   adminQuizRestore,
   adminQuizTransfer,
-  adminQuizQuestionUpdate
+  adminQuizQuestionUpdate,
+  adminQuizSessionStart
 } from '@/services/quiz';
 
 export const quizRouter = Router();
@@ -166,6 +167,17 @@ quizRouter.put('/:quizid(-?\\d+)/question/:questionid(-?\\d+)', (req: Request, r
 
   try {
     return res.json(adminQuizQuestionUpdate(authUserId, quizId, questionId, questionBody));
+  } catch (error) {
+    return res.status(error.statusCode).json({ error: error.message });
+  }
+});
+
+quizRouter.post('/:quizid(-?\\d+)/session/start', (req: Request, res: Response) => {
+  const quizId = parseInt(req.params.quizid);
+  const { authUserId, autoStartNum } = req.body;
+
+  try {
+    return res.json(adminQuizSessionStart(authUserId, quizId, autoStartNum));
   } catch (error) {
     return res.status(error.statusCode).json({ error: error.message });
   }
