@@ -3,6 +3,21 @@ import isEmail from 'validator/lib/isEmail';
 import { User, Quiz } from '@/models/Classes';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import { NextFunction, Request, Response } from 'express';
+import bcrypt from 'bcrypt';
+
+/**
+ * Hashes a string using bcrypt.
+ */
+export async function hash(str: string): Promise<string> {
+  return await bcrypt.hash(str, 1);
+}
+
+/**
+ * Compares a string with a hashed value.
+ */
+export async function hashCompare(str: string, hash: string): Promise<boolean> {
+  return await bcrypt.compare(str, hash);
+}
 
 /**
  * Executes a function, if success, return the response
@@ -15,9 +30,9 @@ import { NextFunction, Request, Response } from 'express';
  * @returns The JSON response if the function executes successfully.
  * @throws Passes any caught error to the next middleware.
  */
-export function tryCatch(fn: any, req: Request, res: Response, next: NextFunction) {
+export async function tryCatch(fn: any, req: Request, res: Response, next: NextFunction) {
   try {
-    return res.json(fn());
+    return res.json(await fn());
   } catch (error) {
     next(error);
   }
