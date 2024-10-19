@@ -1,5 +1,8 @@
+import { findQuizById } from '@/utils/helper';
 import { QuizSessionState, Color, PlayerAction } from './Enums';
-import { QuizSessionSM } from './StateMachine';
+import { StateMachine } from './StateMachine';
+const { LOBBY, QUESTION_COUNTDOWN, QUESTION_OPEN, QUESTION_CLOSE, ANSWER_SHOW, FINAL_RESULTS, END } = QuizSessionState;
+const { NEXT_QUESTION, SKIP_COUNTDOWN, GO_TO_ANSWER, GO_TO_FINAL_RESULTS, END: GO_TO_END } = PlayerAction;
 
 export class User {
   userId: number;
@@ -38,6 +41,10 @@ export class Quiz {
     this.quizId = quizId;
     this.name = name;
     this.description = description;
+  }
+
+  duration(): number {
+    return this.questions.reduce((acc, question) => acc + question.duration, 0);
   }
 }
 
@@ -143,14 +150,45 @@ export class QuizSession {
   atQuestion: number = 1; // Question index starting from 1
   timeCreated: number = Math.floor(Date.now() / 1000);
 
-  private state: QuizSessionSM = new QuizSessionSM(this);
+  private static transitions = StateMachine.parseTransitions<QuizSessionState, PlayerAction, QuizSession>([
+    { from: LOBBY, action: GO_TO_END, to: END },
+    { from: LOBBY, action: NEXT_QUESTION, to: QUESTION_COUNTDOWN },
+    { from: QUESTION_COUNTDOWN, action: SKIP_COUNTDOWN, to: QUESTION_OPEN },
+    { from: QUESTION_COUNTDOWN, action: GO_TO_END, to: END },
+    { from: QUESTION_OPEN, action: GO_TO_ANSWER, to: ANSWER_SHOW },
+    { from: QUESTION_OPEN, action: GO_TO_END, to: END },
+    { from: QUESTION_CLOSE, action: NEXT_QUESTION, to: QUESTION_COUNTDOWN },
+    { from: QUESTION_CLOSE, action: GO_TO_ANSWER, to: ANSWER_SHOW },
+    { from: QUESTION_CLOSE, action: GO_TO_FINAL_RESULTS, to: FINAL_RESULTS },
+    { from: QUESTION_CLOSE, action: GO_TO_END, to: END },
+    { from: FINAL_RESULTS, action: GO_TO_END, to: END },
+    { from: ANSWER_SHOW, action: NEXT_QUESTION, to: QUESTION_COUNTDOWN },
+    { from: ANSWER_SHOW, action: GO_TO_FINAL_RESULTS, to: FINAL_RESULTS },
+    { from: ANSWER_SHOW, action: GO_TO_END, to: END }
+  ]);
 
-  updateState(action: PlayerAction) {
-    this.state.dispatch(action);
-  }
+  private stateMachine = new StateMachine<QuizSessionState, PlayerAction, QuizSession>(this, QuizSessionState.LOBBY, QuizSession.transitions);
 
   getState() {
-    return this.state.getCurrentState();
+    return this.stateMachine.getCurrentState();
+  }
+
+  dispatch(action: PlayerAction) {
+    this.stateMachine.dispatch(action);
+    if (this.getState() === QUESTION_COUNTDOWN) {
+      setTimeout(() => {
+        if (this.getState() === QUESTION_COUNTDOWN) {
+          this.stateMachine.jumpTo(QUESTION_OPEN);
+        }
+      }, 3000);
+    }
+    if (this.getState() === QUESTION_OPEN) {
+      setTimeout(() => {
+        if (this.getState() === QUESTION_OPEN) {
+          this.stateMachine.jumpTo(QUESTION_CLOSE);
+        }
+      }, findQuizById(this.quizId).duration() * 1000);
+    }
   }
 
   constructor(sessionId: number, quizId: number) {
@@ -158,17 +196,6 @@ export class QuizSession {
     this.quizId = quizId;
   }
 }
-
-
-// test state machine
-const session = new QuizSession(1, 1);
-const session2 = new QuizSession(2, 1);
-session.updateState(PlayerAction.NEXT_QUESTION);
-session2.updateState(PlayerAction.END);
-console.log('1', session);
-console.log('2', session2);
-
-
 
 export class Player {
   playerId: number; // Must be globally unique
@@ -195,5 +222,3 @@ export class Message {
     this.messageBody = messageBody;
   }
 }
-
-
