@@ -140,14 +140,17 @@ export class QuizSession {
   quizId: number;
 
   messages: Message[] = [];
-  state: QuizSessionState = QuizSessionState.LOBBY;
   atQuestion: number = 1; // Question index starting from 1
   timeCreated: number = Math.floor(Date.now() / 1000);
 
-  private stateMachine: QuizSessionSM = QuizSessionSM.getInstance();
+  private state: QuizSessionSM = new QuizSessionSM(this);
 
   updateState(action: PlayerAction) {
-    this.stateMachine.transition(this, action);
+    this.state.dispatch(action);
+  }
+
+  getState() {
+    return this.state.getCurrentState();
   }
 
   constructor(sessionId: number, quizId: number) {
