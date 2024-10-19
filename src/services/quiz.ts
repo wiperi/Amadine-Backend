@@ -12,6 +12,7 @@ import {
   isValidQuizDescription,
   recursiveFind,
 } from '@/utils/helper';
+import { PlayerAction, QuizSessionState } from '@/models/Enums';
 
 /**
  * Update the description of the relevant quiz.
@@ -438,4 +439,44 @@ export function adminQuizQuestionDuplicate(authUserId: number, quizId: number, q
   questions.splice(1 + questions.findIndex(q => q.questionId === questionId), 0, newQuestion);
 
   return { newQuestionId: newQuestionId };
+}
+
+
+export function adminQuizSessionUpdate(authUserId: number, quizId: number, sessionId: number, action: string): EmptyObject {
+  const data = getData();
+
+  // Valid token is provided, but user is not an owner of this quiz or quiz doesn't exist
+    const quiz = findQuizById(quizId);
+    if (!quiz) {
+      throw new HttpError(403, '');
+    }
+  
+    if (!quiz.active) {
+      throw new HttpError(403, '');
+    }
+  
+    if (quiz.authUserId !== authUserId) {
+      throw new HttpError(403, '');
+    }
+
+  // Session Id does not refer to a valid session within this quiz
+  const session = data.quizSessions.find(session => session.sessionId === sessionId);
+  if (!session) {
+    throw new HttpError(403, '');
+  }
+
+  if (session.quizId !== quizId) {
+    throw new HttpError(403, '');
+  }
+
+  // Action provided is not a valid Action enum
+  if (!(action in PlayerAction)) {
+    throw new HttpError(400, '');
+  }
+  // Action enum cannot be applied in the current state (see spec for details)
+
+
+  	
+
+  return {};
 }
