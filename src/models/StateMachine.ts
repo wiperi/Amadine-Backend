@@ -1,6 +1,7 @@
 
 import { QuizSessionState, PlayerAction } from './Enums';
 import { QuizSession } from './Classes';
+import { setScalarValue } from 'yaml/dist/parse/cst-scalar';
 
 type Transition<STATE, ACTION, CALLBACK> = {
   from: STATE;
@@ -12,8 +13,8 @@ type Transition<STATE, ACTION, CALLBACK> = {
 function toTransition<
   STATE,
   ACTION,
-  CALLBACK extends (from: STATE, action: ACTION, to: STATE) => unknown
-  = (from: STATE, action: ACTION, to: STATE) => unknown
+  CALLBACK extends (...args: unknown[]) => unknown
+  = (...args: unknown[]) => unknown
 >(from: STATE, action: ACTION, to: STATE, callbacks?: CALLBACK[]):
   Transition<STATE, ACTION, CALLBACK> {
   return {
@@ -38,10 +39,12 @@ class StateMachine<
   constructor(initial: STATE, transtions: Transition<STATE, ACTION, CALLBACK>[]) {
     this.currentState = initial;
 
-    transtions.forEach(t => {
-      this.addTransition(t);
-      this.addCallBack(t);
-    })
+    if (StateMachine.transitions.size === 0 && StateMachine.callBackMap.size === 0) {
+      transtions.forEach(t => {
+        this.addTransition(t);
+        this.addCallBack(t);
+      })
+    }
   }
 
   getCurrentState() {
@@ -153,7 +156,8 @@ export class QuizSessionSM extends StateMachine<QuizSessionState, PlayerAction, 
 
     QuizSessionSM.edges = [
       toTransition(LOBBY, GO_TO_END, END, []),
-      toTransition(LOBBY, NEXT_QUESTION, QUESTION_COUNTDOWN, []),
+      toTransition(LOBBY, NEXT_QUESTION, QUESTION_COUNTDOWN, [(s: QuizSession) => {
+      }]),
       toTransition(QUESTION_COUNTDOWN, SKIP_COUNTDOWN, QUESTION_OPEN, []),
       toTransition(QUESTION_COUNTDOWN, GO_TO_END, END, []),
       toTransition(QUESTION_OPEN, GO_TO_ANSWER, ANSWER_SHOW, []),

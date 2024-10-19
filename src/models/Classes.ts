@@ -159,6 +159,17 @@ export class QuizSession {
   }
 }
 
+
+// test state machine
+const session = new QuizSession(1, 1);
+const session2 = new QuizSession(2, 1);
+session.updateState(PlayerAction.NEXT_QUESTION);
+session2.updateState(PlayerAction.END);
+console.log('1', session);
+console.log('2', session2);
+
+
+
 export class Player {
   playerId: number; // Must be globally unique
   quizSessionId: number;
@@ -186,10 +197,3 @@ export class Message {
 }
 
 
-// test state machine
-const session = new QuizSession(1, 1);
-const session2 = new QuizSession(2, 1);
-session.updateState(PlayerAction.NEXT_QUESTION);
-session2.updateState(PlayerAction.END);
-console.log('1', session);
-console.log('2', session2);
