@@ -137,14 +137,14 @@ export class Answer {
 export class QuizSession {
   sessionId: number;
   quizId: number;
-  copyquizId: number;
+  // copyquizId: number;
   autoStartNum: number;
 
   messages: Message[] = [];
   state: QuizSessionState = QuizSessionState.LOBBY;
   atQuestion: number = 1; // Question index starting from 1
   timeCreated: number = Math.floor(Date.now() / 1000);
-
+  metadata: any = {};
   constructor(sessionId: number, quizId: number) {
     this.sessionId = sessionId;
     this.quizId = quizId;

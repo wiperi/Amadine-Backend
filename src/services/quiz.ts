@@ -462,14 +462,11 @@ export function adminQuizSessionStart(authUserId: number, quizId: number, autoSt
   if (activeSessions.length >= 10) {
     throw new HttpError(400, ERROR_MESSAGES.QUIZ_TOO_MANY_SESSIONS);
   }
-  const newQuizId = getNewID('quiz');
-  const newQuiz = { ...quiz, quizId: newQuizId, timeCreated: Math.floor(Date.now() / 1000), timeLastEdited: Math.floor(Date.now() / 1000) };
-  data.quizzes.push(newQuiz);
 
   const newSessionId = getNewID('quiz session');
   const newSession = new QuizSession(newSessionId, quizId);
-  newSession.copyquizId = newQuizId;
   newSession.autoStartNum = autoStartNum;
+  newSession.metadata = { ...quiz };
   data.quizSessions.push(newSession);
   setData(data);
   return { newSessionId: newSessionId };

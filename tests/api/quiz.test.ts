@@ -1645,7 +1645,9 @@ describe('PUT /v1/admin/quiz/:quizid/question/:questionid', () => {
     });
   });
 });
-
+/*
+ This is test for AQSS
+ */
 describe('POST /v1/admin/quiz/:quizId/session/start', () => {
   let quizId: number;
   beforeEach(() => {
@@ -1717,6 +1719,15 @@ describe('POST /v1/admin/quiz/:quizId/session/start', () => {
   });
   describe('valid cases', () => {
     test('successfully create quiz session', () => {
+      const res = createQuizSession(token, quizId, 2);
+      expect(res.statusCode).toStrictEqual(200);
+      expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
+    });
+    test('successfully create quiz session when 9 sessions that are not in END state currently exist for this quiz', () => {
+      for (let i = 0; i < 9; i++) {
+        const res = createQuizSession(token, quizId, 2);
+        expect(res.statusCode).toStrictEqual(200);
+      }
       const res = createQuizSession(token, quizId, 2);
       expect(res.statusCode).toStrictEqual(200);
       expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
