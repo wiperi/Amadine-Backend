@@ -137,7 +137,6 @@ export class Answer {
 export class QuizSession {
   sessionId: number;
   quizId: number;
-  // copyquizId: number;
   autoStartNum: number;
 
   messages: Message[] = [];
