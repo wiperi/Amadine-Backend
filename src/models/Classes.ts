@@ -169,22 +169,31 @@ export class QuizSession {
 
   private stateMachine = new StateMachine<QuizSessionState, PlayerAction, QuizSession>(this, QuizSessionState.LOBBY, QuizSession.transitions);
 
-  getState() {
+  /**
+   * Gets the current state of the quiz session.
+   * @returns The current state of the quiz session.
+   */
+  state(): QuizSessionState {
     return this.stateMachine.getCurrentState();
   }
 
-  dispatch(action: PlayerAction) {
+  /**
+   * Dispatches an action to the state machine and handles automatic state transitions.
+   * @param action - The action to dispatch.
+   * @throws Error if the action is not valid.
+   */
+  dispatch(action: PlayerAction): void {
     this.stateMachine.dispatch(action);
-    if (this.getState() === QUESTION_COUNTDOWN) {
+    if (this.state() === QUESTION_COUNTDOWN) {
       setTimeout(() => {
-        if (this.getState() === QUESTION_COUNTDOWN) {
+        if (this.state() === QUESTION_COUNTDOWN) {
           this.stateMachine.jumpTo(QUESTION_OPEN);
         }
       }, 3000);
     }
-    if (this.getState() === QUESTION_OPEN) {
+    if (this.state() === QUESTION_OPEN) {
       setTimeout(() => {
-        if (this.getState() === QUESTION_OPEN) {
+        if (this.state() === QUESTION_OPEN) {
           this.stateMachine.jumpTo(QUESTION_CLOSE);
         }
       }, findQuizById(this.quizId).duration() * 1000);
