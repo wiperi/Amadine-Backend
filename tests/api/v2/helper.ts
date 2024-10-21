@@ -1,9 +1,9 @@
 import request, { Response } from 'sync-request-curl';
 import config from '../../../src/config';
 
-const AUTH_URL = `${config.url}:${config.port}/v1/admin/auth`;
-const QUIZ_URL = `${config.url}:${config.port}/v1/admin/quiz`;
-const USER_URL = `${config.url}:${config.port}/v1/admin/user`;
+const AUTH_URL = `${config.url}:${config.port}/v2/admin/auth`;
+const QUIZ_URL = `${config.url}:${config.port}/v2/admin/quiz`;
+const USER_URL = `${config.url}:${config.port}/v2/admin/user`;
 
 type ParsedResponse = Omit<Response, 'body'> & { body: Record<string, any> };
 
