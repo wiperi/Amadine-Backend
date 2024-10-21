@@ -377,7 +377,7 @@ export function getPlayerQuestionInfo(playerId: number, questionposition: number
   return parse(res);
 }
 
-export function putAnswer(answerIds: number, playerId: number, questionposition: number): ParsedResponse {
+export function putAnswer(answerIds: object, playerId: number, questionposition: number): ParsedResponse {
   const res = request('PUT', `${PLAYER_URL}/${playerId}/question/${questionposition}/answer`, {
     json: {
       answerIds,
