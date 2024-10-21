@@ -1263,7 +1263,7 @@ describe('POST /v1/admin/quiz/{quizid}/question/{questionid}/duplicate', () => {
   });
 });
 /*
- This is test for AQQDelete
+ This is test for adminQuizQuestionDelete 
  */
 describe('DELETE /v1/admin/quiz/:quizId/question/:questionId', () => {
   let quizId: number;
@@ -1342,7 +1342,9 @@ describe('DELETE /v1/admin/quiz/:quizId/question/:questionId', () => {
     });
   });
 });
-
+//////////////////////////////////////////////////////
+// Test for adminQuizTransfer ////////////////////////
+//////////////////////////////////////////////////////
 describe('POST /v1/admin/quiz/:quizid/transfer', () => {
   let quizId: number;
 
@@ -1429,7 +1431,9 @@ describe('POST /v1/admin/quiz/:quizid/transfer', () => {
     });
   });
 });
-
+//////////////////////////////////////////////////////////////
+///////////this is test for adminQuizQuestionUpdate //////////////////
+//////////////////////////////////////////////////////////////
 describe('PUT /v1/admin/quiz/:quizid/question/:questionid', () => {
   let quizId: number;
   let questionId: number;
@@ -1520,7 +1524,19 @@ describe('PUT /v1/admin/quiz/:quizid/question/:questionid', () => {
       const res = updateQuestion(token, quizId, 99999, updatedQuestionBody);
       expect(res.statusCode).toBe(400);  // Expect a 400 status code
     });
-
+    test('Invalid Quiz ID', () => {
+      const updatedQuestionBody = {
+        question: 'What is the largest country in the world?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Russia', correct: true },
+          { answer: 'Canada', correct: false },
+        ],
+      };
+      const res = updateQuestion(token, 99999, questionId, updatedQuestionBody);
+      expect(res.statusCode).toBe(403);  
+    });
     test('Invalid token', () => {
       const updatedQuestionBody = {
         question: 'What is the largest country in the world?',

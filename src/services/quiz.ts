@@ -244,8 +244,8 @@ export function adminQuizQuestionCreate(authUserId: number, quizId: number, ques
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
-  
-  if(!isValidQuestionBody(questionBody)) {
+
+  if (!isValidQuestionBody(questionBody)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
   const quiz = findQuizById(quizId);

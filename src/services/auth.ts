@@ -197,10 +197,10 @@ export async function adminUserPasswordUpdate(authUserId: number, oldPassword: s
   }
 
   const user = getData().users.find(user => user.userId === authUserId);
-
-  if (!user) {
-    throw new HttpError(400, ERROR_MESSAGES.UID_NOT_EXIST);
-  }
+  // who write this code?
+  // if (!user) {
+  //   throw new HttpError(400, ERROR_MESSAGES.UID_NOT_EXIST);
+  //  }
 
   if (!(await hashCompare(oldPassword, user.password))) {
     throw new HttpError(400, ERROR_MESSAGES.WRONG_OLD_PASSWORD);

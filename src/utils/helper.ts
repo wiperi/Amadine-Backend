@@ -280,6 +280,6 @@ export function isValidQuestionBody(questionBody: ParamQuestionBody): boolean {
   }
   if (questionBody.duration <= 0) {
     return false;
-  } 
+  }
   return true;
 }
