@@ -268,6 +268,13 @@ describe('POST /v1/admin/auth/login', () => {
   });
 
   describe('invalid cases', () => {
+
+    test('Email does not exist', () => {
+      const res = loginUser('', '');
+      expect(res.body).toStrictEqual(ERROR);
+      expect(res.statusCode).toStrictEqual(400);
+    });
+
     test('Email does not exist', () => {
       const res = loginUser('petergriffin@gmail.com', 'PumpkinEater123');
       expect(res.body).toStrictEqual(ERROR);

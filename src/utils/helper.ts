@@ -3,6 +3,7 @@ import isEmail from 'validator/lib/isEmail';
 import { User, Quiz } from '@/models/Classes';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import { NextFunction, Request, Response } from 'express';
+import { ParamQuestionBody } from '@/models/Types';
 import bcrypt from 'bcrypt';
 
 /**
@@ -268,4 +269,17 @@ export function isQuizIdOwnedByUser(quizId: number, authUserId: number): boolean
 
 export function findQuizById(quizId: number): Quiz | undefined {
   return getData().quizzes.find(quiz => quiz.quizId === quizId);
+}
+
+export function isValidQuestionBody(questionBody: ParamQuestionBody): boolean {
+  if (questionBody.question.length < 5 || questionBody.question.length > 50) {
+    return false;
+  }
+  if (questionBody.answers.length < 2 || questionBody.answers.length > 6) {
+    return false;
+  }
+  if (questionBody.duration <= 0) {
+    return false;
+  } 
+  return true;
 }

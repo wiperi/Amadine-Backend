@@ -11,6 +11,7 @@ import {
   isValidQuizName,
   isValidQuizDescription,
   recursiveFind,
+  isValidQuestionBody
 } from '@/utils/helper';
 
 /**
@@ -243,13 +244,8 @@ export function adminQuizQuestionCreate(authUserId: number, quizId: number, ques
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
-  if (questionBody.question.length < 5 || questionBody.question.length > 50) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  if (questionBody.answers.length < 2 || questionBody.answers.length > 6) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  if (questionBody.duration <= 0) {
+  
+  if(!isValidQuestionBody(questionBody)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
   const quiz = findQuizById(quizId);

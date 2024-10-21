@@ -119,6 +119,11 @@ describe('POST /v1/admin/quiz', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body).toStrictEqual(ERROR);
     });
+    test('invalid description', () => {
+      const res = createQuiz(token, 'Test Quiz', 'A test quiz'.repeat(21));
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
     test('repeated name', () => {
       const res = createQuiz(token, 'Test Quiz', 'A test quiz');
       expect(res.statusCode).toBe(200);
@@ -592,6 +597,22 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
     });
   });
   describe('invalid cases', () => {
+    test('invalid quiz ID', () => {
+      const questionBody = {
+        question: 'What is the capital of France?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Paris', correct: true },
+          { answer: 'Berlin', correct: false },
+          { answer: 'Rome', correct: false },
+        ],
+      };
+
+      const res = createQuestion(token, 0, questionBody);
+      expect(res.statusCode).toBe(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
     test('invalid token', () => {
       const questionBody = {
         question: 'What is the capital of Germany?',
