@@ -245,31 +245,10 @@ export function adminQuizQuestionCreate(authUserId: number, quizId: number, ques
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
 
-  if (!isValidQuestionBody(questionBody)) {
+  if (!isValidQuestionBody(quizId, questionBody)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
   const quiz = findQuizById(quizId);
-  if (quiz.questions.reduce((acc, question) => acc + question.duration, 0) + questionBody.duration > 180) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  if (questionBody.points < 1 || questionBody.points > 10) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  if (questionBody.answers.some(answer => answer.answer.length < 1 || answer.answer.length > 30)) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  // check duplicate answer
-  const answerSet = new Set();
-  for (const answer of questionBody.answers) {
-    if (answerSet.has(answer.answer)) {
-      throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-    }
-    answerSet.add(answer.answer);
-  }
-  if (!questionBody.answers.some(answer => answer.correct)) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-
   // Generate a new question ID
   const questionId = getNewID('question');
 
@@ -308,34 +287,9 @@ export function adminQuizQuestionUpdate(authUserId: number, quizId: number, ques
   if (!question) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION_ID);
   }
-  // TODO: Implement this helper function
-  // if (!isValidQuestion(questionBody)) {};
-  if (questionBody.question.length < 5 || questionBody.question.length > 50) {
+  if (!isValidQuestionBody(quizId, questionBody)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
-  if (questionBody.answers.length < 2 || questionBody.answers.length > 6) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  if (questionBody.duration <= 0) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  if (questionBody.points < 1 || questionBody.points > 10) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  if (questionBody.answers.some(answer => answer.answer.length < 1 || answer.answer.length > 30)) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  const answerSet = new Set();
-  for (const answer of questionBody.answers) {
-    if (answerSet.has(answer.answer)) {
-      throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-    }
-    answerSet.add(answer.answer);
-  }
-  if (!questionBody.answers.some(answer => answer.correct)) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-
   const totalDuration = quiz.questions.reduce((accumulator, question) => {
     if (question.questionId === questionId) {
       return accumulator + questionBody.duration;

@@ -271,7 +271,7 @@ export function findQuizById(quizId: number): Quiz | undefined {
   return getData().quizzes.find(quiz => quiz.quizId === quizId);
 }
 
-export function isValidQuestionBody(questionBody: ParamQuestionBody): boolean {
+export function isValidQuestionBody(quizId:number, questionBody: ParamQuestionBody): boolean {
   if (questionBody.question.length < 5 || questionBody.question.length > 50) {
     return false;
   }
@@ -279,6 +279,27 @@ export function isValidQuestionBody(questionBody: ParamQuestionBody): boolean {
     return false;
   }
   if (questionBody.duration <= 0) {
+    return false;
+  }
+  const quiz = findQuizById(quizId);
+  if (quiz.questions.reduce((acc, question) => acc + question.duration, 0) + questionBody.duration > 180) {
+    return false;
+  }
+  if (questionBody.points < 1 || questionBody.points > 10) {
+    return false;
+  }
+  if (questionBody.answers.some(answer => answer.answer.length < 1 || answer.answer.length > 30)) {
+    return false;
+  }
+  // check duplicate answer
+  const answerSet = new Set();
+  for (const answer of questionBody.answers) {
+    if (answerSet.has(answer.answer)) {
+      return false;
+    }
+    answerSet.add(answer.answer);
+  }
+  if (!questionBody.answers.some(answer => answer.correct)) {
     return false;
   }
   return true;
