@@ -11,6 +11,7 @@ import {
   isValidQuizName,
   isValidQuizDescription,
   recursiveFind,
+  isValidQuestionBody
 } from '@/utils/helper';
 
 /**
@@ -243,37 +244,11 @@ export function adminQuizQuestionCreate(authUserId: number, quizId: number, ques
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
-  if (questionBody.question.length < 5 || questionBody.question.length > 50) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  if (questionBody.answers.length < 2 || questionBody.answers.length > 6) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  if (questionBody.duration <= 0) {
+
+  if (!isValidQuestionBody(quizId, questionBody)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
   const quiz = findQuizById(quizId);
-  if (quiz.questions.reduce((acc, question) => acc + question.duration, 0) + questionBody.duration > 180) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  if (questionBody.points < 1 || questionBody.points > 10) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  if (questionBody.answers.some(answer => answer.answer.length < 1 || answer.answer.length > 30)) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  // check duplicate answer
-  const answerSet = new Set();
-  for (const answer of questionBody.answers) {
-    if (answerSet.has(answer.answer)) {
-      throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-    }
-    answerSet.add(answer.answer);
-  }
-  if (!questionBody.answers.some(answer => answer.correct)) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-
   // Generate a new question ID
   const questionId = getNewID('question');
 
@@ -312,34 +287,9 @@ export function adminQuizQuestionUpdate(authUserId: number, quizId: number, ques
   if (!question) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION_ID);
   }
-  // TODO: Implement this helper function
-  // if (!isValidQuestion(questionBody)) {};
-  if (questionBody.question.length < 5 || questionBody.question.length > 50) {
+  if (!isValidQuestionBody(quizId, questionBody)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
-  if (questionBody.answers.length < 2 || questionBody.answers.length > 6) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  if (questionBody.duration <= 0) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  if (questionBody.points < 1 || questionBody.points > 10) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  if (questionBody.answers.some(answer => answer.answer.length < 1 || answer.answer.length > 30)) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-  const answerSet = new Set();
-  for (const answer of questionBody.answers) {
-    if (answerSet.has(answer.answer)) {
-      throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-    }
-    answerSet.add(answer.answer);
-  }
-  if (!questionBody.answers.some(answer => answer.correct)) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
-  }
-
   const totalDuration = quiz.questions.reduce((accumulator, question) => {
     if (question.questionId === questionId) {
       return accumulator + questionBody.duration;
@@ -439,3 +389,44 @@ export function adminQuizQuestionDuplicate(authUserId: number, quizId: number, q
 
   return { newQuestionId: newQuestionId };
 }
+
+// export function adminQuizSessionUpdate(authUserId: number, quizId: number, sessionId: number, action: string): EmptyObject {
+//   const data = getData();
+
+//   // Valid token is provided, but user is not an owner of this quiz or quiz doesn't exist
+//   const quiz = findQuizById(quizId);
+//   if (!quiz) {
+//     throw new HttpError(403, '');
+//   }
+
+//   if (!quiz.active) {
+//     throw new HttpError(403, '');
+//   }
+
+//   if (quiz.authUserId !== authUserId) {
+//     throw new HttpError(403, '');
+//   }
+
+//   // Session Id does not refer to a valid session within this quiz
+//   const session = data.quizSessions.find(session => session.sessionId === sessionId);
+//   if (!session) {
+//     throw new HttpError(403, '');
+//   }
+
+//   if (session.quizId !== quizId) {
+//     throw new HttpError(403, '');
+//   }
+
+//   // Action provided is not a valid Action enum
+//   if (!(action in PlayerAction)) {
+//     throw new HttpError(400, '');
+//   }
+//   // Action enum cannot be applied in the current state (see spec for details)
+//   try {
+//     session.dispatch(PlayerAction[action as keyof typeof PlayerAction]);
+//   } catch (error) {
+//     throw new HttpError(400, error.message);
+//   }
+
+//   return {};
+// }

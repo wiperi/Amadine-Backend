@@ -2,6 +2,42 @@ import { getData } from '@/dataStore';
 import isEmail from 'validator/lib/isEmail';
 import { User, Quiz } from '@/models/Classes';
 import { ERROR_MESSAGES } from '@/utils/errors';
+import { NextFunction, Request, Response } from 'express';
+import { ParamQuestionBody } from '@/models/Types';
+import bcrypt from 'bcrypt';
+
+/**
+ * Hashes a string using bcrypt.
+ */
+export async function hash(str: string): Promise<string> {
+  return await bcrypt.hash(str, 1);
+}
+
+/**
+ * Compares a string with a hashed value.
+ */
+export async function hashCompare(str: string, hash: string): Promise<boolean> {
+  return await bcrypt.compare(str, hash);
+}
+
+/**
+ * Executes a function, if success, return the response
+ * if error, catch it and pass to next middleware
+ *
+ * @param fn - The function to execute.
+ * @param req - The Express request object.
+ * @param res - The Express response object.
+ * @param next - The Express next function.
+ * @returns The JSON response if the function executes successfully.
+ * @throws Passes any caught error to the next middleware.
+ */
+export async function tryCatch(fn: any, req: Request, res: Response, next: NextFunction) {
+  try {
+    return res.json(await fn());
+  } catch (error) {
+    next(error);
+  }
+}
 
 /**
  * Recursively searches for a target value within an object or its nested properties.
@@ -233,4 +269,38 @@ export function isQuizIdOwnedByUser(quizId: number, authUserId: number): boolean
 
 export function findQuizById(quizId: number): Quiz | undefined {
   return getData().quizzes.find(quiz => quiz.quizId === quizId);
+}
+
+export function isValidQuestionBody(quizId:number, questionBody: ParamQuestionBody): boolean {
+  if (questionBody.question.length < 5 || questionBody.question.length > 50) {
+    return false;
+  }
+  if (questionBody.answers.length < 2 || questionBody.answers.length > 6) {
+    return false;
+  }
+  if (questionBody.duration <= 0) {
+    return false;
+  }
+  const quiz = findQuizById(quizId);
+  if (quiz.questions.reduce((acc, question) => acc + question.duration, 0) + questionBody.duration > 180) {
+    return false;
+  }
+  if (questionBody.points < 1 || questionBody.points > 10) {
+    return false;
+  }
+  if (questionBody.answers.some(answer => answer.answer.length < 1 || answer.answer.length > 30)) {
+    return false;
+  }
+  // check duplicate answer
+  const answerSet = new Set();
+  for (const answer of questionBody.answers) {
+    if (answerSet.has(answer.answer)) {
+      return false;
+    }
+    answerSet.add(answer.answer);
+  }
+  if (!questionBody.answers.some(answer => answer.correct)) {
+    return false;
+  }
+  return true;
 }

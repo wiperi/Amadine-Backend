@@ -17,7 +17,7 @@ import {
   deleteQuestion,
   transferQuiz,
   updateQuestion
-} from './apiTestHelpersV1';
+} from './helpers';
 
 const ERROR = { error: expect.any(String) };
 
@@ -116,6 +116,11 @@ describe('POST /v1/admin/quiz', () => {
     });
     test('long name', () => {
       const res = createQuiz(token, 'a'.repeat(31), 'A test quiz');
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+    test('invalid description', () => {
+      const res = createQuiz(token, 'Test Quiz', 'A test quiz'.repeat(21));
       expect(res.statusCode).toBe(400);
       expect(res.body).toStrictEqual(ERROR);
     });
@@ -592,6 +597,22 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
     });
   });
   describe('invalid cases', () => {
+    test('invalid quiz ID', () => {
+      const questionBody = {
+        question: 'What is the capital of France?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Paris', correct: true },
+          { answer: 'Berlin', correct: false },
+          { answer: 'Rome', correct: false },
+        ],
+      };
+
+      const res = createQuestion(token, 0, questionBody);
+      expect(res.statusCode).toBe(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
     test('invalid token', () => {
       const questionBody = {
         question: 'What is the capital of Germany?',
@@ -1242,7 +1263,7 @@ describe('POST /v1/admin/quiz/{quizid}/question/{questionid}/duplicate', () => {
   });
 });
 /*
- This is test for AQQDelete
+ This is test for adminQuizQuestionDelete 
  */
 describe('DELETE /v1/admin/quiz/:quizId/question/:questionId', () => {
   let quizId: number;
@@ -1321,7 +1342,9 @@ describe('DELETE /v1/admin/quiz/:quizId/question/:questionId', () => {
     });
   });
 });
-
+//////////////////////////////////////////////////////
+// Test for adminQuizTransfer ////////////////////////
+//////////////////////////////////////////////////////
 describe('POST /v1/admin/quiz/:quizid/transfer', () => {
   let quizId: number;
 
@@ -1408,7 +1431,9 @@ describe('POST /v1/admin/quiz/:quizid/transfer', () => {
     });
   });
 });
-
+//////////////////////////////////////////////////////////////
+///////////this is test for adminQuizQuestionUpdate //////////////////
+//////////////////////////////////////////////////////////////
 describe('PUT /v1/admin/quiz/:quizid/question/:questionid', () => {
   let quizId: number;
   let questionId: number;
@@ -1499,7 +1524,19 @@ describe('PUT /v1/admin/quiz/:quizid/question/:questionid', () => {
       const res = updateQuestion(token, quizId, 99999, updatedQuestionBody);
       expect(res.statusCode).toBe(400);  // Expect a 400 status code
     });
-
+    test('Invalid Quiz ID', () => {
+      const updatedQuestionBody = {
+        question: 'What is the largest country in the world?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Russia', correct: true },
+          { answer: 'Canada', correct: false },
+        ],
+      };
+      const res = updateQuestion(token, 99999, questionId, updatedQuestionBody);
+      expect(res.statusCode).toBe(403);  
+    });
     test('Invalid token', () => {
       const updatedQuestionBody = {
         question: 'What is the largest country in the world?',

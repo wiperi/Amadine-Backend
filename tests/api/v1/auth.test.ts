@@ -6,17 +6,10 @@ import {
   getUserDetails,
   updateUserDetails,
   updateUserPassword,
-  getQuizList,
   getQuizDetails,
   createQuiz,
-  updateQuiz,
-  deleteQuiz,
-  updateQuizDescription,
-  getQuizTrash,
-  restoreQuiz,
-  deleteQuizPermanently,
   createQuestion
-} from './apiTestHelpersV1';
+} from './helpers';
 
 const ERROR = { error: expect.any(String) };
 
@@ -25,13 +18,12 @@ beforeEach(() => {
 });
 
 afterAll(() => {
-  clear()
+  clear();
 });
 
 describe('DELETE /v1/clear', () => {
-
   test('correct return value', () => {
-    const res = clear()
+    const res = clear();
     expect(res.statusCode).toStrictEqual(200);
     expect(res.body).toStrictEqual({});
   });
@@ -106,9 +98,7 @@ const validEmails = [
   'goodemail@gmail.com', 'user@example.com', 'test.user@domain.co'
 ];
 
-
 describe('POST /v1/admin/auth/register', () => {
-
   const CORRECT_RESPONSE = { statusCode: 200, body: { token: expect.any(String) } };
   const ERROR_RESPONSE = { statusCode: 400, body: { error: expect.any(String) } };
 
@@ -120,7 +110,7 @@ describe('POST /v1/admin/auth/register', () => {
   function runTestsForOneParam(groupName: string, inputData: string[], paramIndex: number, expectOutput: { statusCode: number, body: any }) {
     describe(groupName, () => {
       test.each(inputData)('%s', (data) => {
-        let inputs = [...validInputs];
+        const inputs = [...validInputs];
         inputs[paramIndex] = data;
 
         const res = registerUser(inputs[0], inputs[1], inputs[2], inputs[3]);
@@ -154,7 +144,6 @@ describe('POST /v1/admin/auth/register', () => {
 });
 
 describe('POST /v1/admin/auth/logout', () => {
-  
   let token: string;
   beforeEach(() => {
     // Register a user and get the token
@@ -205,7 +194,6 @@ describe('POST /v1/admin/auth/logout', () => {
 });
 
 describe('PUT /v1/admin/user/password', () => {
-  
   let token: string;
   beforeEach(() => {
     const res = registerUser('test@example.com', 'OldPassword123', 'John', 'Doe');
@@ -269,9 +257,9 @@ describe('PUT /v1/admin/user/password', () => {
   });
 });
 
-////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////
 // Test for /v1/admin/auth/login
-////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////
 describe('POST /v1/admin/auth/login', () => {
   let token: string;
   beforeEach(() => {
@@ -280,6 +268,13 @@ describe('POST /v1/admin/auth/login', () => {
   });
 
   describe('invalid cases', () => {
+
+    test('Email does not exist', () => {
+      const res = loginUser('', '');
+      expect(res.body).toStrictEqual(ERROR);
+      expect(res.statusCode).toStrictEqual(400);
+    });
+
     test('Email does not exist', () => {
       const res = loginUser('petergriffin@gmail.com', 'PumpkinEater123');
       expect(res.body).toStrictEqual(ERROR);
@@ -295,7 +290,7 @@ describe('POST /v1/admin/auth/login', () => {
 
   describe('valid cases', () => {
     test('successful login with correct id', () => {
-      const res = loginUser('goodemail@gmail.com', 'GlenPassword123')
+      const res = loginUser('goodemail@gmail.com', 'GlenPassword123');
       expect(res.body.token).toStrictEqual(expect.any(String));
       expect(res.statusCode).toStrictEqual(200);
     });
@@ -391,9 +386,9 @@ describe('GET /v1/admin/user/details', () => {
   });
 });
 
-////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////
 // Test for /v1/admin/user/details
-////////////////////////////////////////////////////////////////
+/// /////////////////////////////////////////////////////////////
 
 describe('PUT /v1/admin/user/details', () => {
   let token: string;
@@ -409,35 +404,35 @@ describe('PUT /v1/admin/user/details', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toStrictEqual({});
     });
-  })
+  });
 
   describe('check the token', () => {
     test('error for invalid token', () => {
       const res = updateUserDetails('invalid_token', 'testuser@example.com', 'Johnny', 'Smith');
-      expect(res.statusCode).toBe(401); 
+      expect(res.statusCode).toBe(401);
       expect(res.body).toStrictEqual(ERROR);
     });
-  
+
     test('error for empty token', () => {
       const res = updateUserDetails('', 'newemail@example.com', 'Johnny', 'Smith');
-      expect(res.statusCode).toBe(401);  // Expect 401 for missing token
+      expect(res.statusCode).toBe(401); // Expect 401 for missing token
       expect(res.body).toStrictEqual(ERROR);
     });
-  })
-  
+  });
+
   describe('Invalid email cases and used email', () => {
     test.each(invalidEmails)('error for invalid email: %s', (invalidEmail) => {
       const res = updateUserDetails(token, invalidEmail, 'Johnny', 'Smith');
-      expect(res.statusCode).toBe(400);  // Expect 400 for invalid email
+      expect(res.statusCode).toBe(400); // Expect 400 for invalid email
       expect(res.body).toStrictEqual(ERROR);
     });
 
     test('error for used email', () => {
       // Register another user
       registerUser('otheruser@example.com', 'ValidPass123', 'Jane', 'Doe');
-  
+
       // Attempt to update with the same email
-      const res =  updateUserDetails(token, 'otheruser@example.com', 'Johnny', 'Smith');
+      const res = updateUserDetails(token, 'otheruser@example.com', 'Johnny', 'Smith');
       expect(res.statusCode).toBe(400);
       expect(res.body).toStrictEqual(ERROR);
     });
@@ -450,11 +445,11 @@ describe('PUT /v1/admin/user/details', () => {
       expect(res.body).toStrictEqual(ERROR);
     });
   });
-  
+
   describe('Invalid last name cases', () => {
     test.each(invalidNames)('error for invalid last name: %s', (invalidName) => {
       const res = updateUserDetails(token, 'validemail@example.com', 'Johnny', invalidName);
-      expect(res.statusCode).toBe(400);  // Expect 400 for invalid name
+      expect(res.statusCode).toBe(400); // Expect 400 for invalid name
       expect(res.body).toStrictEqual(ERROR);
     });
   });
