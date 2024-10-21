@@ -294,9 +294,10 @@ export function adminQuizQuestionCreate(authUserId: number, quizId: number, ques
 }
 
 export function adminQuizQuestionUpdate(authUserId: number, quizId: number, questionId: number, questionBody: ParamQuestionBody): EmptyObject {
-  if (recursiveFind(questionBody, undefined)) {
-    throw new HttpError(403, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
+  if (!quizId || recursiveFind(questionBody, undefined)) {
+    throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
   }
+
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
