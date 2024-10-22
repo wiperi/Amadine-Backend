@@ -1,5 +1,7 @@
 tt*
 
+# # *.json # I don't what is this
+# !package.json
 package-lock.json
 node_modules
 build
