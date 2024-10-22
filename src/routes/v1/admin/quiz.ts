@@ -14,7 +14,8 @@ import {
   adminQuizQuestionDuplicate,
   adminQuizRestore,
   adminQuizTransfer,
-  adminQuizQuestionUpdate
+  adminQuizQuestionUpdate,
+  adminQuizSessionStart
 } from '@/services/quiz';
 import { tryCatch } from '@/utils/helper';
 
@@ -109,6 +110,12 @@ router.put('/:quizid(-?\\d+)/question/:questionid(-?\\d+)', (req: Request, res: 
   const questionId = parseInt(req.params.questionid);
   const { authUserId, questionBody } = req.body;
   tryCatch(() => adminQuizQuestionUpdate(authUserId, quizId, questionId, questionBody), req, res, next);
+});
+
+router.post('/:quizid(-?\\d+)/session/start', (req: Request, res: Response, next: NextFunction) => {
+  const quizId = parseInt(req.params.quizid);
+  const { authUserId, autoStartNum } = req.body;
+  tryCatch(() => adminQuizSessionStart(authUserId, quizId, autoStartNum), req, res, next);
 });
 
 export default router;

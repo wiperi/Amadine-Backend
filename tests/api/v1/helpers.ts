@@ -244,13 +244,23 @@ export function transferQuiz(token: string, quizId: number, userEmail: string): 
   return parse(res);
 }
 
-export function updateQuestion(token: string,  quizId: number, questionId: number, questionBody: object): ParsedResponse {
+export function updateQuestion(token: string, quizId: number, questionId: number, questionBody: object): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}/question/${questionId}`, {
     json: {
       token,
       quizId,
       questionId,
       questionBody
+    }
+  });
+  return parse(res);
+}
+
+export function createQuizSession(token: string, quizId: number, autoStartNum: number): ParsedResponse {
+  const res = request('POST', `${QUIZ_URL}/${quizId}/session/start`, {
+    json: {
+      token,
+      autoStartNum
     }
   });
   return parse(res);
