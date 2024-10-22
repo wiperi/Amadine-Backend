@@ -435,6 +435,7 @@ export function adminQuizQuestionDuplicate(authUserId: number, quizId: number, q
   const questions = findQuizById(quizId).questions;
 
   const newQuestion = Object.assign({}, questions.find(q => q.questionId === questionId), { questionId: newQuestionId });
+  Object.setPrototypeOf(newQuestion, Question.prototype);
   questions.splice(1 + questions.findIndex(q => q.questionId === questionId), 0, newQuestion);
 
   return { newQuestionId: newQuestionId };
