@@ -257,7 +257,7 @@ export function updateQuestion(token: string,  quizId: number, questionId: numbe
   return parse(res);
 }
 
-export function updateThumbnail(token: string,  quizId: number, imgUrl: string): ParsedResponse {
+export function updateQuizThumbnail(token: string,  quizId: number, imgUrl: string): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}/thumnail`, {
     headers: {
       token
@@ -270,7 +270,7 @@ export function updateThumbnail(token: string,  quizId: number, imgUrl: string):
   return parse(res);
 }
 
-export function viewaActivity(token: string,  quizId: number): ParsedResponse {
+export function getQuizSessionActivity(token: string,  quizId: number): ParsedResponse {
   const res = request('GET', `${QUIZ_URL}/${quizId}/sessions`, {
     headers: {
       token
@@ -282,7 +282,7 @@ export function viewaActivity(token: string,  quizId: number): ParsedResponse {
   return parse(res);
 }
 
-export function newSession(token: string,  quizId: number, autoStartNum: number): ParsedResponse {
+export function postNewQuizSession(token: string,  quizId: number, autoStartNum: number): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}/${quizId}/sessions/start`, {
     headers: {
       token
@@ -295,7 +295,7 @@ export function newSession(token: string,  quizId: number, autoStartNum: number)
   return parse(res);
 }
 
-export function updateSession(token: string,  quizId: number, sessionId: number, action: string): ParsedResponse {
+export function updateSessionStatus(token: string,  quizId: number, sessionId: number, action: string): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}/sessions/${sessionId}`, {
     headers: {
       token
@@ -309,7 +309,7 @@ export function updateSession(token: string,  quizId: number, sessionId: number,
   return parse(res);
 }
 
-export function getNewSession(token: string,  quizId: number, sessionId: number): ParsedResponse {
+export function getNewSessionStarus(token: string,  quizId: number, sessionId: number): ParsedResponse {
   const res = request('GET', `${QUIZ_URL}/${quizId}/sessions/${sessionId}`, {
     headers: {
       token
@@ -335,7 +335,7 @@ export function getSessionFinalResult(token: string,  quizId: number, sessionId:
   return parse(res);
 }
 
-export function getCSVFormat(token: string,  quizId: number, sessionId: number): ParsedResponse {
+export function getSessionFinalResultCsvFormat(token: string,  quizId: number, sessionId: number): ParsedResponse {
   const res = request('GET', `${QUIZ_URL}/${quizId}/sessions/${sessionId}/result/csv`, {
     headers: {
       token
@@ -348,7 +348,7 @@ export function getCSVFormat(token: string,  quizId: number, sessionId: number):
   return parse(res);
 }
 
-export function joinSession(sessionId: number, name: string): ParsedResponse {
+export function postPlayerJoinSession(sessionId: number, name: string): ParsedResponse {
   const res = request('POST', `${PLAYER_URL}/join`, {
     json: {
       sessionId,
@@ -377,7 +377,7 @@ export function getPlayerQuestionInfo(playerId: number, questionposition: number
   return parse(res);
 }
 
-export function putAnswer(answerIds: object, playerId: number, questionposition: number): ParsedResponse {
+export function putPlayerAnswer(answerIds: object, playerId: number, questionposition: number): ParsedResponse {
   const res = request('PUT', `${PLAYER_URL}/${playerId}/question/${questionposition}/answer`, {
     json: {
       answerIds,
@@ -388,7 +388,7 @@ export function putAnswer(answerIds: object, playerId: number, questionposition:
   return parse(res);
 }
 
-export function getQuestionResult(playerId: number, questionposition: number): ParsedResponse {
+export function getPlayerQuestionResult(playerId: number, questionposition: number): ParsedResponse {
   const res = request('GET', `${PLAYER_URL}/${playerId}/question/${questionposition}/result`, {
     qs: {
       playerId,
@@ -398,7 +398,7 @@ export function getQuestionResult(playerId: number, questionposition: number): P
   return parse(res);
 }
 
-export function getSessionResult(playerId: number): ParsedResponse {
+export function getPlayerSessionFinalResult(playerId: number): ParsedResponse {
   const res = request('GET', `${PLAYER_URL}/${playerId}/result`, {
     qs: {
       playerId,
@@ -407,7 +407,7 @@ export function getSessionResult(playerId: number): ParsedResponse {
   return parse(res);
 }
 
-export function getSessionMessage(playerId: number): ParsedResponse {
+export function getPlayerSessionMessage(playerId: number): ParsedResponse {
   const res = request('GET', `${PLAYER_URL}/${playerId}/chat`, {
     qs: {
       playerId,
@@ -416,7 +416,7 @@ export function getSessionMessage(playerId: number): ParsedResponse {
   return parse(res);
 }
 
-export function postMessage(playerId: number, message: object): ParsedResponse {
+export function postPlayerMessage(playerId: number, message: object): ParsedResponse {
   const res = request('POST', `${PLAYER_URL}/${playerId}/chat`, {
     qs: {
       playerId,
