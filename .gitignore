@@ -1,7 +1,9 @@
 tt*
 
-# # *.json # I don't what is this
+# I don't know why these are being ignored
+# *.json
 # !package.json
+
 package-lock.json
 node_modules
 build

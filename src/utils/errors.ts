@@ -35,7 +35,15 @@ const ERROR_MESSAGES = {
   INVALID_POSITION: 'Position is out of range',
   SAME_POSITION: 'Position is the same as the current position',
   // Duration
-  INVALID_DURATION: 'sum of the question durations in the quiz exceeds 3 minutes'
+  INVALID_DURATION: 'sum of the question durations in the quiz exceeds 3 minutes',
+  // autoStartNum
+  INVALID_AUTO_START_NUM: 'autoStartNum is a number greater than 50',
+  // quiz inactive
+  QUIZ_INACTIVE: 'Quiz is inactive',
+  // quiz do not have any questions
+  QUIZ_NO_QUESTIONS: 'Quiz do not have any questions',
+  // quiz do have too many sessions
+  QUIZ_TOO_MANY_SESSIONS: 'Quiz has too many sessions',
 };
 
 export { ERROR_MESSAGES };

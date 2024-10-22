@@ -1,6 +1,6 @@
 import { getData, setData } from '@/dataStore';
 import { HttpError } from '@/utils/HttpError';
-import { Quiz, Question, Answer } from '@/models/Classes';
+import { Quiz, Question, Answer, QuizSession } from '@/models/Classes';
 import { ReturnedQuizView, EmptyObject, ParamQuestionBody } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import {
@@ -12,6 +12,7 @@ import {
   isValidQuizDescription,
   recursiveFind,
 } from '@/utils/helper';
+import { QuizSessionState } from '@/models/Enums';
 
 /**
  * Update the description of the relevant quiz.
@@ -339,8 +340,14 @@ export function adminQuizQuestionUpdate(authUserId: number, quizId: number, ques
   if (!questionBody.answers.some(answer => answer.correct)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
+  const totalDuration = quiz.questions.reduce((accumulator, question) => {
+    if (question.questionId === questionId) {
+      return accumulator + questionBody.duration;
+    }
+    return accumulator + question.duration;
+  }, 0);
 
-  if (questionBody.duration > 180) {
+  if (totalDuration > 180) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_DURATION);
   }
   question.question = questionBody.question;
@@ -428,6 +435,7 @@ export function adminQuizQuestionDuplicate(authUserId: number, quizId: number, q
   const questions = findQuizById(quizId).questions;
 
   const newQuestion = Object.assign({}, questions.find(q => q.questionId === questionId), { questionId: newQuestionId });
+  Object.setPrototypeOf(newQuestion, Question.prototype);
   questions.splice(1 + questions.findIndex(q => q.questionId === questionId), 0, newQuestion);
 
   return { newQuestionId: newQuestionId };
@@ -473,3 +481,36 @@ export function adminQuizQuestionDuplicate(authUserId: number, quizId: number, q
 
 //   return {};
 // }
+
+export function adminQuizSessionStart(authUserId: number, quizId: number, autoStartNum: number): { newSessionId: number } {
+  const data = getData();
+  const quiz = findQuizById(quizId);
+  if (!quiz) {
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  }
+  if (quiz.authUserId !== authUserId) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
+  if (autoStartNum > 50 || autoStartNum < 1) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_AUTO_START_NUM);
+  }
+  if (quiz.questions.length === 0) {
+    throw new HttpError(400, ERROR_MESSAGES.QUIZ_NO_QUESTIONS);
+  }
+  if (!quiz.active) {
+    throw new HttpError(400, ERROR_MESSAGES.QUIZ_INACTIVE);
+  }
+  const activeSessions = data.quizSessions.filter(s => s.quizId === quizId && s.state() !== QuizSessionState.END);
+  if (activeSessions.length >= 10) {
+    throw new HttpError(400, ERROR_MESSAGES.QUIZ_TOO_MANY_SESSIONS);
+  }
+
+  const newSessionId = getNewID('quiz session');
+  const newSession = new QuizSession(newSessionId, quiz, autoStartNum);
+
+  data.quizSessions.push(newSession);
+
+  setData(data);
+
+  return { newSessionId: newSessionId };
+}
