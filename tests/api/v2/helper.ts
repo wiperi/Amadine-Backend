@@ -1,10 +1,9 @@
 import request, { Response } from 'sync-request-curl';
 import config from '../../../src/config';
 
-const AUTH_URL = `${config.url}:${config.port}/v1/admin/auth`;
-const QUIZ_URL = `${config.url}:${config.port}/v1/admin/quiz`;
-const USER_URL = `${config.url}:${config.port}/v1/admin/user`;
-const PLAYER_URL = `${config.url}:${config.port}/v1/player`;
+const AUTH_URL = `${config.url}:${config.port}/v2/admin/auth`;
+const QUIZ_URL = `${config.url}:${config.port}/v2/admin/quiz`;
+const USER_URL = `${config.url}:${config.port}/v2/admin/user`;
 
 type ParsedResponse = Omit<Response, 'body'> & { body: Record<string, any> };
 
@@ -44,7 +43,7 @@ export function loginUser(email: string, password: string): ParsedResponse {
 
 export function logoutUser(token: string): ParsedResponse {
   const res = request('POST', `${AUTH_URL}/logout`, {
-    json: {
+    headers: {
       token
     }
   });
@@ -53,7 +52,7 @@ export function logoutUser(token: string): ParsedResponse {
 
 export function getUserDetails(token: string): ParsedResponse {
   const res = request('GET', `${USER_URL}/details`, {
-    qs: {
+    headers: {
       token
     }
   });
@@ -62,8 +61,10 @@ export function getUserDetails(token: string): ParsedResponse {
 
 export function updateUserDetails(token: string, email: string, nameFirst: string, nameLast: string): ParsedResponse {
   const res = request('PUT', `${USER_URL}/details`, {
+    headers: {
+        token
+    },
     json: {
-      token,
       email,
       nameFirst,
       nameLast
@@ -74,8 +75,10 @@ export function updateUserDetails(token: string, email: string, nameFirst: strin
 
 export function updateUserPassword(token: string, oldPassword: string, newPassword: string): ParsedResponse {
   const res = request('PUT', `${USER_URL}/password`, {
+    headers: {
+        token
+    },
     json: {
-      token,
       oldPassword,
       newPassword
     }
@@ -85,7 +88,7 @@ export function updateUserPassword(token: string, oldPassword: string, newPasswo
 
 export function getQuizList(token: string): ParsedResponse {
   const res = request('GET', `${QUIZ_URL}/list`, {
-    qs: {
+    headers: {
       token
     }
   });
@@ -94,7 +97,7 @@ export function getQuizList(token: string): ParsedResponse {
 
 export function getQuizDetails(token: string, quizId: number): ParsedResponse {
   const res = request('GET', `${QUIZ_URL}/${quizId}`, {
-    qs: {
+    headers: {
       token
     }
   });
@@ -103,8 +106,10 @@ export function getQuizDetails(token: string, quizId: number): ParsedResponse {
 
 export function createQuiz(token: string, name: string, description: string): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}`, {
+    headers: {
+        token
+    },
     json: {
-      token,
       name,
       description,
     }
@@ -114,8 +119,10 @@ export function createQuiz(token: string, name: string, description: string): Pa
 
 export function updateQuiz(token: string, quizId: number, name: string, description: string): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}`, {
+    headers: {
+        token
+    },
     json: {
-      token,
       name,
       description,
     }
@@ -125,7 +132,7 @@ export function updateQuiz(token: string, quizId: number, name: string, descript
 
 export function deleteQuiz(token: string, quizId: number): ParsedResponse {
   const res = request('DELETE', `${QUIZ_URL}/${quizId}`, {
-    qs: {
+    headers: {
       token,
     }
   });
@@ -134,8 +141,10 @@ export function deleteQuiz(token: string, quizId: number): ParsedResponse {
 
 export function updateQuizDescription(token: string, quizId: number, description: string): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}/description`, {
+    headers: {
+        token
+    },
     json: {
-      token,
       description
     }
   });
@@ -144,7 +153,7 @@ export function updateQuizDescription(token: string, quizId: number, description
 
 export function getQuizTrash(token: string): ParsedResponse {
   const res = request('GET', `${QUIZ_URL}/trash`, {
-    qs: {
+    headers: {
       token
     }
   });
@@ -153,7 +162,7 @@ export function getQuizTrash(token: string): ParsedResponse {
 
 export function restoreQuiz(token: string, quizId: number): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}/${quizId}/restore`, {
-    json: {
+    headers: {
       token
     }
   });
@@ -162,7 +171,7 @@ export function restoreQuiz(token: string, quizId: number): ParsedResponse {
 
 export function deleteQuizPermanently(token: string, quizId: number): ParsedResponse {
   const res = request('DELETE', `${QUIZ_URL}/${quizId}`, {
-    qs: {
+    headers: {
       token
     }
   });
@@ -171,8 +180,10 @@ export function deleteQuizPermanently(token: string, quizId: number): ParsedResp
 
 export function moveQuestion(token: string, quizId: number, questionId: number, newPosition: number): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}/question/${questionId}/move`, {
+    headers: {
+        token
+    },
     json: {
-      token,
       newPosition
     }
   });
@@ -181,21 +192,25 @@ export function moveQuestion(token: string, quizId: number, questionId: number, 
 
 export function createQuestion(token: string, quizId: number, questionBody: object): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}/${quizId}/question`, {
+    headers: {
+        token
+    },
     json: {
-      token,
       questionBody
     }
   });
   return parse(res);
 }
 
-export function requestAdminQuizNameUpdate(quizId: Number, token: String, name: String) {
+export function requestAdminQuizNameUpdate(quizId: number, token:string, name: string) {
   const res = request(
     'PUT',
     `${config.url}:${config.port}/v1/admin/quiz/${quizId}/name`,
     {
+      headers: {
+        token
+    },
       json: {
-        token,
         name
       }
     }
@@ -209,17 +224,19 @@ export function requestAdminQuizNameUpdate(quizId: Number, token: String, name: 
 
 export function duplicateQuestion(token: string, quizId: number, questionId: number): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}/${quizId}/question/${questionId}/duplicate`, {
-    json: {
+    headers: {
       token
     }
-  });
+  })
   return parse(res);
 }
 
 export function emptyTrash(token: string, quizIds: string): ParsedResponse {
   const res = request('DELETE', `${QUIZ_URL}/trash/empty`, {
+    headers: {
+        token
+    },
     qs: {
-      token,
       quizIds
     }
   });
@@ -227,7 +244,7 @@ export function emptyTrash(token: string, quizIds: string): ParsedResponse {
 }
 export function deleteQuestion(token: string, quizId: number, questionId: number): ParsedResponse {
   const res = request('DELETE', `${QUIZ_URL}/${quizId}/question/${questionId}`, {
-    qs: {
+    headers: {
       token,
     }
   });
@@ -236,8 +253,10 @@ export function deleteQuestion(token: string, quizId: number, questionId: number
 
 export function transferQuiz(token: string, quizId: number, userEmail: string): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}/${quizId}/transfer`, {
+    headers: {
+        token
+    },
     json: {
-      token,
       quizId,
       userEmail
     }
@@ -245,192 +264,15 @@ export function transferQuiz(token: string, quizId: number, userEmail: string): 
   return parse(res);
 }
 
-export function updateQuestion(token: string, quizId: number, questionId: number, questionBody: object): ParsedResponse {
+export function updateQuestion(token: string,  quizId: number, questionId: number, questionBody: object): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}/question/${questionId}`, {
+    headers: {
+        token
+    },
     json: {
-      token,
       quizId,
       questionId,
       questionBody
-    }
-  });
-  return parse(res);
-}
-
-export function createQuizSession(token: string, quizId: number, autoStartNum: number): ParsedResponse {
-  const res = request('POST', `${QUIZ_URL}/${quizId}/session/start`, {
-    json: {
-      token,
-      autoStartNum
-    }
-  });
-  return parse(res);
-}
-
-export function updateQuizThumbnail(token: string,  quizId: number, imgUrl: string): ParsedResponse {
-  const res = request('PUT', `${QUIZ_URL}/${quizId}/thumnail`, {
-    headers: {
-      token
-    },
-    json: {
-      quizId,
-      imgUrl
-    }
-  });
-  return parse(res);
-}
-
-export function getQuizSessionActivity(token: string,  quizId: number): ParsedResponse {
-  const res = request('GET', `${QUIZ_URL}/${quizId}/sessions`, {
-    headers: {
-      token
-    },
-    qs: {
-      quizId,
-    }
-  });
-  return parse(res);
-}
-
-export function postNewQuizSession(token: string,  quizId: number, autoStartNum: number): ParsedResponse {
-  const res = request('POST', `${QUIZ_URL}/${quizId}/sessions/start`, {
-    headers: {
-      token
-    },
-    json: {
-      quizId,
-      autoStartNum
-    }
-  });
-  return parse(res);
-}
-
-export function updateSessionStatus(token: string,  quizId: number, sessionId: number, action: string): ParsedResponse {
-  const res = request('PUT', `${QUIZ_URL}/${quizId}/sessions/${sessionId}`, {
-    headers: {
-      token
-    },
-    json: {
-      quizId,
-      sessionId,
-      action
-    }
-  });
-  return parse(res);
-}
-
-export function getNewSessionStarus(token: string,  quizId: number, sessionId: number): ParsedResponse {
-  const res = request('GET', `${QUIZ_URL}/${quizId}/sessions/${sessionId}`, {
-    headers: {
-      token
-    },
-    qs: {
-      quizId,
-      sessionId,
-    }
-  });
-  return parse(res);
-}
-
-export function getSessionFinalResult(token: string,  quizId: number, sessionId: number): ParsedResponse {
-  const res = request('GET', `${QUIZ_URL}/${quizId}/sessions/${sessionId}/result`, {
-    headers: {
-      token
-    },
-    qs: {
-      quizId,
-      sessionId,
-    }
-  });
-  return parse(res);
-}
-
-export function getSessionFinalResultCsvFormat(token: string,  quizId: number, sessionId: number): ParsedResponse {
-  const res = request('GET', `${QUIZ_URL}/${quizId}/sessions/${sessionId}/result/csv`, {
-    headers: {
-      token
-    },
-    qs: {
-      quizId,
-      sessionId,
-    }
-  });
-  return parse(res);
-}
-
-export function postPlayerJoinSession(sessionId: number, name: string): ParsedResponse {
-  const res = request('POST', `${PLAYER_URL}/join`, {
-    json: {
-      sessionId,
-      name,
-    }
-  });
-  return parse(res);
-}
-
-export function getPlayerSession(playerId: number): ParsedResponse {
-  const res = request('GET', `${PLAYER_URL}/${playerId}`, {
-    qs: {
-      playerId
-    }
-  });
-  return parse(res);
-}
-
-export function getPlayerQuestionInfo(playerId: number, questionposition: number): ParsedResponse {
-  const res = request('GET', `${PLAYER_URL}/${playerId}/question/${questionposition}`, {
-    qs: {
-      playerId,
-      questionposition
-    }
-  });
-  return parse(res);
-}
-
-export function putPlayerAnswer(answerIds: object, playerId: number, questionposition: number): ParsedResponse {
-  const res = request('PUT', `${PLAYER_URL}/${playerId}/question/${questionposition}/answer`, {
-    json: {
-      answerIds,
-      playerId,
-      questionposition
-    }
-  });
-  return parse(res);
-}
-
-export function getPlayerQuestionResult(playerId: number, questionposition: number): ParsedResponse {
-  const res = request('GET', `${PLAYER_URL}/${playerId}/question/${questionposition}/result`, {
-    qs: {
-      playerId,
-      questionposition
-    }
-  });
-  return parse(res);
-}
-
-export function getPlayerSessionFinalResult(playerId: number): ParsedResponse {
-  const res = request('GET', `${PLAYER_URL}/${playerId}/result`, {
-    qs: {
-      playerId,
-    }
-  });
-  return parse(res);
-}
-
-export function getPlayerSessionMessage(playerId: number): ParsedResponse {
-  const res = request('GET', `${PLAYER_URL}/${playerId}/chat`, {
-    qs: {
-      playerId,
-    }
-  });
-  return parse(res);
-}
-
-export function postPlayerMessage(playerId: number, message: object): ParsedResponse {
-  const res = request('POST', `${PLAYER_URL}/${playerId}/chat`, {
-    qs: {
-      playerId,
-      message
     }
   });
   return parse(res);

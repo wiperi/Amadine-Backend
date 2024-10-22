@@ -295,10 +295,10 @@ export function adminQuizQuestionCreate(authUserId: number, quizId: number, ques
 }
 
 export function adminQuizQuestionUpdate(authUserId: number, quizId: number, questionId: number, questionBody: ParamQuestionBody): EmptyObject {
-  // TODO: Implement this function
-  if (!quizId || recursiveFind(questionBody, undefined)) {
-    throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
+  if (recursiveFind(questionBody, undefined)) {
+    throw new HttpError(403, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
   }
+
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -340,7 +340,6 @@ export function adminQuizQuestionUpdate(authUserId: number, quizId: number, ques
   if (!questionBody.answers.some(answer => answer.correct)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
-
   const totalDuration = quiz.questions.reduce((accumulator, question) => {
     if (question.questionId === questionId) {
       return accumulator + questionBody.duration;

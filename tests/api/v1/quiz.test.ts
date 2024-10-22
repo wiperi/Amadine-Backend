@@ -1574,17 +1574,45 @@ describe('PUT /v1/admin/quiz/:quizid/question/:questionid', () => {
       expect(res.statusCode).toBe(400);
     });
 
-    test('Total duration exceeds 3 minutes (180 seconds)', () => {
-      const updatedQuestionBody = {
-        question: 'Valid question?',
-        duration: 181,  // Invalid duration (exceeds limit)
+    test('Total duration exceeds 180 seconds after question update', () => {
+      // Create the first question with a valid duration
+      const questionBody1 = {
+        question: 'Question 1',
+        duration: 60, 
         points: 5,
         answers: [
-          { answer: 'Paris', correct: true },
-          { answer: 'Berlin', correct: false },
+          { answer: 'Answer 1', correct: true },
+          { answer: 'Answer 2', correct: false },
         ],
       };
-      const res = updateQuestion(token, quizId, questionId, updatedQuestionBody);
+      const createQuestionRes1 = createQuestion(token, quizId, questionBody1);
+      expect(createQuestionRes1.statusCode).toBe(200);
+    
+      // Create another question with a small duration
+      const questionBody2 = {
+        question: 'Question 2',
+        duration: 50,
+        points: 5,
+        answers: [
+          { answer: 'Answer 1', correct: true },
+          { answer: 'Answer 2', correct: false },
+        ],
+      };
+      const createQuestionRes2 = createQuestion(token, quizId, questionBody2);
+      expect(createQuestionRes2.statusCode).toBe(200);
+    
+      // Now try to update the first question to push total duration over 180 seconds
+      const updatedQuestionBody = {
+        question: 'Updated Question',
+        duration: 100, 
+        points: 5,
+        answers: [
+          { answer: 'Answer A', correct: true },
+          { answer: 'Answer B', correct: false },
+        ],
+      };
+    
+      const res = updateQuestion(token, quizId, createQuestionRes1.body.questionId, updatedQuestionBody);
       expect(res.statusCode).toBe(400);
     });
 
