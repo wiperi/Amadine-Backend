@@ -1,14 +1,14 @@
 import {
   clear,
-  registerUser,
+  userRegister,
   loginUser,
   logoutUser,
   getUserDetails,
-  updateUserDetails,
-  updateUserPassword,
-  getQuizDetails,
-  createQuiz,
-  createQuestion
+  userUpdateDetails,
+  userUpdatePassword,
+  quizGetDetails,
+  quizCreate,
+  questionCreate
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -30,17 +30,17 @@ describe('DELETE /v1/clear', () => {
 
   test('correctly clears data', () => {
     // Register a user
-    const registerRes = registerUser('test@example.com', 'ValidPass123', 'John', 'Doe');
+    const registerRes = userRegister('test@example.com', 'ValidPass123', 'John', 'Doe');
     expect(registerRes.statusCode).toBe(200);
     const { token } = registerRes.body;
 
     // Create a quiz
-    const createQuizRes = createQuiz(token, 'Test Quiz', 'A test quiz');
+    const createQuizRes = quizCreate(token, 'Test Quiz', 'A test quiz');
     expect(createQuizRes.statusCode).toBe(200);
     const { quizId } = createQuizRes.body;
 
     // Create a question
-    const createQuestionRes = createQuestion(token, quizId, {
+    const createQuestionRes = questionCreate(token, quizId, {
       question: 'Test question?',
       duration: 30,
       points: 5,
@@ -60,7 +60,7 @@ describe('DELETE /v1/clear', () => {
     expect(loginRes.statusCode).toBe(400);
 
     // Check that quiz is cleared (try to get quiz info)
-    const getQuizRes = getQuizDetails(token, quizId);
+    const getQuizRes = quizGetDetails(token, quizId);
     expect(getQuizRes.statusCode).toBe(401);
 
     // Note: We can't directly check if the question is cleared because there's no specific endpoint for that.
@@ -113,7 +113,7 @@ describe('POST /v1/admin/auth/register', () => {
         const inputs = [...validInputs];
         inputs[paramIndex] = data;
 
-        const res = registerUser(inputs[0], inputs[1], inputs[2], inputs[3]);
+        const res = userRegister(inputs[0], inputs[1], inputs[2], inputs[3]);
         expect(res.statusCode).toStrictEqual(expectOutput.statusCode);
         expect(res.body).toStrictEqual(expectOutput.body);
       });
@@ -121,11 +121,11 @@ describe('POST /v1/admin/auth/register', () => {
   }
 
   test('Email is used', () => {
-    const res = registerUser(validInputs[0], validInputs[1], validInputs[2], validInputs[3]);
+    const res = userRegister(validInputs[0], validInputs[1], validInputs[2], validInputs[3]);
     expect(res.statusCode).toStrictEqual(200);
     expect(res.body).toStrictEqual(CORRECT);
 
-    const res2 = registerUser(validInputs[0], validInputs[1], validInputs[2], validInputs[3]);
+    const res2 = userRegister(validInputs[0], validInputs[1], validInputs[2], validInputs[3]);
     expect(res2.statusCode).toStrictEqual(400);
     expect(res2.body).toStrictEqual(ERROR);
   });
@@ -147,7 +147,7 @@ describe('POST /v1/admin/auth/logout', () => {
   let token: string;
   beforeEach(() => {
     // Register a user and get the token
-    const res = registerUser('test@example.com', 'ValidPass123', 'John', 'Doe');
+    const res = userRegister('test@example.com', 'ValidPass123', 'John', 'Doe');
     expect(res.statusCode).toBe(200);
     token = res.body.token;
   });
@@ -196,14 +196,14 @@ describe('POST /v1/admin/auth/logout', () => {
 describe('PUT /v1/admin/user/password', () => {
   let token: string;
   beforeEach(() => {
-    const res = registerUser('test@example.com', 'OldPassword123', 'John', 'Doe');
+    const res = userRegister('test@example.com', 'OldPassword123', 'John', 'Doe');
     expect(res.statusCode).toBe(200);
     token = res.body.token;
   });
 
   describe('valid cases', () => {
     test('successful password update', () => {
-      const res = updateUserPassword(token, 'OldPassword123', 'NewPassword456');
+      const res = userUpdatePassword(token, 'OldPassword123', 'NewPassword456');
       expect(res.statusCode).toBe(200);
       expect(res.body).toStrictEqual({});
 
@@ -216,41 +216,41 @@ describe('PUT /v1/admin/user/password', () => {
 
   describe('invalid cases', () => {
     test('invalid token', () => {
-      const res = updateUserPassword('invalid_token', 'OldPassword123', 'NewPassword456');
+      const res = userUpdatePassword('invalid_token', 'OldPassword123', 'NewPassword456');
       expect(res.statusCode).toBe(401);
       expect(res.body).toStrictEqual(ERROR);
     });
 
     test('missing token', () => {
-      const res = updateUserPassword('', 'OldPassword123', 'NewPassword456');
+      const res = userUpdatePassword('', 'OldPassword123', 'NewPassword456');
       expect(res.statusCode).toBe(401);
       expect(res.body).toStrictEqual(ERROR);
     });
 
     test('incorrect old password', () => {
-      const res = updateUserPassword(token, 'WrongOldPassword', 'NewPassword456');
+      const res = userUpdatePassword(token, 'WrongOldPassword', 'NewPassword456');
       expect(res.statusCode).toBe(400);
       expect(res.body).toStrictEqual(ERROR);
     });
 
     test('new password same as old password', () => {
-      const res = updateUserPassword(token, 'OldPassword123', 'OldPassword123');
+      const res = userUpdatePassword(token, 'OldPassword123', 'OldPassword123');
       expect(res.statusCode).toBe(400);
       expect(res.body).toStrictEqual(ERROR);
     });
 
     test('new password has been used before', () => {
-      const res = updateUserPassword(token, 'OldPassword123', 'NewPassword456');
+      const res = userUpdatePassword(token, 'OldPassword123', 'NewPassword456');
       expect(res.statusCode).toBe(200);
       expect(res.body).toStrictEqual({});
 
-      const res2 = updateUserPassword(token, 'NewPassword456', 'OldPassword123');
+      const res2 = userUpdatePassword(token, 'NewPassword456', 'OldPassword123');
       expect(res2.statusCode).toBe(400);
       expect(res2.body).toStrictEqual(ERROR);
     });
 
     test.each(invalidPasswords)('new password is invalid: %s', (password) => {
-      const res = updateUserPassword(token, 'OldPassword123', password);
+      const res = userUpdatePassword(token, 'OldPassword123', password);
       expect(res.statusCode).toBe(400);
       expect(res.body).toStrictEqual(ERROR);
     });
@@ -263,7 +263,7 @@ describe('PUT /v1/admin/user/password', () => {
 describe('POST /v1/admin/auth/login', () => {
   let token: string;
   beforeEach(() => {
-    const res = registerUser('goodemail@gmail.com', 'GlenPassword123', 'Glen', 'Quagmire');
+    const res = userRegister('goodemail@gmail.com', 'GlenPassword123', 'Glen', 'Quagmire');
     token = res.body.token;
   });
 
@@ -290,7 +290,7 @@ describe('POST /v1/admin/auth/login', () => {
 
     test('different user return different id', () => {
       const res1 = loginUser('goodemail@gmail.com', 'GlenPassword123');
-      registerUser('peter@gmail.com', 'PumpkinEater123', 'peter', 'griffin');
+      userRegister('peter@gmail.com', 'PumpkinEater123', 'peter', 'griffin');
       const res2 = loginUser('peter@gmail.com', 'PumpkinEater123');
       expect(res1.body).not.toStrictEqual(res2.body);
     });
@@ -301,7 +301,7 @@ describe('GET /v1/admin/user/details', () => {
   // Valid cases:
   describe('adminUserDetails valid cases', () => {
     test('numFailedPasswordsSinceLastLogin increments correctly', () => {
-      const registerRes = registerUser('wick@example.com', 'JohnWick123', 'John', 'Wick');
+      const registerRes = userRegister('wick@example.com', 'JohnWick123', 'John', 'Wick');
       expect(registerRes.statusCode).toBe(200);
       const user = registerRes.body;
       const token = user.token;
@@ -324,7 +324,7 @@ describe('GET /v1/admin/user/details', () => {
     });
 
     test('reset numFailedPasswordsSinceLastLogin', () => {
-      const registerRes = registerUser('lucy@example.com', 'Lucy12356', 'Lucy', 'David');
+      const registerRes = userRegister('lucy@example.com', 'Lucy12356', 'Lucy', 'David');
       const user = registerRes.body;
       const token = user.token;
 
@@ -347,7 +347,7 @@ describe('GET /v1/admin/user/details', () => {
     });
 
     test('valid user details', () => {
-      const registerRes = registerUser('artoria@example.com', 'Artoria123', 'Artoria', 'Pendragon');
+      const registerRes = userRegister('artoria@example.com', 'Artoria123', 'Artoria', 'Pendragon');
       const user = registerRes.body;
       const token = user.token;
       loginUser('artoria@example.com', 'Artoria123');
@@ -370,7 +370,7 @@ describe('GET /v1/admin/user/details', () => {
   // Error cases:
   describe('adminUserDetails error cases', () => {
     test('User ID does not exist', () => {
-      registerUser('test@example.com', 'TestPassword123', 'Test', 'User');
+      userRegister('test@example.com', 'TestPassword123', 'Test', 'User');
       const token = '11111';
       const detailsRes = getUserDetails(token);
       expect(detailsRes.statusCode).toBe(401);
@@ -387,13 +387,13 @@ describe('PUT /v1/admin/user/details', () => {
   let token: string;
   beforeEach(() => {
     // Register a user to get the token
-    const registerRes = registerUser('handsomejim@example.com', 'ValidPass123', 'Jim', 'Hu');
+    const registerRes = userRegister('handsomejim@example.com', 'ValidPass123', 'Jim', 'Hu');
     expect(registerRes.statusCode).toBe(200);
     token = registerRes.body.token;
   });
   describe('valid case', () => {
     test('successful update of user details', () => {
-      const res = updateUserDetails(token, 'newemail@example.com', 'Johnny', 'Smith');
+      const res = userUpdateDetails(token, 'newemail@example.com', 'Johnny', 'Smith');
       expect(res.statusCode).toBe(200);
       expect(res.body).toStrictEqual({});
     });
@@ -401,13 +401,13 @@ describe('PUT /v1/admin/user/details', () => {
 
   describe('check the token', () => {
     test('error for invalid token', () => {
-      const res = updateUserDetails('invalid_token', 'testuser@example.com', 'Johnny', 'Smith');
+      const res = userUpdateDetails('invalid_token', 'testuser@example.com', 'Johnny', 'Smith');
       expect(res.statusCode).toBe(401);
       expect(res.body).toStrictEqual(ERROR);
     });
 
     test('error for empty token', () => {
-      const res = updateUserDetails('', 'newemail@example.com', 'Johnny', 'Smith');
+      const res = userUpdateDetails('', 'newemail@example.com', 'Johnny', 'Smith');
       expect(res.statusCode).toBe(401); // Expect 401 for missing token
       expect(res.body).toStrictEqual(ERROR);
     });
@@ -415,17 +415,17 @@ describe('PUT /v1/admin/user/details', () => {
 
   describe('Invalid email cases and used email', () => {
     test.each(invalidEmails)('error for invalid email: %s', (invalidEmail) => {
-      const res = updateUserDetails(token, invalidEmail, 'Johnny', 'Smith');
+      const res = userUpdateDetails(token, invalidEmail, 'Johnny', 'Smith');
       expect(res.statusCode).toBe(400); // Expect 400 for invalid email
       expect(res.body).toStrictEqual(ERROR);
     });
 
     test('error for used email', () => {
       // Register another user
-      registerUser('otheruser@example.com', 'ValidPass123', 'Jane', 'Doe');
+      userRegister('otheruser@example.com', 'ValidPass123', 'Jane', 'Doe');
 
       // Attempt to update with the same email
-      const res = updateUserDetails(token, 'otheruser@example.com', 'Johnny', 'Smith');
+      const res = userUpdateDetails(token, 'otheruser@example.com', 'Johnny', 'Smith');
       expect(res.statusCode).toBe(400);
       expect(res.body).toStrictEqual(ERROR);
     });
@@ -433,7 +433,7 @@ describe('PUT /v1/admin/user/details', () => {
 
   describe('Invalid first name cases', () => {
     test.each(invalidNames)('error for invalid first name: %s', (invalidName) => {
-      const res = updateUserDetails(token, 'validemail@example.com', invalidName, 'Smith');
+      const res = userUpdateDetails(token, 'validemail@example.com', invalidName, 'Smith');
       expect(res.statusCode).toBe(400);
       expect(res.body).toStrictEqual(ERROR);
     });
@@ -441,7 +441,7 @@ describe('PUT /v1/admin/user/details', () => {
 
   describe('Invalid last name cases', () => {
     test.each(invalidNames)('error for invalid last name: %s', (invalidName) => {
-      const res = updateUserDetails(token, 'validemail@example.com', 'Johnny', invalidName);
+      const res = userUpdateDetails(token, 'validemail@example.com', 'Johnny', invalidName);
       expect(res.statusCode).toBe(400); // Expect 400 for invalid name
       expect(res.body).toStrictEqual(ERROR);
     });
