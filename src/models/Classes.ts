@@ -145,12 +145,14 @@ export class Answer {
 export class QuizSession {
   sessionId: number;
   quizId: number;
+  autoStartNum: number;
+  metadata: object; // deep copy of quiz
 
   messages: Message[] = [];
   atQuestion: number = 1; // Question index starting from 1
   timeCreated: number = Math.floor(Date.now() / 1000);
 
-  private static transitions = StateMachine.parseTransitions<QuizSessionState, PlayerAction, QuizSession>([
+  private static transitions = StateMachine.parseTransitions<QuizSessionState, PlayerAction>([
     { from: LOBBY, action: GO_TO_END, to: END },
     { from: LOBBY, action: NEXT_QUESTION, to: QUESTION_COUNTDOWN },
     { from: QUESTION_COUNTDOWN, action: SKIP_COUNTDOWN, to: QUESTION_OPEN },
@@ -167,7 +169,7 @@ export class QuizSession {
     { from: ANSWER_SHOW, action: GO_TO_END, to: END }
   ]);
 
-  private stateMachine = new StateMachine<QuizSessionState, PlayerAction, QuizSession>(this, QuizSessionState.LOBBY, QuizSession.transitions);
+  private stateMachine = new StateMachine<QuizSessionState, PlayerAction>(QuizSessionState.LOBBY, QuizSession.transitions);
 
   /**
    * Gets the current state of the quiz session.
@@ -200,9 +202,11 @@ export class QuizSession {
     }
   }
 
-  constructor(sessionId: number, quizId: number) {
+  constructor(sessionId: number, quiz: Quiz, autoStartNum: number) {
     this.sessionId = sessionId;
-    this.quizId = quizId;
+    this.quizId = quiz.quizId;
+    this.metadata = { ...quiz };
+    this.autoStartNum = autoStartNum;
   }
 }
 

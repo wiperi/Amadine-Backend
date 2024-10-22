@@ -10,6 +10,7 @@ function cleanupLogs() {
   console.log('🧹 Checking for outdated logs...');
   const now = new Date().getTime();
   const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000; // Timestamp of one week ago
+  const fileSizeLimit = 5 * 1024 * 1024; // 5 MB
 
   fs.readdir(LOG_PATH, (err, files) => {
     if (err) {
@@ -25,7 +26,7 @@ function cleanupLogs() {
           return;
         }
 
-        if (stats.mtimeMs < oneWeekAgo) {
+        if (stats.mtimeMs < oneWeekAgo || stats.size > fileSizeLimit) {
           fs.writeFile(filePath, '', err => {
             if (err) {
               console.error(`Error emptying file ${file}:`, err);

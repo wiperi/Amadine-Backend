@@ -17,7 +17,7 @@ export type Transition<STATE, ACTION, CALLBACK> = {
 export class StateMachine<
   STATE extends string | number | symbol,
   ACTION extends string | number | symbol,
-  INSTANCE extends object = object,
+  INSTANCE extends object = undefined,
   CALLBACK extends (instance: INSTANCE, from: STATE, action: ACTION, to: STATE) => unknown
   = (instance: INSTANCE, from: STATE, action: ACTION, to: STATE) => unknown
 > {
@@ -32,15 +32,15 @@ export class StateMachine<
   protected static callBackMap: Map<string, object[]>;
 
   /**
-   * @param instance - The instance object
    * @param initial - The initial state
    * @param transtions - Array of transitions
+   * @param instance - The instance object, callbacks can access instance and make side effects
    *
    * The transitions is a static property of the class,
    * so a class have only one set of transitions, i.e. every instance of the class share the same transitions rules
    * use StateMachine.parseTransitions to parse transitions from an array of objects
    */
-  constructor(instance: INSTANCE, initial: STATE, transtions: Transition<STATE, ACTION, CALLBACK>[]) {
+  constructor(initial: STATE, transitions: Transition<STATE, ACTION, CALLBACK>[], instance?: INSTANCE) {
     this.instance = instance;
     this.currentState = initial;
 
@@ -50,7 +50,7 @@ export class StateMachine<
       StateMachine.callBackMap = new Map<string, CALLBACK[]>();
 
       // Add each transition and callback
-      transtions.forEach(t => {
+      transitions.forEach(t => {
         this.addTransition(t);
         this.addCallBack(t);
       });
@@ -65,7 +65,7 @@ export class StateMachine<
   static parseTransitions<
     STATE extends string | number | symbol,
     ACTION extends string | number | symbol,
-    INSTANCE extends object = object,
+    INSTANCE extends object = undefined,
     CALLBACK extends (instance: INSTANCE, from: STATE, action: ACTION, to: STATE) => unknown
     = (instance: INSTANCE, from: STATE, action: ACTION, to: STATE) => unknown
   >(transitions: { from: STATE, action: ACTION, to: STATE, callbacks?: CALLBACK[] }[]):
