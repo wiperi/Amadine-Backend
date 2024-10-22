@@ -1,9 +1,9 @@
 import {
   clear,
   userRegister,
-  loginUser,
-  logoutUser,
-  getUserDetails,
+  userLogin,
+  userLogout,
+  userGetDetails,
   userUpdateDetails,
   userUpdatePassword,
   quizGetDetails,
@@ -56,7 +56,7 @@ describe('DELETE /v1/clear', () => {
     expect(clearRes.statusCode).toBe(200);
 
     // Check that user is cleared (try to login)
-    const loginRes = loginUser('test@example.com', 'ValidPass123');
+    const loginRes = userLogin('test@example.com', 'ValidPass123');
     expect(loginRes.statusCode).toBe(400);
 
     // Check that quiz is cleared (try to get quiz info)
@@ -154,14 +154,14 @@ describe('POST /v1/admin/auth/logout', () => {
 
   describe('valid cases', () => {
     test('successful logout', async () => {
-      const res = logoutUser(token);
+      const res = userLogout(token);
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({});
 
       // Verify that the token is no longer valid
       // - Since jet generation is based on time, we need to wait for a second to ensure the new token is different to old one
       await new Promise(resolve => setTimeout(resolve, 1000));
-      const loginRes = loginUser('test@example.com', 'ValidPass123');
+      const loginRes = userLogin('test@example.com', 'ValidPass123');
       expect(loginRes.statusCode).toBe(200);
       expect(loginRes.body).toHaveProperty('token');
       expect(loginRes.body.token).not.toBe(token);
@@ -170,23 +170,23 @@ describe('POST /v1/admin/auth/logout', () => {
 
   describe('invalid cases', () => {
     test('invalid token', () => {
-      const res = logoutUser('invalid_token');
+      const res = userLogout('invalid_token');
       expect(res.statusCode).toBe(401);
       expect(res.body).toEqual({ error: expect.any(String) });
     });
 
     test('missing token', () => {
-      const res = logoutUser('');
+      const res = userLogout('');
       expect(res.statusCode).toBe(401);
       expect(res.body).toEqual({ error: expect.any(String) });
     });
 
     test('already logged out token', () => {
       // Logout once
-      logoutUser(token);
+      userLogout(token);
 
       // Try to logout again with the same token
-      const res = logoutUser(token);
+      const res = userLogout(token);
       expect(res.statusCode).toBe(401);
       expect(res.body).toEqual({ error: expect.any(String) });
     });
@@ -208,7 +208,7 @@ describe('PUT /v1/admin/user/password', () => {
       expect(res.body).toStrictEqual({});
 
       // Verify that the new password works for login
-      const loginRes = loginUser('test@example.com', 'NewPassword456');
+      const loginRes = userLogin('test@example.com', 'NewPassword456');
       expect(loginRes.statusCode).toBe(200);
       expect(loginRes.body).toHaveProperty('token');
     });
@@ -269,13 +269,13 @@ describe('POST /v1/admin/auth/login', () => {
 
   describe('invalid cases', () => {
     test('Email does not exist', () => {
-      const res = loginUser('petergriffin@gmail.com', 'PumpkinEater123');
+      const res = userLogin('petergriffin@gmail.com', 'PumpkinEater123');
       expect(res.body).toStrictEqual(ERROR);
       expect(res.statusCode).toStrictEqual(400);
     });
 
     test('Password is not correct for the given email', () => {
-      const res = loginUser('goodemail@email.com', 'Ifogortmypassword123');
+      const res = userLogin('goodemail@email.com', 'Ifogortmypassword123');
       expect(res.body).toStrictEqual(ERROR);
       expect(res.statusCode).toStrictEqual(400);
     });
@@ -283,15 +283,15 @@ describe('POST /v1/admin/auth/login', () => {
 
   describe('valid cases', () => {
     test('successful login with correct id', () => {
-      const res = loginUser('goodemail@gmail.com', 'GlenPassword123');
+      const res = userLogin('goodemail@gmail.com', 'GlenPassword123');
       expect(res.body.token).toStrictEqual(expect.any(String));
       expect(res.statusCode).toStrictEqual(200);
     });
 
     test('different user return different id', () => {
-      const res1 = loginUser('goodemail@gmail.com', 'GlenPassword123');
+      const res1 = userLogin('goodemail@gmail.com', 'GlenPassword123');
       userRegister('peter@gmail.com', 'PumpkinEater123', 'peter', 'griffin');
-      const res2 = loginUser('peter@gmail.com', 'PumpkinEater123');
+      const res2 = userLogin('peter@gmail.com', 'PumpkinEater123');
       expect(res1.body).not.toStrictEqual(res2.body);
     });
   });
@@ -305,10 +305,10 @@ describe('GET /v1/admin/user/details', () => {
       expect(registerRes.statusCode).toBe(200);
       const user = registerRes.body;
       const token = user.token;
-      loginUser('wick@example.com', 'JohnWick123');
-      loginUser('wick@example.com', 'JohnWick12');
-      loginUser('wick@example.com', 'JohnWick1234');
-      const detailsRes = getUserDetails(token);
+      userLogin('wick@example.com', 'JohnWick123');
+      userLogin('wick@example.com', 'JohnWick12');
+      userLogin('wick@example.com', 'JohnWick1234');
+      const detailsRes = userGetDetails(token);
 
       expect(detailsRes.statusCode).toBe(200);
       const details = detailsRes.body;
@@ -328,11 +328,11 @@ describe('GET /v1/admin/user/details', () => {
       const user = registerRes.body;
       const token = user.token;
 
-      loginUser('lucy@example.com', 'Lucy123567');
-      loginUser('lucy@example.com', 'Lucy123567');
-      loginUser('lucy@example.com', 'Lucy12356');
+      userLogin('lucy@example.com', 'Lucy123567');
+      userLogin('lucy@example.com', 'Lucy123567');
+      userLogin('lucy@example.com', 'Lucy12356');
 
-      const detailsRes = getUserDetails(token);
+      const detailsRes = userGetDetails(token);
       expect(detailsRes.statusCode).toBe(200);
       const details = detailsRes.body;
       expect(details).toStrictEqual({
@@ -350,9 +350,9 @@ describe('GET /v1/admin/user/details', () => {
       const registerRes = userRegister('artoria@example.com', 'Artoria123', 'Artoria', 'Pendragon');
       const user = registerRes.body;
       const token = user.token;
-      loginUser('artoria@example.com', 'Artoria123');
+      userLogin('artoria@example.com', 'Artoria123');
 
-      const detailsRes = getUserDetails(token);
+      const detailsRes = userGetDetails(token);
       expect(detailsRes.statusCode).toBe(200);
       const details = detailsRes.body;
       expect(details).toStrictEqual({
@@ -372,7 +372,7 @@ describe('GET /v1/admin/user/details', () => {
     test('User ID does not exist', () => {
       userRegister('test@example.com', 'TestPassword123', 'Test', 'User');
       const token = '11111';
-      const detailsRes = getUserDetails(token);
+      const detailsRes = userGetDetails(token);
       expect(detailsRes.statusCode).toBe(401);
       expect(detailsRes.body).toStrictEqual(ERROR);
     });
