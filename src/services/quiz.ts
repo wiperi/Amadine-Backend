@@ -340,14 +340,7 @@ export function adminQuizQuestionUpdate(authUserId: number, quizId: number, ques
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
 
-  const totalDuration = quiz.questions.reduce((accumulator, question) => {
-    if (question.questionId === questionId) {
-      return accumulator + questionBody.duration;
-    }
-    return accumulator + question.duration;
-  }, 0);
-
-  if (totalDuration > 180) {
+  if (questionBody.duration > 180) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_DURATION);
   }
   question.question = questionBody.question;

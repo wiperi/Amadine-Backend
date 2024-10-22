@@ -1573,17 +1573,30 @@ describe('PUT /v1/admin/quiz/:quizid/question/:questionid', () => {
       expect(res.statusCode).toBe(400);
     });
 
-    test('Total duration exceeds 3 minutes (180 seconds)', () => {
+    test('Update fails when question duration exceeds 3 minutes (180 seconds)', () => {
+      const questionBody1 = {
+        question: 'Question 1',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Answer 1', correct: true },
+          { answer: 'Answer 2', correct: false },
+        ],
+      };
+      const createQuestionRes1 = createQuestion(token, quizId, questionBody1);
+      expect(createQuestionRes1.statusCode).toBe(200);
+    
       const updatedQuestionBody = {
-        question: 'Valid question?',
-        duration: 181,  // Invalid duration (exceeds limit)
+        question: 'Updated Question',
+        duration: 181,  // Invalid duration (exceeds the limit)
         points: 5,
         answers: [
           { answer: 'Paris', correct: true },
           { answer: 'Berlin', correct: false },
         ],
       };
-      const res = updateQuestion(token, quizId, questionId, updatedQuestionBody);
+    
+      const res = updateQuestion(token, quizId, createQuestionRes1.body.questionId, updatedQuestionBody);
       expect(res.statusCode).toBe(400);
     });
 
