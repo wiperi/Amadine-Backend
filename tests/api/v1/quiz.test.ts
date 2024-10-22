@@ -17,7 +17,7 @@ import {
   deleteQuestion,
   transferQuiz,
   updateQuestion
-} from './apiTestHelpersV1';
+} from './helpers';
 
 const ERROR = { error: expect.any(String) };
 
