@@ -8,7 +8,7 @@ export type Transition<STATE, ACTION, CALLBACK> = {
 /**
  * StateMachine class represents a finite state machine.
  * It manages state transitions based on defined actions and allows for callback execution.
- * 
+ *
  * @template STATE - The type for states (string, number, or symbol)
  * @template ACTION - The type for actions (string, number, or symbol)
  * @template INSTANCE - The type of the instance object, callbacks can access instance and make side effects (default: object)
@@ -35,8 +35,8 @@ export class StateMachine<
    * @param instance - The instance object
    * @param initial - The initial state
    * @param transtions - Array of transitions
-   * 
-   * The transitions is a static property of the class, 
+   *
+   * The transitions is a static property of the class,
    * so a class have only one set of transitions, i.e. every instance of the class share the same transitions rules
    * use StateMachine.parseTransitions to parse transitions from an array of objects
    */
