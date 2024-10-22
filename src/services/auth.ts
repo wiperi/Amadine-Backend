@@ -11,9 +11,8 @@ import {
   isValidUserName,
 } from '../utils/helper';
 import jwt from 'jsonwebtoken';
-import config from '@/config';
+import config from '@/config.json';
 import { Request, Response, NextFunction } from 'express';
-import { hash, hashCompare } from '@/utils/helper';
 
 export function authorizeToken(req: Request, res: Response, next: NextFunction) {
   // Authorization white list
@@ -41,13 +40,13 @@ export function authorizeToken(req: Request, res: Response, next: NextFunction) 
   }
 
   if (!token) {
-    return next(new HttpError(401, ERROR_MESSAGES.MISSING_TOKEN));
+    return res.status(401).json({ error: ERROR_MESSAGES.MISSING_TOKEN });
   }
 
   // Check if token is valid
   const userSession = getData().userSessions.find((session) => session.token === token);
   if (!userSession) {
-    return next(new HttpError(401, ERROR_MESSAGES.INVALID_TOKEN));
+    return res.status(401).json({ error: ERROR_MESSAGES.INVALID_TOKEN });
   }
 
   // Set authUserId in request
@@ -60,7 +59,7 @@ export function authorizeToken(req: Request, res: Response, next: NextFunction) 
  * Register a user with an email, password, and names,
  * then returns their authUserId value.
  */
-export async function adminAuthRegister(email: string, password: string, nameFirst: string, nameLast: string): Promise<{ token: string }> {
+export function adminAuthRegister(email: string, password: string, nameFirst: string, nameLast: string): { token: string } {
   const data = getData();
 
   if (!email || !password || !nameFirst || !nameLast) {
@@ -85,9 +84,7 @@ export async function adminAuthRegister(email: string, password: string, nameFir
 
   const userId = getNewID('user');
 
-  const hashedPassword = await hash(password);
-
-  data.users.push(new User(userId, email, hashedPassword, nameFirst, nameLast));
+  data.users.push(new User(userId, email, password, nameFirst, nameLast));
 
   const token = jwt.sign({ payload: Math.random() }, config.jwtSecretKey);
 
@@ -102,7 +99,7 @@ export async function adminAuthRegister(email: string, password: string, nameFir
  * Given a registered user's email and password
  * returns their authUserId value.
  */
-export async function adminAuthLogin(email: string, password: string): Promise<{ token: string }> {
+export function adminAuthLogin(email: string, password: string): { token: string } {
   const data = getData();
 
   if (!email || !password) {
@@ -115,7 +112,7 @@ export async function adminAuthLogin(email: string, password: string): Promise<{
     throw new HttpError(400, ERROR_MESSAGES.EMAIL_NOT_EXIST);
   }
 
-  if (!(await hashCompare(password, user.password))) {
+  if (user.password !== password) {
     user.numFailedPasswordsSinceLastLogin++;
     throw new HttpError(400, ERROR_MESSAGES.WRONG_PASSWORD);
   }
@@ -191,18 +188,18 @@ export function adminUserDetails(authUserId: number): {
 /**
  * Updates the password for an admin user.
  */
-export async function adminUserPasswordUpdate(authUserId: number, oldPassword: string, newPassword: string): Promise<EmptyObject> {
+export function adminUserPasswordUpdate(authUserId: number, oldPassword: string, newPassword: string): EmptyObject {
   if (!authUserId || !oldPassword || !newPassword) {
     throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
   }
 
   const user = getData().users.find(user => user.userId === authUserId);
-  // who write this code?
-  // if (!user) {
-  //   throw new HttpError(400, ERROR_MESSAGES.UID_NOT_EXIST);
-  //  }
 
-  if (!(await hashCompare(oldPassword, user.password))) {
+  if (!user) {
+    throw new HttpError(400, ERROR_MESSAGES.UID_NOT_EXIST);
+  }
+
+  if (oldPassword !== user.password) {
     throw new HttpError(400, ERROR_MESSAGES.WRONG_OLD_PASSWORD);
   }
 
@@ -210,7 +207,7 @@ export async function adminUserPasswordUpdate(authUserId: number, oldPassword: s
     throw new HttpError(400, ERROR_MESSAGES.NEW_PASSWORD_SAME_AS_OLD);
   }
 
-  if (user.oldPasswords.some(async (password) => await hashCompare(newPassword, password))) {
+  if (user.oldPasswords.includes(newPassword)) {
     throw new HttpError(400, ERROR_MESSAGES.PASSWORD_ALREADY_USED);
   }
 
@@ -218,8 +215,8 @@ export async function adminUserPasswordUpdate(authUserId: number, oldPassword: s
     throw new HttpError(400, ERROR_MESSAGES.INVALID_PASSWORD);
   }
 
-  user.oldPasswords.push(user.password);
-  user.password = await hash(newPassword);
+  user.oldPasswords.push(oldPassword);
+  user.password = newPassword;
 
   setData();
 

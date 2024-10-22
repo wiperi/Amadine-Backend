@@ -1,5 +1,5 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW ONLY
-import { User, UserSession, Quiz, QuizSession, Player, Question, Answer, Message } from './models/Classes';
+import { User, UserSession, Quiz, QuizSession, Player, Question, Answer } from './models/Classes';
 import fs from 'fs';
 import path from 'path';
 
@@ -66,8 +66,7 @@ function loadData(): void {
   rawData.quizzes.forEach((q: any) => Object.setPrototypeOf(q, Quiz.prototype) &&
     q.questions.forEach((q: any) => Object.setPrototypeOf(q, Question.prototype) &&
       q.answers.forEach((a: any) => Object.setPrototypeOf(a, Answer.prototype))));
-  rawData.quizSessions.forEach((qs: any) => Object.setPrototypeOf(qs, QuizSession.prototype) &&
-    qs.messages.forEach((m: any) => Object.setPrototypeOf(m, Message.prototype)));
+  rawData.quizSessions.forEach((qs: any) => Object.setPrototypeOf(qs, QuizSession.prototype));
   rawData.players.forEach((p: any) => Object.setPrototypeOf(p, Player.prototype));
 
   data = rawData;
