@@ -771,7 +771,7 @@ describe('PUT /v1/admin/quiz/:quizId/thumbnail', () => {
       const registerRes = userRegister('peter@gmail.com', 'PumpkinEater123', 'Peter', 'Griffin');
       expect(registerRes.statusCode).toBe(200);
       const token1 = registerRes.body.token;
-      const res = quizUpdateThumbnail(token, quizId, 'http://google.com/some/image/path.jpg');
+      const res = quizUpdateThumbnail(token1, quizId, 'http://google.com/some/image/path.jpg');
       expect(res.statusCode).toBe(403);
       expect(res.body).toStrictEqual(ERROR);
     });
