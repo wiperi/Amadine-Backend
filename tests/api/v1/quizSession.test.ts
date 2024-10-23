@@ -5,7 +5,6 @@ import {
   questionCreate,
   quizSessionCreate,
   quizDelete,
-  quizSessionUpdateState,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
