@@ -7,6 +7,7 @@ import {
   quizDelete,
   quizSessionGetStatus,
 } from './helpers';
+import { QuizSessionState } from '../../../src/models/Enums';
 
 const ERROR = { error: expect.any(String) };
 
@@ -139,7 +140,7 @@ describe('POST /v1/admin/quiz/:quizId/session/start', () => {
       expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
       const res1 = quizSessionGetStatus(token, quizId, res.body.newSessionId);
       expect(res1.statusCode).toBe(200);
-      expect(res1.body.state).toStrictEqual(0);
+      expect(res1.body.state).toStrictEqual(QuizSessionState.LOBBY);
     });
     test('successfully create quiz session when 9 sessions that are not in END state currently exist for this quiz', () => {
       for (let i = 0; i < 9; i++) {
@@ -156,7 +157,7 @@ describe('POST /v1/admin/quiz/:quizId/session/start', () => {
       expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
       const res1 = quizSessionGetStatus(token, quizId, res.body.newSessionId);
       expect(res1.statusCode).toBe(200);
-      expect(res1.body.state).toStrictEqual(1);
+      expect(res1.body.state).toStrictEqual(QuizSessionState.QUESTION_COUNTDOWN);
     });
   });
 });
