@@ -1,8 +1,22 @@
 import { findQuizById } from '@/utils/helper';
 import { QuizSessionState, Color, PlayerAction } from './Enums';
 import { StateMachine } from './StateMachine';
-const { LOBBY, QUESTION_COUNTDOWN, QUESTION_OPEN, QUESTION_CLOSE, ANSWER_SHOW, FINAL_RESULTS, END } = QuizSessionState;
-const { NEXT_QUESTION, SKIP_COUNTDOWN, GO_TO_ANSWER, GO_TO_FINAL_RESULTS, END: GO_TO_END } = PlayerAction;
+const {
+  LOBBY,
+  QUESTION_COUNTDOWN,
+  QUESTION_OPEN,
+  QUESTION_CLOSE,
+  ANSWER_SHOW,
+  FINAL_RESULTS,
+  END,
+} = QuizSessionState;
+const {
+  NEXT_QUESTION,
+  SKIP_COUNTDOWN,
+  GO_TO_ANSWER,
+  GO_TO_FINAL_RESULTS,
+  END: GO_TO_END,
+} = PlayerAction;
 
 export class User {
   userId: number;
@@ -15,7 +29,13 @@ export class User {
   numFailedPasswordsSinceLastLogin: number = 0;
   oldPasswords: string[] = [];
 
-  constructor(userId: number, email: string, password: string, nameFirst: string, nameLast: string) {
+  constructor(
+    userId: number,
+    email: string,
+    password: string,
+    nameFirst: string,
+    nameLast: string
+  ) {
     this.userId = userId;
     this.email = email;
     this.password = password;
@@ -80,7 +100,9 @@ export class Question {
     }
 
     if (unusedColor.length <= 0) {
-      throw new Error(`Can not create more answers. Current number of answers: ${this.answers.length}`);
+      throw new Error(
+        `Can not create more answers. Current number of answers: ${this.answers.length}`
+      );
     }
 
     const randomIndex = Math.floor(Math.random() * unusedColor.length);
@@ -114,7 +136,13 @@ export class Question {
     this.answers = this.answers.filter(answer => answer.answerId !== answerId);
   }
 
-  constructor(questionId: number, question: string, duration: number, points: number, answers: Answer[]) {
+  constructor(
+    questionId: number,
+    question: string,
+    duration: number,
+    points: number,
+    answers: Answer[]
+  ) {
     this.questionId = questionId;
     this.question = question;
     this.duration = duration;
@@ -166,10 +194,13 @@ export class QuizSession {
     { from: FINAL_RESULTS, action: GO_TO_END, to: END },
     { from: ANSWER_SHOW, action: NEXT_QUESTION, to: QUESTION_COUNTDOWN },
     { from: ANSWER_SHOW, action: GO_TO_FINAL_RESULTS, to: FINAL_RESULTS },
-    { from: ANSWER_SHOW, action: GO_TO_END, to: END }
+    { from: ANSWER_SHOW, action: GO_TO_END, to: END },
   ]);
 
-  private stateMachine = new StateMachine<QuizSessionState, PlayerAction>(QuizSessionState.LOBBY, QuizSession.transitions);
+  private stateMachine = new StateMachine<QuizSessionState, PlayerAction>(
+    QuizSessionState.LOBBY,
+    QuizSession.transitions
+  );
 
   /**
    * Gets the current state of the quiz session.
@@ -194,11 +225,14 @@ export class QuizSession {
       }, 3000);
     }
     if (this.state() === QUESTION_OPEN) {
-      setTimeout(() => {
-        if (this.state() === QUESTION_OPEN) {
-          this.stateMachine.jumpTo(QUESTION_CLOSE);
-        }
-      }, findQuizById(this.quizId).duration() * 1000);
+      setTimeout(
+        () => {
+          if (this.state() === QUESTION_OPEN) {
+            this.stateMachine.jumpTo(QUESTION_CLOSE);
+          }
+        },
+        findQuizById(this.quizId).duration() * 1000
+      );
     }
   }
 

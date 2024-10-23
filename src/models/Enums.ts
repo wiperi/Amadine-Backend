@@ -6,7 +6,7 @@ export enum QuizSessionState {
   QUESTION_CLOSE,
   ANSWER_SHOW,
   FINAL_RESULTS,
-  END
+  END,
 }
 
 // Action that can be taken in a quiz session
@@ -15,7 +15,7 @@ export enum PlayerAction {
   SKIP_COUNTDOWN,
   GO_TO_ANSWER,
   GO_TO_FINAL_RESULTS,
-  END
+  END,
 }
 
 export enum Color {
@@ -25,5 +25,5 @@ export enum Color {
   YELLOW = 'yellow',
   PURPLE = 'purple',
   BROWN = 'brown',
-  ORANGE = 'orange'
+  ORANGE = 'orange',
 }
