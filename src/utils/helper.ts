@@ -292,14 +292,28 @@ export function findQuizById(quizId: number): Quiz | undefined {
   return getData().quizzes.find(quiz => quiz.quizId === quizId);
 }
 
-export function getActiveQuizSession(quizSessions: QuizSession[]): number[] {
+export function getActiveQuizSession(quizId: number): number[] {
+  const data = getData();
+
+  const quizSessions = data.quizSessions.filter(
+    (session: QuizSession) => session.quizId === quizId
+  );
+
   return quizSessions
-    .filter(session => session.state() !== QuizSessionState.END)
-    .map(session => session.sessionId);
+    .filter((session) => session.state() !== QuizSessionState.END)
+    .map((session) => session.sessionId)
+    .sort((a, b) => a - b);
 }
 
-export function getInactiveQuizSession(quizSessions: QuizSession[]): number[] {
+export function getInactiveQuizSession(quizId: number): number[] {
+  const data = getData();
+
+  const quizSessions = data.quizSessions.filter(
+    (session: QuizSession) => session.quizId === quizId
+  );
+
   return quizSessions
-    .filter(session => session.state() === QuizSessionState.END)
-    .map(session => session.sessionId);
+    .filter((session) => session.state() === QuizSessionState.END)
+    .map((session) => session.sessionId)
+    .sort((a, b) => a - b);
 }

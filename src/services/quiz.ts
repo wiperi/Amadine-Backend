@@ -578,7 +578,7 @@ export function adminQuizSessionStart(
   return { newSessionId: newSessionId };
 }
 
-export function adminQuizSessionActivity(
+export function adminQuizSessionsActivity(
   authUserId: number,
   quizId: number
 ): {
@@ -593,16 +593,8 @@ export function adminQuizSessionActivity(
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
 
-  const data = getData();
-
-  const quizSessions = data.quizSessions.filter(
-    (session: QuizSession) => session.quizId === quizId
-  );
-
-  const activeSessions = getActiveQuizSession(quizSessions);
-
-  const inactiveSessions = getInactiveQuizSession(quizSessions);
-
+  const activeSessions = getActiveQuizSession(quizId);
+  const inactiveSessions = getInactiveQuizSession(quizId);
   return {
     activeSessions,
     inactiveSessions,
