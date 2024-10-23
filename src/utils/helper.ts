@@ -1,9 +1,10 @@
 import { getData } from '@/dataStore';
 import isEmail from 'validator/lib/isEmail';
-import { User, Quiz } from '@/models/Classes';
+import { User, Quiz, QuizSession } from '@/models/Classes';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
+import { QuizSessionState } from '@/models/Enums';
 
 /**
  * Hashes a string using bcrypt.
@@ -289,4 +290,16 @@ export function isQuizIdOwnedByUser(quizId: number, authUserId: number): boolean
 
 export function findQuizById(quizId: number): Quiz | undefined {
   return getData().quizzes.find(quiz => quiz.quizId === quizId);
+}
+
+export function getActiveQuizSession(quizSessions: QuizSession[]): number[] {
+  return quizSessions
+    .filter(session => session.state() !== QuizSessionState.END)
+    .map(session => session.sessionId);
+}
+
+export function getInactiveQuizSession(quizSessions: QuizSession[]): number[] {
+  return quizSessions
+    .filter(session => session.state() === QuizSessionState.END)
+    .map(session => session.sessionId);
 }
