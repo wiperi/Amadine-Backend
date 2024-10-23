@@ -45,7 +45,7 @@ const ERROR_MESSAGES = {
   QUIZ_NO_QUESTIONS: 'Quiz do not have any questions',
   // quiz do have too many sessions
   QUIZ_TOO_MANY_SESSIONS: 'Quiz has too many sessions',
-  //Session not found
+  // Session not found
   INVALID_SESSION_ID: 'Invalid session id',
   QUIZ_SESSION_NOT_EXIST: 'Quiz session does not exist',
   QUIZ_SESSION_NOT_IN_QUIZ: 'Quiz session does not belong to this quiz',

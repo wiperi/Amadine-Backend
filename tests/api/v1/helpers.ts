@@ -203,7 +203,7 @@ export function questionMove(
       token,
       newPosition,
     },
-  })
+  });
   return parse(res);
 }
 

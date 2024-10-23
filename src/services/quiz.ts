@@ -575,7 +575,11 @@ export function adminQuizSessionStart(
   return { newSessionId: newSessionId };
 }
 
-export function adminQuizSessionGetStatus(authUserId: number, quizId: number, sessionId: number): {state: QuizSessionState, atQuestion: number, players: string[], metadata: object} {
+export function adminQuizSessionGetStatus(
+  authUserId: number,
+  quizId: number,
+  sessionId: number
+): { state: QuizSessionState; atQuestion: number; players: string[]; metadata: object } {
   const data = getData();
   const quiz = findQuizById(quizId);
   if (!quiz) {
@@ -588,10 +592,10 @@ export function adminQuizSessionGetStatus(authUserId: number, quizId: number, se
   if (!quizSession) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_SESSION_ID);
   }
-  //find the players in this session
+  // find the players in this session
   const players = data.players.filter(player => player.quizSessionId === sessionId);
-  //get the name of the players
-  const playerNames = players.map(player => player.name); 
+  // get the name of the players
+  const playerNames = players.map(player => player.name);
   return {
     state: quizSession.state(),
     atQuestion: quizSession.atQuestion,
@@ -599,4 +603,3 @@ export function adminQuizSessionGetStatus(authUserId: number, quizId: number, se
     metadata: quizSession.metadata,
   };
 }
-

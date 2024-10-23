@@ -5,6 +5,7 @@ import {
   questionCreate,
   quizSessionCreate,
   quizDelete,
+  quizSessionGetStatus,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -190,5 +191,50 @@ describe('POST /v1/admin/quiz/:quizId/session/:sessionId/update', () => {
 
   describe('ANSWER_SHOW state', () => {
     // Tests for ANSWER_SHOW state will be added here by yibin
+  });
+});
+/////////////////////////////////////////////
+// Test for AdminQuizSessionGetStatus /////////////
+/////////////////////////////////////////////
+describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
+  test('empty token', () => {
+    const res = quizSessionGetStatus('', 1, 1);
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toStrictEqual(ERROR);
+  });
+  test('invalid token', () => {
+    const res = quizSessionGetStatus('invalid token', 1, 1);
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toStrictEqual(ERROR);
+  });
+
+  test('user is not the owner of the quiz', () => {
+    const userRegisterRes = userRegister('cheong1024@mail.com', 'Cheong1024', 'Cheong', 'Zhang');
+    expect(userRegisterRes.statusCode).toBe(200);
+    const token1 = userRegisterRes.body.token;
+    const quizId = 1;
+    const res = quizSessionGetStatus(token1, quizId, quizId);
+    expect(res.statusCode).toBe(403);
+  });
+
+  test('Session Id does not refer to a valid session within this quiz', () => {
+    const res = quizSessionCreate(token, quizId, 2);
+    expect(res.statusCode).toStrictEqual(200);
+    expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
+    const sessionId = res.body.newSessionId;
+    const res1 = quizSessionGetStatus(token, quizId, sessionId + 1);
+    expect(res1.statusCode).toBe(400);
+  });
+
+  test.skip('valid cases', () => {
+    const res = quizSessionCreate(token, quizId, 2);
+    expect(res.statusCode).toStrictEqual(200);
+    expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
+    const sessionId = res.body.newSessionId;
+    const res1 = quizSessionGetStatus(token, quizId, sessionId);
+    expect(res1.statusCode).toBe(200);
+    //WARNING: the following test is not correct, because the players array is empty
+    // console.log(res1.body);
+    // will be discussed with in Oct 24
   });
 });
