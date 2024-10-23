@@ -5,12 +5,14 @@ import {
   questionCreate,
   quizSessionCreate,
   quizDelete,
+  quizSessionUpdateState,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
 
 let token: string;
 let quizId: number;
+let quizSessionId: number;
 
 beforeEach(() => {
   clear();
@@ -36,6 +38,11 @@ beforeEach(() => {
     ],
   });
   expect(createQuestionRes.statusCode).toBe(200);
+
+  // Create a quiz session
+  const createQuizSessionRes = quizSessionCreate(token, quizId, 2);
+  expect(createQuizSessionRes.statusCode).toBe(200);
+  quizSessionId = createQuizSessionRes.body.newSessionId;
 });
 
 afterAll(() => {
@@ -46,6 +53,32 @@ afterAll(() => {
  This is test for AQSC
  */
 describe('POST /v1/admin/quiz/:quizId/session/start', () => {
+  beforeEach(() => {
+    clear();
+    // Register a user and get the token
+    const res = userRegister('test@example.com', 'ValidPass123', 'John', 'Doe');
+    expect(res.statusCode).toBe(200);
+    token = res.body.token;
+  
+    // Create a quiz
+    const createQuizRes = quizCreate(token, 'Test Quiz', 'A test quiz');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = createQuizRes.body.quizId;
+  
+    // Create a question
+    const createQuestionRes = questionCreate(token, quizId, {
+      question: 'Are you my master?',
+      duration: 60,
+      points: 6,
+      answers: [
+        { answer: 'Yes', correct: true },
+        { answer: 'No', correct: false },
+        { answer: 'Maybe', correct: false },
+      ],
+    });
+    expect(createQuestionRes.statusCode).toBe(200);
+  });
+
   describe('invalid cases', () => {
     test('token is invalid', () => {
       const res = quizSessionCreate('invalid token', quizId, 2);
@@ -114,5 +147,49 @@ describe('POST /v1/admin/quiz/:quizId/session/start', () => {
       expect(res.statusCode).toStrictEqual(200);
       expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
     });
+  });
+});
+
+describe('POST /v1/admin/quiz/:quizId/session/:sessionId/update', () => {
+  describe('LOBBY state', () => {
+    // Tests for LOBBY state will be added here by guangwei
+
+    // beforeEach(() => {
+    //   // Go to TARGET_STATE from LOBBY state
+    // });
+
+    describe('valid cases', () => {
+      // Tests for valid cases will be added here by guangwei
+      // use test each to test each valid outbound action
+    });
+
+    describe('invalid cases', () => {
+      // Tests for invalid cases will be added here by guangwei
+      // use test each to test each invalid outbound action
+    });
+  });
+
+  describe('END state', () => {
+    // Tests for END state will be added here by guangwei
+  });
+
+  describe('QUESTION_COUNTDOWN state', () => {
+    // Tests for QUESTION_COUNTDOWN state will be added here by yibin
+  });
+
+  describe('QUESTION_OPEN state', () => {
+    // Tests for QUESTION_OPEN state will be added here by cheong
+  });
+
+  describe('QUESTION_CLOSE state', () => {
+    // Tests for QUESTION_CLOSE state will be added here by yuting
+  });
+
+  describe('FINAL_RESULT state', () => {
+    // Tests for FINAL_RESULT state will be added here by cheong
+  });
+
+  describe('ANSWER_SHOW state', () => {
+    // Tests for ANSWER_SHOW state will be added here by yibin
   });
 });
