@@ -43,7 +43,7 @@ const ERROR_MESSAGES = {
   QUIZ_INACTIVE: 'Quiz is inactive',
   // quiz do not have any questions
   QUIZ_NO_QUESTIONS: 'Quiz do not have any questions',
-  // quiz do have too many sessions
+  // quiz have too many sessions
   QUIZ_TOO_MANY_SESSIONS: 'Quiz has too many sessions',
   QUIZ_SESSION_NOT_EXIST: 'Quiz session does not exist',
   QUIZ_SESSION_NOT_IN_QUIZ: 'Quiz session does not belong to this quiz',

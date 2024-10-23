@@ -146,6 +146,11 @@ describe('POST /v1/admin/quiz/:quizId/session/start', () => {
       expect(res.statusCode).toStrictEqual(200);
       expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
     });
+    test('successfully create quiz session when autoStartNum is 0', () => {
+      const res = quizSessionCreate(token, quizId, 0);
+      expect(res.statusCode).toStrictEqual(200);
+      expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
+    });
   });
 });
 
