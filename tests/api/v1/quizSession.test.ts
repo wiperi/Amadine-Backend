@@ -6,7 +6,7 @@ import {
   quizSessionCreate,
   quizDelete,
   quizSessionGetActivity,
-  quizSessionUpdateState
+  quizSessionUpdateState,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -197,7 +197,7 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
 
 describe('GET /v1/admin/quiz/:quizId/sessions', () => {
   beforeEach(() => {
-    clear(); 
+    clear();
     // Register a user and get the token
     const res = userRegister('test@example.com', 'ValidPass123', 'John', 'Doe');
     expect(res.statusCode).toBe(200);
@@ -253,7 +253,7 @@ describe('GET /v1/admin/quiz/:quizId/sessions', () => {
         expect(createSessionRes.statusCode).toBe(200);
         activeSessionIds.push(createSessionRes.body.newSessionId);
       }
-  
+
       // Create 2 sessions and mark them as inactive using quizSessionUpdateState
       const inactiveSessionIds = [];
       for (let i = 0; i < 2; i++) {
@@ -261,20 +261,19 @@ describe('GET /v1/admin/quiz/:quizId/sessions', () => {
         expect(createSessionRes.statusCode).toBe(200);
         const sessionId = createSessionRes.body.newSessionId;
         inactiveSessionIds.push(sessionId);
-  
+
         // Mark this session as inactive using quizSessionUpdateState
         const updateRes = quizSessionUpdateState(token, quizId, sessionId, 'END');
-        expect(updateRes.statusCode).toBe(200); 
+        expect(updateRes.statusCode).toBe(200);
       }
-  
+
       const res = quizSessionGetActivity(token, quizId);
       expect(res.statusCode).toBe(200);
-  
+
       // Ensure that active and inactive sessions are returned correctly and sorted
       expect(res.body.activeSessions).toStrictEqual(activeSessionIds.sort((a, b) => a - b));
       expect(res.body.inactiveSessions).toStrictEqual(inactiveSessionIds.sort((a, b) => a - b));
     });
-
   });
 
   describe('invalid cases', () => {

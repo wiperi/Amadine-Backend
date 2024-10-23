@@ -300,8 +300,8 @@ export function getActiveQuizSession(quizId: number): number[] {
   );
 
   return quizSessions
-    .filter((session) => session.state() !== QuizSessionState.END)
-    .map((session) => session.sessionId)
+    .filter(session => session.state() !== QuizSessionState.END)
+    .map(session => session.sessionId)
     .sort((a, b) => a - b);
 }
 
@@ -313,7 +313,7 @@ export function getInactiveQuizSession(quizId: number): number[] {
   );
 
   return quizSessions
-    .filter((session) => session.state() === QuizSessionState.END)
-    .map((session) => session.sessionId)
+    .filter(session => session.state() === QuizSessionState.END)
+    .map(session => session.sessionId)
     .sort((a, b) => a - b);
 }
