@@ -58,12 +58,12 @@ describe('POST /v1/admin/quiz/:quizId/session/start', () => {
     const res = userRegister('test@example.com', 'ValidPass123', 'John', 'Doe');
     expect(res.statusCode).toBe(200);
     token = res.body.token;
-  
+
     // Create a quiz
     const createQuizRes = quizCreate(token, 'Test Quiz', 'A test quiz');
     expect(createQuizRes.statusCode).toBe(200);
     quizId = createQuizRes.body.quizId;
-  
+
     // Create a question
     const createQuestionRes = questionCreate(token, quizId, {
       question: 'Are you my master?',
