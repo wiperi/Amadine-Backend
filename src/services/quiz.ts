@@ -25,7 +25,6 @@ export function adminQuizDescriptionUpdate(
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
-
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
@@ -574,4 +573,33 @@ export function adminQuizSessionStart(
   setData(data);
 
   return { newSessionId: newSessionId };
+}
+
+export function adminQuizSessionGetStatus(
+  authUserId: number,
+  quizId: number,
+  sessionId: number
+): { state: QuizSessionState; atQuestion: number; players: string[]; metadata: object } {
+  const data = getData();
+  const quiz = findQuizById(quizId);
+  if (!quiz) {
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  }
+  if (quiz.authUserId !== authUserId) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
+  const quizSession = data.quizSessions.find(s => s.sessionId === sessionId);
+  if (!quizSession) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_SESSION_ID);
+  }
+  // find the players in this session
+  const players = data.players.filter(player => player.quizSessionId === sessionId);
+  // get the name of the players
+  const playerNames = players.map(player => player.name);
+  return {
+    state: quizSession.state(),
+    atQuestion: quizSession.atQuestion,
+    players: playerNames,
+    metadata: quizSession.metadata,
+  };
 }

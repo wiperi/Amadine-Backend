@@ -367,7 +367,7 @@ export function quizSessionGetStatus(
   quizId: number,
   sessionId: number
 ): ParsedResponse {
-  const res = request('GET', `${QUIZ_URL}/${quizId}/sessions/${sessionId}`, {
+  const res = request('GET', `${QUIZ_URL}/${quizId}/session/${sessionId}`, {
     headers: {
       token,
     },
