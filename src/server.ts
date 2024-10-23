@@ -41,7 +41,12 @@ morgan.token('query', (req: Request) => JSON.stringify(req.query, null, 2));
 morgan.token('params', (req: Request) => JSON.stringify(req.params, null, 2));
 morgan.token('body', (req: Request) => JSON.stringify(req.body, null, 2));
 // - morgan logging format, using combined format plus query and body
-app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"\nquery: :query\nparams: :params\nbody: :body\n', { stream: logStream }));
+app.use(
+  morgan(
+    ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"\nquery: :query\nparams: :params\nbody: :body\n',
+    { stream: logStream }
+  )
+);
 
 // for logging errors (print to terminal)
 app.use(morgan('dev'));
@@ -49,7 +54,13 @@ app.use(morgan('dev'));
 // for producing the docs that define the API
 const file = fs.readFileSync(path.join(process.cwd(), 'swagger.yaml'), 'utf8');
 app.get('/', (req: Request, res: Response) => res.redirect('/docs'));
-app.use('/docs', sui.serve, sui.setup(YAML.parse(file), { swaggerOptions: { docExpansion: config.expandDocs ? 'full' : 'list' } }));
+app.use(
+  '/docs',
+  sui.serve,
+  sui.setup(YAML.parse(file), {
+    swaggerOptions: { docExpansion: config.expandDocs ? 'full' : 'list' },
+  })
+);
 
 const PORT: number = parseInt(process.env.PORT || config.port);
 const HOST: string = process.env.IP || '127.0.0.1';
@@ -98,12 +109,12 @@ app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
       method: req.method,
       query: req.query,
       params: req.params,
-      body: req.body
+      body: req.body,
     },
     res: {
       statusCode: statusCode,
       error: http.STATUS_CODES[statusCode],
-      message: message
+      message: message,
     },
     stack: err.stack?.split('\n'),
     process: {
@@ -114,13 +125,13 @@ app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
       execPath: process.execPath,
       version: process.version,
       argv: process.argv,
-      memoryUsage: process.memoryUsage()
+      memoryUsage: process.memoryUsage(),
     },
     os: {
       name: process.platform,
       version: process.version,
       uptime: process.uptime(),
-      loadavg: os.loadavg()
+      loadavg: os.loadavg(),
     },
   });
 });

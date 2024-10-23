@@ -1,6 +1,6 @@
 import request, { Response } from 'sync-request-curl';
 import config from '../../../src/config';
-import {parse, ParsedResponse} from '../../../tests/api/v1/helpers';
+import { parse, ParsedResponse } from '../../../tests/api/v1/helpers';
 
 const AUTH_URL = `${config.url}:${config.port}/v2/admin/auth`;
 const QUIZ_URL = `${config.url}:${config.port}/v2/admin/quiz`;
@@ -9,8 +9,8 @@ const USER_URL = `${config.url}:${config.port}/v2/admin/user`;
 export function userLogout(token: string): ParsedResponse {
   const res = request('POST', `${AUTH_URL}/logout`, {
     headers: {
-      token
-    }
+      token,
+    },
   });
   return parse(res);
 }
@@ -18,35 +18,44 @@ export function userLogout(token: string): ParsedResponse {
 export function userGetDetails(token: string): ParsedResponse {
   const res = request('GET', `${USER_URL}/details`, {
     headers: {
-      token
-    }
+      token,
+    },
   });
   return parse(res);
 }
 
-export function userUpdateDetails(token: string, email: string, nameFirst: string, nameLast: string): ParsedResponse {
+export function userUpdateDetails(
+  token: string,
+  email: string,
+  nameFirst: string,
+  nameLast: string
+): ParsedResponse {
   const res = request('PUT', `${USER_URL}/details`, {
     headers: {
-        token
+      token,
     },
     json: {
       email,
       nameFirst,
-      nameLast
-    }
+      nameLast,
+    },
   });
   return parse(res);
 }
 
-export function userUpdatePassword(token: string, oldPassword: string, newPassword: string): ParsedResponse {
+export function userUpdatePassword(
+  token: string,
+  oldPassword: string,
+  newPassword: string
+): ParsedResponse {
   const res = request('PUT', `${USER_URL}/password`, {
     headers: {
-        token
+      token,
     },
     json: {
       oldPassword,
-      newPassword
-    }
+      newPassword,
+    },
   });
   return parse(res);
 }
@@ -54,8 +63,8 @@ export function userUpdatePassword(token: string, oldPassword: string, newPasswo
 export function quizGetList(token: string): ParsedResponse {
   const res = request('GET', `${QUIZ_URL}/list`, {
     headers: {
-      token
-    }
+      token,
+    },
   });
   return parse(res);
 }
@@ -63,8 +72,8 @@ export function quizGetList(token: string): ParsedResponse {
 export function quizGetDetails(token: string, quizId: number): ParsedResponse {
   const res = request('GET', `${QUIZ_URL}/${quizId}`, {
     headers: {
-      token
-    }
+      token,
+    },
   });
   return parse(res);
 }
@@ -72,12 +81,12 @@ export function quizGetDetails(token: string, quizId: number): ParsedResponse {
 export function quizCreate(token: string, name: string, description: string): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}`, {
     headers: {
-        token
+      token,
     },
     json: {
       name,
       description,
-    }
+    },
   });
   return parse(res);
 }
@@ -86,19 +95,23 @@ export function quizDelete(token: string, quizId: number): ParsedResponse {
   const res = request('DELETE', `${QUIZ_URL}/${quizId}`, {
     headers: {
       token,
-    }
+    },
   });
   return parse(res);
 }
 
-export function quizUpdateDescription(token: string, quizId: number, description: string): ParsedResponse {
+export function quizUpdateDescription(
+  token: string,
+  quizId: number,
+  description: string
+): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}/description`, {
     headers: {
-        token
+      token,
     },
     json: {
-      description
-    }
+      description,
+    },
   });
   return parse(res);
 }
@@ -106,8 +119,8 @@ export function quizUpdateDescription(token: string, quizId: number, description
 export function quizGetTrash(token: string): ParsedResponse {
   const res = request('GET', `${QUIZ_URL}/trash`, {
     headers: {
-      token
-    }
+      token,
+    },
   });
   return parse(res);
 }
@@ -115,49 +128,54 @@ export function quizGetTrash(token: string): ParsedResponse {
 export function quizRestore(token: string, quizId: number): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}/${quizId}/restore`, {
     headers: {
-      token
-    }
+      token,
+    },
   });
   return parse(res);
 }
 
-export function questionMove(token: string, quizId: number, questionId: number, newPosition: number): ParsedResponse {
+export function questionMove(
+  token: string,
+  quizId: number,
+  questionId: number,
+  newPosition: number
+): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}/question/${questionId}/move`, {
     headers: {
-        token
+      token,
     },
     json: {
-      newPosition
-    }
+      newPosition,
+    },
   });
   return parse(res);
 }
 
-export function questionCreate(token: string, quizId: number, questionBody: object): ParsedResponse {
+export function questionCreate(
+  token: string,
+  quizId: number,
+  questionBody: object
+): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}/${quizId}/question`, {
     headers: {
-        token
+      token,
     },
     json: {
-      questionBody
-    }
+      questionBody,
+    },
   });
   return parse(res);
 }
 
-export function quizRequestNameUpdate(quizId: number, token:string, name: string) {
-  const res = request(
-    'PUT',
-    `${config.url}:${config.port}/v1/admin/quiz/${quizId}/name`,
-    {
-      headers: {
-        token
+export function quizRequestNameUpdate(quizId: number, token: string, name: string) {
+  const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/name`, {
+    headers: {
+      token,
     },
-      json: {
-        name
-      }
-    }
-  );
+    json: {
+      name,
+    },
+  });
 
   if (res.statusCode === 200) {
     return JSON.parse(res.body.toString());
@@ -165,23 +183,27 @@ export function quizRequestNameUpdate(quizId: number, token:string, name: string
   return res.statusCode;
 }
 
-export function questionDuplicate(token: string, quizId: number, questionId: number): ParsedResponse {
+export function questionDuplicate(
+  token: string,
+  quizId: number,
+  questionId: number
+): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}/${quizId}/question/${questionId}/duplicate`, {
     headers: {
-      token
-    }
-  })
+      token,
+    },
+  });
   return parse(res);
 }
 
 export function trashEmpty(token: string, quizIds: string): ParsedResponse {
   const res = request('DELETE', `${QUIZ_URL}/trash/empty`, {
     headers: {
-        token
+      token,
     },
     qs: {
-      quizIds
-    }
+      quizIds,
+    },
   });
   return parse(res);
 }
@@ -189,7 +211,7 @@ export function questionDelete(token: string, quizId: number, questionId: number
   const res = request('DELETE', `${QUIZ_URL}/${quizId}/question/${questionId}`, {
     headers: {
       token,
-    }
+    },
   });
   return parse(res);
 }
@@ -197,26 +219,31 @@ export function questionDelete(token: string, quizId: number, questionId: number
 export function quizTransfer(token: string, quizId: number, userEmail: string): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}/${quizId}/transfer`, {
     headers: {
-        token
+      token,
     },
     json: {
       quizId,
-      userEmail
-    }
+      userEmail,
+    },
   });
   return parse(res);
 }
 
-export function questionUpdate(token: string,  quizId: number, questionId: number, questionBody: object): ParsedResponse {
+export function questionUpdate(
+  token: string,
+  quizId: number,
+  questionId: number,
+  questionBody: object
+): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}/question/${questionId}`, {
     headers: {
-        token
+      token,
     },
     json: {
       quizId,
       questionId,
-      questionBody
-    }
+      questionBody,
+    },
   });
   return parse(res);
 }

@@ -12,12 +12,16 @@ import {
   isValidQuizDescription,
   recursiveFind,
 } from '@/utils/helper';
-import { QuizSessionState } from '@/models/Enums';
+import { PlayerAction, QuizSessionState } from '@/models/Enums';
 
 /**
  * Update the description of the relevant quiz.
  */
-export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, description: string): EmptyObject {
+export function adminQuizDescriptionUpdate(
+  authUserId: number,
+  quizId: number,
+  description: string
+): EmptyObject {
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -51,7 +55,7 @@ export function adminQuizInfo(
   timeLastEdited: number;
   description: string;
   numQuestions: number;
-  questions: Question[]
+  questions: Question[];
   duration: number;
 } {
   if (!isValidQuizId(quizId)) {
@@ -72,7 +76,7 @@ export function adminQuizInfo(
     description: quiz.description,
     numQuestions: quiz.questions.length,
     questions: quiz.questions, // Include the questions array
-    duration: quiz.questions.reduce((acc, question) => acc + question.duration, 0)
+    duration: quiz.questions.reduce((acc, question) => acc + question.duration, 0),
   };
 }
 
@@ -103,7 +107,11 @@ export function adminQuizNameUpdate(authUserId: number, quizId: number, name: st
 /**
  * Creates a new quiz if the provided user ID, name, and description are valid.
  */
-export function adminQuizCreate(authUserId: number, name: string, description: string): { quizId: number } {
+export function adminQuizCreate(
+  authUserId: number,
+  name: string,
+  description: string
+): { quizId: number } {
   if (!isValidQuizName(authUserId, name, undefined)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_NAME);
   }
@@ -115,7 +123,7 @@ export function adminQuizCreate(authUserId: number, name: string, description: s
   data.quizzes.push(new Quiz(authUserId, quizId, name, description));
   setData(data);
   return {
-    quizId: quizId
+    quizId: quizId,
   };
 }
 
@@ -124,11 +132,11 @@ export function adminQuizCreate(authUserId: number, name: string, description: s
  * if the user ID is valid. The quizzes are returned with their IDs and names.
  */
 export function adminQuizList(authUserId: number): { quizzes: ReturnedQuizView[] } {
-  const quizzes = getData().quizzes
-    .filter(quiz => quiz.authUserId === authUserId && quiz.active)
+  const quizzes = getData()
+    .quizzes.filter(quiz => quiz.authUserId === authUserId && quiz.active)
     .map(quiz => ({
       quizId: quiz.quizId,
-      name: quiz.name
+      name: quiz.name,
     }));
 
   return { quizzes: quizzes };
@@ -156,10 +164,12 @@ export function adminQuizRemove(authUserId: number, quizId: number): EmptyObject
 }
 
 export function adminQuizTrashView(authUserId: number): { quizzes: ReturnedQuizView[] } {
-  const trash: ReturnedQuizView[] = getData().quizzes.filter(quiz => quiz.authUserId === authUserId && !quiz.active).map(quiz => ({
-    quizId: quiz.quizId,
-    name: quiz.name
-  }));
+  const trash: ReturnedQuizView[] = getData()
+    .quizzes.filter(quiz => quiz.authUserId === authUserId && !quiz.active)
+    .map(quiz => ({
+      quizId: quiz.quizId,
+      name: quiz.name,
+    }));
 
   return { quizzes: trash };
 }
@@ -207,7 +217,11 @@ export function adminQuizTrashEmpty(authUserId: number, quizIds: number[]): Empt
   return {};
 }
 
-export function adminQuizTransfer(authUserId: number, quizId: number, userEmail: string): EmptyObject {
+export function adminQuizTransfer(
+  authUserId: number,
+  quizId: number,
+  userEmail: string
+): EmptyObject {
   // TODO: Implement this function
   // const newAuthUserId = data.users.find(user => user.email === userEmail).userId;
   // findQuizById(quizId).authUserId = newAuthUserId;
@@ -226,7 +240,9 @@ export function adminQuizTransfer(authUserId: number, quizId: number, userEmail:
     throw new HttpError(400, ERROR_MESSAGES.USED_EMAIL);
   }
   const quiz = findQuizById(quizId);
-  const hasSameName = data.quizzes.some(q => q.authUserId === targetuser.userId && q.name === quiz.name);
+  const hasSameName = data.quizzes.some(
+    q => q.authUserId === targetuser.userId && q.name === quiz.name
+  );
   if (hasSameName) {
     throw new HttpError(400, ERROR_MESSAGES.QUIZ_NAME_CONFLICT);
   }
@@ -235,7 +251,11 @@ export function adminQuizTransfer(authUserId: number, quizId: number, userEmail:
   return {};
 }
 
-export function adminQuizQuestionCreate(authUserId: number, quizId: number, questionBody: ParamQuestionBody): { questionId: number } {
+export function adminQuizQuestionCreate(
+  authUserId: number,
+  quizId: number,
+  questionBody: ParamQuestionBody
+): { questionId: number } {
   // TODO: extract questionBody check to a helper function
 
   if (!isValidQuizId(quizId)) {
@@ -254,7 +274,10 @@ export function adminQuizQuestionCreate(authUserId: number, quizId: number, ques
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
   const quiz = findQuizById(quizId);
-  if (quiz.questions.reduce((acc, question) => acc + question.duration, 0) + questionBody.duration > 180) {
+  if (
+    quiz.questions.reduce((acc, question) => acc + question.duration, 0) + questionBody.duration >
+    180
+  ) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
   if (questionBody.points < 1 || questionBody.points > 10) {
@@ -284,7 +307,9 @@ export function adminQuizQuestionCreate(authUserId: number, quizId: number, ques
     questionBody.question,
     questionBody.duration,
     questionBody.points,
-    questionBody.answers.map(answer => new Answer(getNewID('answer'), answer.answer, answer.correct))
+    questionBody.answers.map(
+      answer => new Answer(getNewID('answer'), answer.answer, answer.correct)
+    )
   );
 
   quiz.questions.push(question);
@@ -294,7 +319,12 @@ export function adminQuizQuestionCreate(authUserId: number, quizId: number, ques
   return { questionId: questionId };
 }
 
-export function adminQuizQuestionUpdate(authUserId: number, quizId: number, questionId: number, questionBody: ParamQuestionBody): EmptyObject {
+export function adminQuizQuestionUpdate(
+  authUserId: number,
+  quizId: number,
+  questionId: number,
+  questionBody: ParamQuestionBody
+): EmptyObject {
   if (recursiveFind(questionBody, undefined)) {
     throw new HttpError(403, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
   }
@@ -355,7 +385,9 @@ export function adminQuizQuestionUpdate(authUserId: number, quizId: number, ques
   question.points = questionBody.points;
 
   question.setAnswers(
-    questionBody.answers.map(answer => new Answer(getNewID('answer'), answer.answer, answer.correct))
+    questionBody.answers.map(
+      answer => new Answer(getNewID('answer'), answer.answer, answer.correct)
+    )
   );
   quiz.timeLastEdited = Math.floor(Date.now() / 1000);
   setData();
@@ -363,7 +395,11 @@ export function adminQuizQuestionUpdate(authUserId: number, quizId: number, ques
   return {};
 }
 
-export function adminQuizQuestionDelete(authUserId: number, quizId: number, questionId: number): EmptyObject {
+export function adminQuizQuestionDelete(
+  authUserId: number,
+  quizId: number,
+  questionId: number
+): EmptyObject {
   const quiz = findQuizById(quizId);
   if (!quiz || !quiz.active) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
@@ -384,7 +420,12 @@ export function adminQuizQuestionDelete(authUserId: number, quizId: number, ques
   return {};
 }
 
-export function adminQuizQuestionMove(authUserId: number, quizId: number, questionId: number, newPosition: number): EmptyObject {
+export function adminQuizQuestionMove(
+  authUserId: number,
+  quizId: number,
+  questionId: number,
+  newPosition: number
+): EmptyObject {
   const quiz = findQuizById(quizId);
   if (!quiz) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
@@ -394,7 +435,7 @@ export function adminQuizQuestionMove(authUserId: number, quizId: number, questi
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
 
-  if (newPosition < 0 || newPosition > (quiz.questions.length - 1)) {
+  if (newPosition < 0 || newPosition > quiz.questions.length - 1) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_POSITION);
   }
 
@@ -415,7 +456,11 @@ export function adminQuizQuestionMove(authUserId: number, quizId: number, questi
   return {};
 }
 
-export function adminQuizQuestionDuplicate(authUserId: number, quizId: number, questionId: number): { newQuestionId: number } {
+export function adminQuizQuestionDuplicate(
+  authUserId: number,
+  quizId: number,
+  questionId: number
+): { newQuestionId: number } {
   const quiz = findQuizById(quizId);
   if (!quiz || !quiz.active) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
@@ -434,55 +479,69 @@ export function adminQuizQuestionDuplicate(authUserId: number, quizId: number, q
   const newQuestionId = getNewID('question');
   const questions = findQuizById(quizId).questions;
 
-  const newQuestion = Object.assign({}, questions.find(q => q.questionId === questionId), { questionId: newQuestionId });
+  const newQuestion = Object.assign(
+    {},
+    questions.find(q => q.questionId === questionId),
+    { questionId: newQuestionId }
+  );
   Object.setPrototypeOf(newQuestion, Question.prototype);
   questions.splice(1 + questions.findIndex(q => q.questionId === questionId), 0, newQuestion);
 
   return { newQuestionId: newQuestionId };
 }
 
-// export function adminQuizSessionUpdate(authUserId: number, quizId: number, sessionId: number, action: string): EmptyObject {
-//   const data = getData();
+export function adminQuizSessionUpdate(
+  authUserId: number,
+  quizId: number,
+  sessionId: number,
+  action: string
+): EmptyObject {
+  const data = getData();
 
-//   // Valid token is provided, but user is not an owner of this quiz or quiz doesn't exist
-//   const quiz = findQuizById(quizId);
-//   if (!quiz) {
-//     throw new HttpError(403, '');
-//   }
+  // Valid token is provided, but user is not an owner of this quiz or quiz doesn't exist
+  const quiz = findQuizById(quizId);
+  if (!quiz) {
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  }
 
-//   if (!quiz.active) {
-//     throw new HttpError(403, '');
-//   }
+  if (!quiz.active) {
+    throw new HttpError(403, ERROR_MESSAGES.QUIZ_INACTIVE);
+  }
 
-//   if (quiz.authUserId !== authUserId) {
-//     throw new HttpError(403, '');
-//   }
+  if (quiz.authUserId !== authUserId) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
 
-//   // Session Id does not refer to a valid session within this quiz
-//   const session = data.quizSessions.find(session => session.sessionId === sessionId);
-//   if (!session) {
-//     throw new HttpError(403, '');
-//   }
+  // Session Id does not refer to a valid session within this quiz
+  const session = data.quizSessions.find(session => session.sessionId === sessionId);
+  if (!session) {
+    throw new HttpError(403, ERROR_MESSAGES.QUIZ_SESSION_NOT_EXIST);
+  }
 
-//   if (session.quizId !== quizId) {
-//     throw new HttpError(403, '');
-//   }
+  if (session.quizId !== quizId) {
+    throw new HttpError(403, ERROR_MESSAGES.QUIZ_SESSION_NOT_IN_QUIZ);
+  }
 
-//   // Action provided is not a valid Action enum
-//   if (!(action in PlayerAction)) {
-//     throw new HttpError(400, '');
-//   }
-//   // Action enum cannot be applied in the current state (see spec for details)
-//   try {
-//     session.dispatch(PlayerAction[action as keyof typeof PlayerAction]);
-//   } catch (error) {
-//     throw new HttpError(400, error.message);
-//   }
+  // Action provided is not a valid Action enum
+  if (!(action in PlayerAction)) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_ACTION);
+  }
 
-//   return {};
-// }
+  // Action enum cannot be applied in the current state (see spec for details)
+  try {
+    session.dispatch(PlayerAction[action as keyof typeof PlayerAction]);
+  } catch (error) {
+    throw new HttpError(400, error.message);
+  }
 
-export function adminQuizSessionStart(authUserId: number, quizId: number, autoStartNum: number): { newSessionId: number } {
+  return {};
+}
+
+export function adminQuizSessionStart(
+  authUserId: number,
+  quizId: number,
+  autoStartNum: number
+): { newSessionId: number } {
   const data = getData();
   const quiz = findQuizById(quizId);
   if (!quiz) {
@@ -500,7 +559,9 @@ export function adminQuizSessionStart(authUserId: number, quizId: number, autoSt
   if (!quiz.active) {
     throw new HttpError(400, ERROR_MESSAGES.QUIZ_INACTIVE);
   }
-  const activeSessions = data.quizSessions.filter(s => s.quizId === quizId && s.state() !== QuizSessionState.END);
+  const activeSessions = data.quizSessions.filter(
+    s => s.quizId === quizId && s.state() !== QuizSessionState.END
+  );
   if (activeSessions.length >= 10) {
     throw new HttpError(400, ERROR_MESSAGES.QUIZ_TOO_MANY_SESSIONS);
   }
