@@ -42,7 +42,7 @@ export function authorizeToken(req: Request, res: Response, next: NextFunction) 
   }
 
   // Check if token is valid
-  const userSession = getData().userSessions.find((session) => session.token === token);
+  const userSession = getData().userSessions.find(session => session.token === token);
   if (!userSession) {
     return next(new HttpError(401, ERROR_MESSAGES.INVALID_TOKEN));
   }
@@ -57,7 +57,12 @@ export function authorizeToken(req: Request, res: Response, next: NextFunction) 
  * Register a user with an email, password, and names,
  * then returns their authUserId value.
  */
-export async function adminAuthRegister(email: string, password: string, nameFirst: string, nameLast: string): Promise<{ token: string }> {
+export async function adminAuthRegister(
+  email: string,
+  password: string,
+  nameFirst: string,
+  nameLast: string,
+): Promise<{ token: string }> {
   const data = getData();
 
   if (!email || !password || !nameFirst || !nameLast) {
@@ -132,15 +137,22 @@ export async function adminAuthLogin(email: string, password: string): Promise<{
 /**
  * Updates the details of an admin user.
  */
-export function adminUserDetailsUpdate(authUserId: number, email: string, nameFirst: string, nameLast: string): EmptyObject {
+export function adminUserDetailsUpdate(
+  authUserId: number,
+  email: string,
+  nameFirst: string,
+  nameLast: string,
+): EmptyObject {
   if (!isValidEmail(email)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_EMAIL_FORMAT);
   }
 
   const data = getData();
-  const user = data.users.find((user) => user.userId === authUserId);
+  const user = data.users.find(user => user.userId === authUserId);
 
-  const emailUsedByOthers = data.users.find(user => user.email === email && user.userId !== authUserId);
+  const emailUsedByOthers = data.users.find(
+    user => user.email === email && user.userId !== authUserId,
+  );
 
   if (emailUsedByOthers) {
     throw new HttpError(400, ERROR_MESSAGES.USED_EMAIL);
@@ -169,7 +181,7 @@ export function adminUserDetails(authUserId: number): {
     email: string;
     numSuccessfulLogins: number;
     numFailedPasswordsSinceLastLogin: number;
-  }
+  };
 } {
   const data = getData();
   const user = data.users.find(user => user.userId === authUserId);
@@ -181,14 +193,18 @@ export function adminUserDetails(authUserId: number): {
       email: user.email,
       numSuccessfulLogins: user.numSuccessfulLogins,
       numFailedPasswordsSinceLastLogin: user.numFailedPasswordsSinceLastLogin,
-    }
+    },
   };
 }
 
 /**
  * Updates the password for an admin user.
  */
-export async function adminUserPasswordUpdate(authUserId: number, oldPassword: string, newPassword: string): Promise<EmptyObject> {
+export async function adminUserPasswordUpdate(
+  authUserId: number,
+  oldPassword: string,
+  newPassword: string,
+): Promise<EmptyObject> {
   if (!authUserId || !oldPassword || !newPassword) {
     throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
   }
@@ -207,7 +223,7 @@ export async function adminUserPasswordUpdate(authUserId: number, oldPassword: s
     throw new HttpError(400, ERROR_MESSAGES.NEW_PASSWORD_SAME_AS_OLD);
   }
 
-  if (user.oldPasswords.some(async (password) => await hashCompare(newPassword, password))) {
+  if (user.oldPasswords.some(async password => await hashCompare(newPassword, password))) {
     throw new HttpError(400, ERROR_MESSAGES.PASSWORD_ALREADY_USED);
   }
 

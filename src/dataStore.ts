@@ -1,5 +1,14 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW ONLY
-import { User, UserSession, Quiz, QuizSession, Player, Question, Answer, Message } from './models/Classes';
+import {
+  User,
+  UserSession,
+  Quiz,
+  QuizSession,
+  Player,
+  Question,
+  Answer,
+  Message,
+} from './models/Classes';
 import fs from 'fs';
 import path from 'path';
 
@@ -9,7 +18,7 @@ type DataStore = {
   userSessions: UserSession[];
   quizSessions: QuizSession[];
   players: Player[];
-}
+};
 
 let data: DataStore = {
   users: [],
@@ -63,11 +72,20 @@ function loadData(): void {
   // Reconstruct the objects
   rawData.users.forEach((u: any) => Object.setPrototypeOf(u, User.prototype));
   rawData.userSessions.forEach((us: any) => Object.setPrototypeOf(us, UserSession.prototype));
-  rawData.quizzes.forEach((q: any) => Object.setPrototypeOf(q, Quiz.prototype) &&
-    q.questions.forEach((q: any) => Object.setPrototypeOf(q, Question.prototype) &&
-      q.answers.forEach((a: any) => Object.setPrototypeOf(a, Answer.prototype))));
-  rawData.quizSessions.forEach((qs: any) => Object.setPrototypeOf(qs, QuizSession.prototype) &&
-    qs.messages.forEach((m: any) => Object.setPrototypeOf(m, Message.prototype)));
+  rawData.quizzes.forEach(
+    (q: any) =>
+      Object.setPrototypeOf(q, Quiz.prototype) &&
+      q.questions.forEach(
+        (q: any) =>
+          Object.setPrototypeOf(q, Question.prototype) &&
+          q.answers.forEach((a: any) => Object.setPrototypeOf(a, Answer.prototype)),
+      ),
+  );
+  rawData.quizSessions.forEach(
+    (qs: any) =>
+      Object.setPrototypeOf(qs, QuizSession.prototype) &&
+      qs.messages.forEach((m: any) => Object.setPrototypeOf(m, Message.prototype)),
+  );
   rawData.players.forEach((p: any) => Object.setPrototypeOf(p, Player.prototype));
 
   data = rawData;

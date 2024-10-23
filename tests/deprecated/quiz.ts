@@ -46,7 +46,7 @@ describe('adminQuizCreate()', () => {
     });
     test('Name is more than 30 characters long', () => {
       expect(adminQuizCreate(authUser.authUserId, 'Name'.repeat(10), 'Description')).toStrictEqual(
-        ERROR
+        ERROR,
       );
     });
     test('Name is already used by the current logged in user for another quiz', () => {
@@ -55,7 +55,7 @@ describe('adminQuizCreate()', () => {
     });
     test('Description is more than 100 characters in length', () => {
       expect(adminQuizCreate(authUser.authUserId, 'Name', 'Description'.repeat(10))).toStrictEqual(
-        ERROR
+        ERROR,
       );
     });
   });
@@ -154,7 +154,7 @@ describe('adminQuizList()', () => {
         expect.arrayContaining([
           { quizId: quiz1.quizId, name: 'Quiz1' },
           { quizId: quiz2.quizId, name: 'Quiz2' },
-        ])
+        ]),
       );
     });
   });
@@ -192,7 +192,7 @@ describe('adminQuizNameUpdate', () => {
 
     test('quiz id does not refer to a quiz that this user owns', () => {
       expect(adminQuizNameUpdate(authUser.adminUserId, quiz.quizId, 'newName')).toStrictEqual(
-        ERROR
+        ERROR,
       );
     });
 
@@ -203,7 +203,7 @@ describe('adminQuizNameUpdate', () => {
     test('name less than 3 characters or more than 30 characters', () => {
       expect(adminQuizNameUpdate(owner.authUserId, quiz.quizId, 'n')).toStrictEqual(ERROR);
       expect(
-        adminQuizNameUpdate(owner.authUserId, quiz.quizId, 'morethanthirtycharsmorethanthirty')
+        adminQuizNameUpdate(owner.authUserId, quiz.quizId, 'morethanthirtycharsmorethanthirty'),
       ).toStrictEqual(ERROR);
     });
 
@@ -255,20 +255,20 @@ describe('adminQuizDescriptionUpdate()', () => {
     });
     test('Quiz ID does not refer to a valid quiz', () => {
       expect(adminQuizDescriptionUpdate(authUser.authUserId, 0, 'Description')).toStrictEqual(
-        ERROR
+        ERROR,
       );
     });
     test('Quiz ID does not refer to a quiz that this user owns', () => {
       const quiz = adminQuizCreate(authUser.authUserId, 'Name', 'Description');
       const user = adminAuthRegister('artoria@example.com', 'Artoria123', 'Artoria', 'Pendragon');
       expect(
-        adminQuizDescriptionUpdate(user.authUserId, quiz.quizId, 'New Description')
+        adminQuizDescriptionUpdate(user.authUserId, quiz.quizId, 'New Description'),
       ).toStrictEqual(ERROR);
     });
     test('Description is more than 100 characters in length', () => {
       const quiz = adminQuizCreate(authUser.authUserId, 'Name', 'Description');
       expect(
-        adminQuizDescriptionUpdate(authUser.authUserId, quiz.quizId, 'Description'.repeat(10))
+        adminQuizDescriptionUpdate(authUser.authUserId, quiz.quizId, 'Description'.repeat(10)),
       ).toStrictEqual(ERROR);
     });
   });
@@ -334,7 +334,7 @@ describe('adminQuizRemove()', () => {
         'anotheruser@gmail.com',
         'Anothepassword123',
         'First',
-        'Last'
+        'Last',
       );
       const anotherUserQuiz = adminQuizCreate(anotherUser.authUserId, 'Anotherquiz', 'Description');
       expect(adminQuizRemove(authUser.authUserId, anotherUserQuiz.quizId)).toStrictEqual(ERROR);

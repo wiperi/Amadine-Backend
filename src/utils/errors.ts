@@ -7,7 +7,8 @@ const ERROR_MESSAGES = {
   USED_EMAIL: 'Email address already in use.',
   // Name
   INVALID_NAME: 'Invalid name format',
-  QUIZ_NAME_CONFLICT: 'Quiz ID refers to a quiz that has a name that is already used by the target user.',
+  QUIZ_NAME_CONFLICT:
+    'Quiz ID refers to a quiz that has a name that is already used by the target user.',
   // Description
   INVALID_DESCRIPTION: 'Invalid description format',
   // Quiz ID

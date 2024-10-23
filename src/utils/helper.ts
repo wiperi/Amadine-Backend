@@ -63,19 +63,23 @@ export function recursiveFind(obj: any, target: any): boolean {
  * @returns A unique ID number.
  * @throws Error if an invalid ID type is provided.
  */
-export function getNewID(type?: 'user' | 'quiz' | 'question' | 'answer' | 'user session' | 'quiz session' | 'player'): number {
+export function getNewID(
+  type?: 'user' | 'quiz' | 'question' | 'answer' | 'user session' | 'quiz session' | 'player',
+): number {
   const numberInRange = (start: number, end: number) => {
-    return Math.floor((Math.random() * (end - start)) + start);
+    return Math.floor(Math.random() * (end - start) + start);
   };
 
   const getUniqueID = (idGenerator: () => number, dataSet: any[]) => {
     id = idGenerator();
-    while (dataSet.some(item => {
-      // Check if any property has a name contains 'id' and the value is the same as the id
-      return Object.keys(item).some(key => {
-        return key.toLowerCase().includes('id') && item[key] === id;
-      });
-    })) {
+    while (
+      dataSet.some(item => {
+        // Check if any property has a name contains 'id' and the value is the same as the id
+        return Object.keys(item).some(key => {
+          return key.toLowerCase().includes('id') && item[key] === id;
+        });
+      })
+    ) {
       id = idGenerator();
     }
     return id;
@@ -88,7 +92,9 @@ export function getNewID(type?: 'user' | 'quiz' | 'question' | 'answer' | 'user 
 
   switch (type) {
     case undefined:
-      console.log('This Id type is deprecated, you should use a specific type like user, quiz, question, etc.');
+      console.log(
+        'This Id type is deprecated, you should use a specific type like user, quiz, question, etc.',
+      );
       return numberInRange(1, 1000000000);
     case 'user':
       idGenerator = () => numberInRange(1 * Math.pow(10, 9), 10 * Math.pow(10, 9) - 1);
@@ -141,7 +147,7 @@ export function isValidPassword(password: string): boolean {
   const numberRequirement = /[0-9]/.test(password);
   const letterRequirement = /[a-zA-Z]/.test(password);
 
-  return (password.length >= 8 && numberRequirement && letterRequirement);
+  return password.length >= 8 && numberRequirement && letterRequirement;
 }
 
 /**
@@ -195,7 +201,11 @@ export function isValidUserName(userName: string): boolean {
  * @param quizId - (Optional) The ID of the quiz being edited, to exclude it from uniqueness check.
  * @returns `true` if the quiz name is valid, otherwise `false`.
  */
-export function isValidQuizName(authUserId: number, name: string, quizId: number | undefined): boolean {
+export function isValidQuizName(
+  authUserId: number,
+  name: string,
+  quizId: number | undefined,
+): boolean {
   // regex for alphanumeric and spaces
   const regex = /^[a-z0-9\s]+$/i;
   if (!regex.test(name)) {
@@ -207,9 +217,18 @@ export function isValidQuizName(authUserId: number, name: string, quizId: number
   }
 
   const quizzes = getData().quizzes;
-  if (quizId && quizzes.some((q) => q.name === name && q.active === true && q.authUserId === authUserId && q.quizId !== quizId)) {
+  if (
+    quizId &&
+    quizzes.some(
+      q =>
+        q.name === name && q.active === true && q.authUserId === authUserId && q.quizId !== quizId,
+    )
+  ) {
     return false;
-  } else if (!quizId && quizzes.some((q) => q.name === name && q.active === true && q.authUserId === authUserId)) {
+  } else if (
+    !quizId &&
+    quizzes.some(q => q.name === name && q.active === true && q.authUserId === authUserId)
+  ) {
     return false;
   }
 
@@ -236,7 +255,7 @@ export function isValidQuizDescription(quizDescription: string): boolean {
  */
 export function isValidUserId(id: number): boolean {
   const userList = getData().users;
-  return userList.some((user) => user.userId === id);
+  return userList.some(user => user.userId === id);
 }
 
 export function findUserById(userId: number): User | undefined {
@@ -251,7 +270,7 @@ export function findUserById(userId: number): User | undefined {
  */
 export function isValidQuizId(quizId: number): boolean {
   const quizList = getData().quizzes;
-  return quizList.some((quiz) => quiz.quizId === quizId && quiz.active);
+  return quizList.some(quiz => quiz.quizId === quizId && quiz.active);
 }
 
 /**
@@ -263,7 +282,9 @@ export function isValidQuizId(quizId: number): boolean {
  */
 export function isQuizIdOwnedByUser(quizId: number, authUserId: number): boolean {
   const quizList = getData().quizzes;
-  return quizList.some((quiz) => quiz.quizId === quizId && quiz.authUserId === authUserId && quiz.active);
+  return quizList.some(
+    quiz => quiz.quizId === quizId && quiz.authUserId === authUserId && quiz.active,
+  );
 }
 
 export function findQuizById(quizId: number): Quiz | undefined {

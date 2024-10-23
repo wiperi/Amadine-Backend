@@ -23,7 +23,7 @@ export function registerUser(
   email: string,
   password: string,
   nameFirst: string,
-  nameLast: string
+  nameLast: string,
 ): ParsedResponse {
   const res = request('POST', `${AUTH_URL}/register`, {
     json: {
@@ -68,7 +68,7 @@ export function updateUserDetails(
   token: string,
   email: string,
   nameFirst: string,
-  nameLast: string
+  nameLast: string,
 ): ParsedResponse {
   const res = request('PUT', `${USER_URL}/details`, {
     headers: {
@@ -86,7 +86,7 @@ export function updateUserDetails(
 export function updateUserPassword(
   token: string,
   oldPassword: string,
-  newPassword: string
+  newPassword: string,
 ): ParsedResponse {
   const res = request('PUT', `${USER_URL}/password`, {
     headers: {
@@ -135,7 +135,7 @@ export function updateQuiz(
   token: string,
   quizId: number,
   name: string,
-  description: string
+  description: string,
 ): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}`, {
     headers: {
@@ -161,7 +161,7 @@ export function deleteQuiz(token: string, quizId: number): ParsedResponse {
 export function updateQuizDescription(
   token: string,
   quizId: number,
-  description: string
+  description: string,
 ): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}/description`, {
     headers: {
@@ -205,7 +205,7 @@ export function moveQuestion(
   token: string,
   quizId: number,
   questionId: number,
-  newPosition: number
+  newPosition: number,
 ): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}/question/${questionId}/move`, {
     headers: {
@@ -221,7 +221,7 @@ export function moveQuestion(
 export function createQuestion(
   token: string,
   quizId: number,
-  questionBody: object
+  questionBody: object,
 ): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}/${quizId}/question`, {
     headers: {
@@ -253,7 +253,7 @@ export function requestAdminQuizNameUpdate(quizId: number, token: string, name: 
 export function duplicateQuestion(
   token: string,
   quizId: number,
-  questionId: number
+  questionId: number,
 ): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}/${quizId}/question/${questionId}/duplicate`, {
     headers: {
@@ -300,7 +300,7 @@ export function updateQuestion(
   token: string,
   quizId: number,
   questionId: number,
-  questionBody: object
+  questionBody: object,
 ): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}/question/${questionId}`, {
     headers: {

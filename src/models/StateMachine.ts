@@ -18,8 +18,12 @@ export class StateMachine<
   STATE extends string | number | symbol,
   ACTION extends string | number | symbol,
   INSTANCE extends object = undefined,
-  CALLBACK extends (instance: INSTANCE, from: STATE, action: ACTION, to: STATE) => unknown
-  = (instance: INSTANCE, from: STATE, action: ACTION, to: STATE) => unknown
+  CALLBACK extends (instance: INSTANCE, from: STATE, action: ACTION, to: STATE) => unknown = (
+    instance: INSTANCE,
+    from: STATE,
+    action: ACTION,
+    to: STATE,
+  ) => unknown,
 > {
   // The instance object that the state machine operates on
   protected instance: INSTANCE;
@@ -27,7 +31,11 @@ export class StateMachine<
   protected currentState: STATE;
 
   // Static map to store all transitions
-  protected static transitions: Map<string | number | symbol, Map<string | number | symbol, string | number | symbol>>;
+  protected static transitions: Map<
+    string | number | symbol,
+    Map<string | number | symbol, string | number | symbol>
+  >;
+
   // Static map to store all callbacks
   protected static callBackMap: Map<string, object[]>;
 
@@ -40,7 +48,11 @@ export class StateMachine<
    * so a class have only one set of transitions, i.e. every instance of the class share the same transitions rules
    * use StateMachine.parseTransitions to parse transitions from an array of objects
    */
-  constructor(initial: STATE, transitions: Transition<STATE, ACTION, CALLBACK>[], instance?: INSTANCE) {
+  constructor(
+    initial: STATE,
+    transitions: Transition<STATE, ACTION, CALLBACK>[],
+    instance?: INSTANCE,
+  ) {
     this.instance = instance;
     this.currentState = initial;
 
@@ -66,15 +78,20 @@ export class StateMachine<
     STATE extends string | number | symbol,
     ACTION extends string | number | symbol,
     INSTANCE extends object = undefined,
-    CALLBACK extends (instance: INSTANCE, from: STATE, action: ACTION, to: STATE) => unknown
-    = (instance: INSTANCE, from: STATE, action: ACTION, to: STATE) => unknown
-  >(transitions: { from: STATE, action: ACTION, to: STATE, callbacks?: CALLBACK[] }[]):
-    Transition<STATE, ACTION, CALLBACK>[] {
+    CALLBACK extends (instance: INSTANCE, from: STATE, action: ACTION, to: STATE) => unknown = (
+      instance: INSTANCE,
+      from: STATE,
+      action: ACTION,
+      to: STATE,
+    ) => unknown,
+  >(
+    transitions: { from: STATE; action: ACTION; to: STATE; callbacks?: CALLBACK[] }[],
+  ): Transition<STATE, ACTION, CALLBACK>[] {
     return transitions.map(t => ({
       from: t.from,
       action: t.action,
       to: t.to,
-      callbacks: t.callbacks
+      callbacks: t.callbacks,
     }));
   }
 
@@ -100,7 +117,9 @@ export class StateMachine<
 
     // If edge already exist, error
     if (StateMachine.transitions.get(from).has(action)) {
-      throw new Error(`State ${String(from)} has already an transition ${String(action)}, to ${String(to)}`);
+      throw new Error(
+        `State ${String(from)} has already an transition ${String(action)}, to ${String(to)}`,
+      );
     }
 
     StateMachine.transitions.get(from)!.set(action, to);
@@ -134,7 +153,9 @@ export class StateMachine<
 
     if (!currentVertex.has(action)) {
       // action can not apply to current state
-      throw new Error(`Action ${String(action)} can not apply to current state ${String(this.currentState)}`);
+      throw new Error(
+        `Action ${String(action)} can not apply to current state ${String(this.currentState)}`,
+      );
     }
 
     const next = currentVertex.get(action) as STATE;

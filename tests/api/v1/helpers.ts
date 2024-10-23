@@ -24,7 +24,7 @@ export function userRegister(
   email: string,
   password: string,
   nameFirst: string,
-  nameLast: string
+  nameLast: string,
 ): ParsedResponse {
   const res = request('POST', `${AUTH_URL}/register`, {
     json: {
@@ -69,7 +69,7 @@ export function userUpdateDetails(
   token: string,
   email: string,
   nameFirst: string,
-  nameLast: string
+  nameLast: string,
 ): ParsedResponse {
   const res = request('PUT', `${USER_URL}/details`, {
     json: {
@@ -85,7 +85,7 @@ export function userUpdateDetails(
 export function userUpdatePassword(
   token: string,
   oldPassword: string,
-  newPassword: string
+  newPassword: string,
 ): ParsedResponse {
   const res = request('PUT', `${USER_URL}/password`, {
     json: {
@@ -130,7 +130,7 @@ export function quizUpdate(
   token: string,
   quizId: number,
   name: string,
-  description: string
+  description: string,
 ): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}`, {
     json: {
@@ -154,7 +154,7 @@ export function quizDelete(token: string, quizId: number): ParsedResponse {
 export function quizUpdateDescription(
   token: string,
   quizId: number,
-  description: string
+  description: string,
 ): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}/description`, {
     json: {
@@ -196,7 +196,7 @@ export function questionMove(
   token: string,
   quizId: number,
   questionId: number,
-  newPosition: number
+  newPosition: number,
 ): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}/question/${questionId}/move`, {
     json: {
@@ -210,7 +210,7 @@ export function questionMove(
 export function questionCreate(
   token: string,
   quizId: number,
-  questionBody: object
+  questionBody: object,
 ): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}/${quizId}/question`, {
     json: {
@@ -238,7 +238,7 @@ export function quizRequestNameUpdate(quizId: Number, token: String, name: Strin
 export function questionDuplicate(
   token: string,
   quizId: number,
-  questionId: number
+  questionId: number,
 ): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}/${quizId}/question/${questionId}/duplicate`, {
     json: {
@@ -280,7 +280,7 @@ export function questionUpdate(
   token: string,
   quizId: number,
   questionId: number,
-  questionBody: object
+  questionBody: object,
 ): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}/question/${questionId}`, {
     json: {
@@ -295,7 +295,7 @@ export function questionUpdate(
 export function quizSessionCreate(
   token: string,
   quizId: number,
-  autoStartNum: number
+  autoStartNum: number,
 ): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}/${quizId}/session/start`, {
     headers: {
@@ -332,7 +332,7 @@ export function quizSessionGetActivity(token: string, quizId: number): ParsedRes
 export function quizStartNewSession(
   token: string,
   quizId: number,
-  autoStartNum: number
+  autoStartNum: number,
 ): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}/${quizId}/sessions/start`, {
     headers: {
@@ -349,7 +349,7 @@ export function quizSessionUpdateState(
   token: string,
   quizId: number,
   sessionId: number,
-  action: string
+  action: string,
 ): ParsedResponse {
   const res = request('PUT', `${QUIZ_URL}/${quizId}/sessions/${sessionId}`, {
     headers: {
@@ -365,7 +365,7 @@ export function quizSessionUpdateState(
 export function quizSessionGetStatus(
   token: string,
   quizId: number,
-  sessionId: number
+  sessionId: number,
 ): ParsedResponse {
   const res = request('GET', `${QUIZ_URL}/${quizId}/sessions/${sessionId}`, {
     headers: {
@@ -378,7 +378,7 @@ export function quizSessionGetStatus(
 export function quizSessionGetFinalResult(
   token: string,
   quizId: number,
-  sessionId: number
+  sessionId: number,
 ): ParsedResponse {
   const res = request('GET', `${QUIZ_URL}/${quizId}/sessions/${sessionId}/result`, {
     headers: {
@@ -391,7 +391,7 @@ export function quizSessionGetFinalResult(
 export function quizSessionGetFinalResultCsvFormat(
   token: string,
   quizId: number,
-  sessionId: number
+  sessionId: number,
 ): ParsedResponse {
   const res = request('GET', `${QUIZ_URL}/${quizId}/sessions/${sessionId}/result/csv`, {
     headers: {
@@ -424,7 +424,7 @@ export function playerGetQuestionInfo(playerId: number, questionposition: number
 export function playerSubmitAnswer(
   answerIds: object,
   playerId: number,
-  questionposition: number
+  questionposition: number,
 ): ParsedResponse {
   const res = request('PUT', `${PLAYER_URL}/${playerId}/question/${questionposition}/answer`, {
     json: {
@@ -436,7 +436,7 @@ export function playerSubmitAnswer(
 
 export function playerGetOneQuestionResult(
   playerId: number,
-  questionposition: number
+  questionposition: number,
 ): ParsedResponse {
   const res = request('GET', `${PLAYER_URL}/${playerId}/question/${questionposition}/result`, {});
   return parse(res);

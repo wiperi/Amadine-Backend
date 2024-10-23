@@ -15,7 +15,7 @@ import {
   adminQuizRestore,
   adminQuizTransfer,
   adminQuizQuestionUpdate,
-  adminQuizSessionStart
+  adminQuizSessionStart,
 } from '@/services/quiz';
 import { tryCatch } from '@/utils/helper';
 
@@ -43,12 +43,20 @@ router.put('/:quizid(-?\\d+)/name', (req: Request, res: Response, next: NextFunc
   tryCatch(() => adminQuizNameUpdate(authUserId, quizid, name), req, res, next);
 });
 
-router.put('/:quizid(-?\\d+)/question/:questionid(-?\\d+)/move', (req: Request, res: Response, next: NextFunction) => {
-  const quizid = parseInt(req.params.quizid);
-  const questionid = parseInt(req.params.questionid);
-  const { authUserId, newPosition } = req.body;
-  tryCatch(() => adminQuizQuestionMove(authUserId, quizid, questionid, newPosition), req, res, next);
-});
+router.put(
+  '/:quizid(-?\\d+)/question/:questionid(-?\\d+)/move',
+  (req: Request, res: Response, next: NextFunction) => {
+    const quizid = parseInt(req.params.quizid);
+    const questionid = parseInt(req.params.questionid);
+    const { authUserId, newPosition } = req.body;
+    tryCatch(
+      () => adminQuizQuestionMove(authUserId, quizid, questionid, newPosition),
+      req,
+      res,
+      next,
+    );
+  },
+);
 
 router.delete('/:quizid(-?\\d+)', (req: Request, res: Response, next: NextFunction) => {
   const quizid = parseInt(req.params.quizid);
@@ -85,19 +93,25 @@ router.post('/:quizId(-?\\d+)/restore', (req: Request, res: Response, next: Next
   tryCatch(() => adminQuizRestore(authUserId, quizId), req, res, next);
 });
 
-router.post('/:quizId(-?\\d+)/question/:questionId(-?\\d+)/duplicate', (req: Request, res: Response, next: NextFunction) => {
-  const { authUserId } = req.body;
-  const quizId = parseInt(req.params.quizId);
-  const questionId = parseInt(req.params.questionId);
-  tryCatch(() => adminQuizQuestionDuplicate(authUserId, quizId, questionId), req, res, next);
-});
+router.post(
+  '/:quizId(-?\\d+)/question/:questionId(-?\\d+)/duplicate',
+  (req: Request, res: Response, next: NextFunction) => {
+    const { authUserId } = req.body;
+    const quizId = parseInt(req.params.quizId);
+    const questionId = parseInt(req.params.questionId);
+    tryCatch(() => adminQuizQuestionDuplicate(authUserId, quizId, questionId), req, res, next);
+  },
+);
 
-router.delete('/:quizid(-?\\d+)/question/:questionid(-?\\d+)', (req: Request, res: Response, next: NextFunction) => {
-  const quizid = parseInt(req.params.quizid);
-  const questionid = parseInt(req.params.questionid);
-  const { authUserId } = req.body;
-  tryCatch(() => adminQuizQuestionDelete(authUserId, quizid, questionid), req, res, next);
-});
+router.delete(
+  '/:quizid(-?\\d+)/question/:questionid(-?\\d+)',
+  (req: Request, res: Response, next: NextFunction) => {
+    const quizid = parseInt(req.params.quizid);
+    const questionid = parseInt(req.params.questionid);
+    const { authUserId } = req.body;
+    tryCatch(() => adminQuizQuestionDelete(authUserId, quizid, questionid), req, res, next);
+  },
+);
 
 router.post('/:quizid(-?\\d+)/transfer', (req: Request, res: Response, next: NextFunction) => {
   const quizid = parseInt(req.params.quizid);
@@ -105,12 +119,20 @@ router.post('/:quizid(-?\\d+)/transfer', (req: Request, res: Response, next: Nex
   tryCatch(() => adminQuizTransfer(authUserId, quizid, userEmail), req, res, next);
 });
 
-router.put('/:quizid(-?\\d+)/question/:questionid(-?\\d+)', (req: Request, res: Response, next: NextFunction) => {
-  const quizId = parseInt(req.params.quizid);
-  const questionId = parseInt(req.params.questionid);
-  const { authUserId, questionBody } = req.body;
-  tryCatch(() => adminQuizQuestionUpdate(authUserId, quizId, questionId, questionBody), req, res, next);
-});
+router.put(
+  '/:quizid(-?\\d+)/question/:questionid(-?\\d+)',
+  (req: Request, res: Response, next: NextFunction) => {
+    const quizId = parseInt(req.params.quizid);
+    const questionId = parseInt(req.params.questionid);
+    const { authUserId, questionBody } = req.body;
+    tryCatch(
+      () => adminQuizQuestionUpdate(authUserId, quizId, questionId, questionBody),
+      req,
+      res,
+      next,
+    );
+  },
+);
 
 router.post('/:quizid(-?\\d+)/session/start', (req: Request, res: Response, next: NextFunction) => {
   const quizId = parseInt(req.params.quizid);
