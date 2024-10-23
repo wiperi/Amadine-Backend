@@ -27,7 +27,6 @@ beforeEach(() => {
 ///////////////////////////////////////////////////////////////////
 
 describe('adminQuizCreate()', () => {
-
   // AuthUserId is not a valid user.
   // Name contains invalid characters. Valid characters are alphanumeric and spaces.
   // Name is either less than 3 characters long or more than 30 characters long.
@@ -46,27 +45,39 @@ describe('adminQuizCreate()', () => {
       expect(adminQuizCreate(authUser.authUserId, 'Na', 'Description')).toStrictEqual(ERROR);
     });
     test('Name is more than 30 characters long', () => {
-      expect(adminQuizCreate(authUser.authUserId, 'Name'.repeat(10), 'Description')).toStrictEqual(ERROR);
+      expect(adminQuizCreate(authUser.authUserId, 'Name'.repeat(10), 'Description')).toStrictEqual(
+        ERROR
+      );
     });
     test('Name is already used by the current logged in user for another quiz', () => {
       adminQuizCreate(authUser.authUserId, 'Name', 'Description');
       expect(adminQuizCreate(authUser.authUserId, 'Name', 'Description')).toStrictEqual(ERROR);
     });
     test('Description is more than 100 characters in length', () => {
-      expect(adminQuizCreate(authUser.authUserId, 'Name', 'Description'.repeat(10))).toStrictEqual(ERROR);
+      expect(adminQuizCreate(authUser.authUserId, 'Name', 'Description'.repeat(10))).toStrictEqual(
+        ERROR
+      );
     });
   });
   describe('has a return type', () => {
     test('should return a number', () => {
-      expect(adminQuizCreate(authUser.authUserId, 'Name', 'Description')).toEqual({ quizId: expect.any(Number) });
+      expect(adminQuizCreate(authUser.authUserId, 'Name', 'Description')).toEqual({
+        quizId: expect.any(Number),
+      });
     });
   });
   describe('valid input', () => {
     test('should add a quiz to the data store', () => {
       const quiz = adminQuizCreate(authUser.authUserId, 'Name', 'Description');
-      expect(adminQuizInfo(authUser.authUserId, quiz.quizId)).toEqual({ quizId: quiz.quizId, name: 'Name', timeCreated: expect.any(Number), timeLastEdited: expect.any(Number), description: 'Description' });
+      expect(adminQuizInfo(authUser.authUserId, quiz.quizId)).toEqual({
+        quizId: quiz.quizId,
+        name: 'Name',
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number),
+        description: 'Description',
+      });
     });
-  })
+  });
 });
 
 ///////////////////////////////////////////////////////////////////
@@ -74,7 +85,6 @@ describe('adminQuizCreate()', () => {
 ///////////////////////////////////////////////////////////////////
 
 describe('adminQuizInfo()', () => {
-
   describe('invalid input', () => {
     test('AuthUserId is not a valid user', () => {
       expect(adminQuizInfo(0, 0)).toStrictEqual(ERROR);
@@ -88,14 +98,26 @@ describe('adminQuizInfo()', () => {
   describe('has a correct return type', () => {
     test('should return an object', () => {
       const quiz = adminQuizCreate(authUser.authUserId, 'Name', 'Description');
-      expect(adminQuizInfo(authUser.authUserId, quiz.quizId)).toEqual({ quizId: expect.any(Number), name: expect.any(String), timeCreated: expect.any(Number), timeLastEdited: expect.any(Number), description: expect.any(String) });
+      expect(adminQuizInfo(authUser.authUserId, quiz.quizId)).toEqual({
+        quizId: expect.any(Number),
+        name: expect.any(String),
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number),
+        description: expect.any(String),
+      });
     });
   });
 
   describe('valid input', () => {
     test('should return the correct information', () => {
       const quiz = adminQuizCreate(authUser.authUserId, 'Name', 'Description');
-      expect(adminQuizInfo(authUser.authUserId, quiz.quizId)).toEqual({ quizId: quiz.quizId, name: 'Name', timeCreated: expect.any(Number), timeLastEdited: expect.any(Number), description: 'Description' });
+      expect(adminQuizInfo(authUser.authUserId, quiz.quizId)).toEqual({
+        quizId: quiz.quizId,
+        name: 'Name',
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number),
+        description: 'Description',
+      });
     });
   });
 });
@@ -105,7 +127,6 @@ describe('adminQuizInfo()', () => {
 /////////////////////////////////////////////////////////////////////
 
 describe('adminQuizList()', () => {
-
   describe('invalid input', () => {
     test('authUserId is not a valid user', () => {
       expect(adminQuizList(authUser.authUserId + 1)).toStrictEqual(ERROR);
@@ -118,9 +139,9 @@ describe('adminQuizList()', () => {
       quizzes: [
         {
           quizId: quiz.quizId,
-          name: 'Quiz1'
-        }
-      ]
+          name: 'Quiz1',
+        },
+      ],
     });
   });
 
@@ -129,10 +150,12 @@ describe('adminQuizList()', () => {
       const quiz1 = adminQuizCreate(authUser.authUserId, 'Quiz1', 'Description1');
       const quiz2 = adminQuizCreate(authUser.authUserId, 'Quiz2', 'Description2');
       const quizList = adminQuizList(authUser.authUserId);
-      expect(quizList.quizzes).toEqual(expect.arrayContaining([
-        { quizId: quiz1.quizId, name: 'Quiz1' },
-        { quizId: quiz2.quizId, name: 'Quiz2' }
-      ]));
+      expect(quizList.quizzes).toEqual(
+        expect.arrayContaining([
+          { quizId: quiz1.quizId, name: 'Quiz1' },
+          { quizId: quiz2.quizId, name: 'Quiz2' },
+        ])
+      );
     });
   });
 });
@@ -154,7 +177,7 @@ describe('adminQuizList()', () => {
 describe('adminQuizNameUpdate', () => {
   let owner, quiz;
   beforeEach(() => {
-    owner  = adminAuthRegister('peter@gmail.com', 'PumpkinEater123', 'Peter', 'Griffin');
+    owner = adminAuthRegister('peter@gmail.com', 'PumpkinEater123', 'Peter', 'Griffin');
     quiz = adminQuizCreate(owner.authUserId, 'Name', 'Description');
   });
 
@@ -168,7 +191,9 @@ describe('adminQuizNameUpdate', () => {
     });
 
     test('quiz id does not refer to a quiz that this user owns', () => {
-      expect(adminQuizNameUpdate(authUser.adminUserId, quiz.quizId, 'newName')).toStrictEqual(ERROR);
+      expect(adminQuizNameUpdate(authUser.adminUserId, quiz.quizId, 'newName')).toStrictEqual(
+        ERROR
+      );
     });
 
     test('name contains invalid characters', () => {
@@ -177,7 +202,9 @@ describe('adminQuizNameUpdate', () => {
 
     test('name less than 3 characters or more than 30 characters', () => {
       expect(adminQuizNameUpdate(owner.authUserId, quiz.quizId, 'n')).toStrictEqual(ERROR);
-      expect(adminQuizNameUpdate(owner.authUserId, quiz.quizId, 'morethanthirtycharsmorethanthirty')).toStrictEqual(ERROR);
+      expect(
+        adminQuizNameUpdate(owner.authUserId, quiz.quizId, 'morethanthirtycharsmorethanthirty')
+      ).toStrictEqual(ERROR);
     });
 
     test('name is already used by the current logged in user for another quiz', () => {
@@ -193,15 +220,22 @@ describe('adminQuizNameUpdate', () => {
 
     test('successful update the quiz name', () => {
       adminQuizNameUpdate(owner.authUserId, quiz.quizId, 'speedRound');
-      expect(adminQuizInfo(owner.authUserId, quiz.quizId)).toStrictEqual({ quizId: quiz.quizId, name: 'speedRound', timeCreated: expect.any(Number), timeLastEdited: expect.any(Number), description: 'Description' });
+      expect(adminQuizInfo(owner.authUserId, quiz.quizId)).toStrictEqual({
+        quizId: quiz.quizId,
+        name: 'speedRound',
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number),
+        description: 'Description',
+      });
     });
 
     test('wait 1 second before successful update the last edited time', () => {
-
       // mocking the time to be in the future
       const NOW = '2200-05-03T08:00:00.000Z';
-      const mockDateNow = jest.spyOn(global.Date, 'now').mockImplementation(() => new Date(NOW).getTime());
-      
+      const mockDateNow = jest
+        .spyOn(global.Date, 'now')
+        .mockImplementation(() => new Date(NOW).getTime());
+
       adminQuizNameUpdate(owner.authUserId, quiz.quizId, 'speedRound');
       const testQuiz = findQuizById(quiz.quizId);
       expect(testQuiz.timeLastEdited).not.toEqual(testQuiz.timeCreated);
@@ -212,66 +246,79 @@ describe('adminQuizNameUpdate', () => {
 });
 
 ///////////////////////////////////////////////////////////////////
-  ///test for adminQuizDescriptionUpdate
-  ///////////////////////////////////////////////////////////////////
-  describe('adminQuizDescriptionUpdate()', () => {
-    describe('invalid input', () => {
-      test('AuthUserId is not a valid user', () => {
-        expect(adminQuizDescriptionUpdate(0, 0, 'Description')).toStrictEqual(ERROR);
-      });
-      test('Quiz ID does not refer to a valid quiz', () => {
-        expect(adminQuizDescriptionUpdate(authUser.authUserId, 0, 'Description')).toStrictEqual(ERROR);
-      });
-      test('Quiz ID does not refer to a quiz that this user owns', () => {
-        const quiz = adminQuizCreate(authUser.authUserId, 'Name', 'Description');
-        const user = adminAuthRegister('artoria@example.com', 'Artoria123', 'Artoria', 'Pendragon');
-        expect(adminQuizDescriptionUpdate(user.authUserId, quiz.quizId, 'New Description')).toStrictEqual(ERROR);
-      });
-      test('Description is more than 100 characters in length', () => {
-        const quiz = adminQuizCreate(authUser.authUserId, 'Name', 'Description');
-        expect(adminQuizDescriptionUpdate(authUser.authUserId, quiz.quizId, 'Description'.repeat(10))).toStrictEqual(ERROR);
-      });
+///test for adminQuizDescriptionUpdate
+///////////////////////////////////////////////////////////////////
+describe('adminQuizDescriptionUpdate()', () => {
+  describe('invalid input', () => {
+    test('AuthUserId is not a valid user', () => {
+      expect(adminQuizDescriptionUpdate(0, 0, 'Description')).toStrictEqual(ERROR);
     });
-  
-    describe('valid input', () => {
-      test('should update the description of the quiz', () => {
-        const quiz = adminQuizCreate(authUser.authUserId, 'Fate', 'Description');
-        adminQuizDescriptionUpdate(authUser.authUserId, quiz.quizId, 'New Description');
-        expect(adminQuizInfo(authUser.authUserId, quiz.quizId)).toEqual({ quizId: quiz.quizId, name: 'Fate', timeCreated: expect.any(Number), timeLastEdited: expect.any(Number), description: 'New Description'});
-      });
-      test ('timeLastEdited should be updated', () => {
-        const authUser = adminAuthRegister('validuser@example.com', 'ValidPass123', 'Valid', 'User');
-        const quiz = adminQuizCreate(authUser.authUserId, 'Fate', 'Description');
-        const NOW = '2200-05-03T08:00:00.000Z';
-        const mockDateNow = jest.spyOn(global.Date, 'now').mockImplementation(() => new Date(NOW).getTime());
-
-        adminQuizDescriptionUpdate(authUser.authUserId, quiz.quizId, 'New Description');
-        const testQuiz = findQuizById(quiz.quizId);
-        expect(testQuiz.timeLastEdited).not.toEqual(testQuiz.timeCreated);
-
-        mockDateNow.mockRestore();
-      });
-
-      test ('Test successful quiz read after edit is different to creation time', () => {
-        Object.defineProperty(global, 'performance', {
-          writable: true,
-        });
-        jest.useFakeTimers();
-        setTimeout(() => {
-          adminQuizDescriptionUpdate(authUser.authUserId, quiz.quizId, 'newDescription');
-          const quizState1 = adminQuizInfo(authUser.authUserId, quiz.quizId);
-          expect(quizState1.timeLastEdited).not.toStrictEqual(quizState1.timeCreated);
-        });
-      })
+    test('Quiz ID does not refer to a valid quiz', () => {
+      expect(adminQuizDescriptionUpdate(authUser.authUserId, 0, 'Description')).toStrictEqual(
+        ERROR
+      );
+    });
+    test('Quiz ID does not refer to a quiz that this user owns', () => {
+      const quiz = adminQuizCreate(authUser.authUserId, 'Name', 'Description');
+      const user = adminAuthRegister('artoria@example.com', 'Artoria123', 'Artoria', 'Pendragon');
+      expect(
+        adminQuizDescriptionUpdate(user.authUserId, quiz.quizId, 'New Description')
+      ).toStrictEqual(ERROR);
+    });
+    test('Description is more than 100 characters in length', () => {
+      const quiz = adminQuizCreate(authUser.authUserId, 'Name', 'Description');
+      expect(
+        adminQuizDescriptionUpdate(authUser.authUserId, quiz.quizId, 'Description'.repeat(10))
+      ).toStrictEqual(ERROR);
     });
   });
+
+  describe('valid input', () => {
+    test('should update the description of the quiz', () => {
+      const quiz = adminQuizCreate(authUser.authUserId, 'Fate', 'Description');
+      adminQuizDescriptionUpdate(authUser.authUserId, quiz.quizId, 'New Description');
+      expect(adminQuizInfo(authUser.authUserId, quiz.quizId)).toEqual({
+        quizId: quiz.quizId,
+        name: 'Fate',
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number),
+        description: 'New Description',
+      });
+    });
+    test('timeLastEdited should be updated', () => {
+      const authUser = adminAuthRegister('validuser@example.com', 'ValidPass123', 'Valid', 'User');
+      const quiz = adminQuizCreate(authUser.authUserId, 'Fate', 'Description');
+      const NOW = '2200-05-03T08:00:00.000Z';
+      const mockDateNow = jest
+        .spyOn(global.Date, 'now')
+        .mockImplementation(() => new Date(NOW).getTime());
+
+      adminQuizDescriptionUpdate(authUser.authUserId, quiz.quizId, 'New Description');
+      const testQuiz = findQuizById(quiz.quizId);
+      expect(testQuiz.timeLastEdited).not.toEqual(testQuiz.timeCreated);
+
+      mockDateNow.mockRestore();
+    });
+
+    test('Test successful quiz read after edit is different to creation time', () => {
+      Object.defineProperty(global, 'performance', {
+        writable: true,
+      });
+      jest.useFakeTimers();
+      setTimeout(() => {
+        adminQuizDescriptionUpdate(authUser.authUserId, quiz.quizId, 'newDescription');
+        const quizState1 = adminQuizInfo(authUser.authUserId, quiz.quizId);
+        expect(quizState1.timeLastEdited).not.toStrictEqual(quizState1.timeCreated);
+      });
+    });
+  });
+});
 
 /////////////////////////////////////////////////////////////////////////
 ///test for adminQuizRemove
 /////////////////////////////////////////////////////////////////////////
 
 describe('adminQuizRemove()', () => {
-
   describe('invalid input', () => {
     test('AuthUserId is not a valid user', () => {
       const quiz = adminQuizCreate(authUser.authUserId, 'Remove', 'Description');
@@ -283,7 +330,12 @@ describe('adminQuizRemove()', () => {
     });
 
     test('QuizId does not belong to the current user', () => {
-      const anotherUser = adminAuthRegister('anotheruser@gmail.com', 'Anothepassword123', 'First', 'Last');
+      const anotherUser = adminAuthRegister(
+        'anotheruser@gmail.com',
+        'Anothepassword123',
+        'First',
+        'Last'
+      );
       const anotherUserQuiz = adminQuizCreate(anotherUser.authUserId, 'Anotherquiz', 'Description');
       expect(adminQuizRemove(authUser.authUserId, anotherUserQuiz.quizId)).toStrictEqual(ERROR);
     });
@@ -293,9 +345,9 @@ describe('adminQuizRemove()', () => {
     test('should successfully remove a quiz by the owner', () => {
       const quiz = adminQuizCreate(authUser.authUserId, 'Remove', 'Description');
       const result = adminQuizRemove(authUser.authUserId, quiz.quizId);
-      
+
       expect(result).toEqual({});
-      
+
       const quizInfo = adminQuizInfo(authUser.authUserId, quiz.quizId);
       expect(quizInfo.active).toBeFalsy();
     });
@@ -303,13 +355,11 @@ describe('adminQuizRemove()', () => {
     test('should not list removed quiz in adminQuizList', () => {
       const quiz1 = adminQuizCreate(authUser.authUserId, 'Quiz1', 'Description1');
       const quiz2 = adminQuizCreate(authUser.authUserId, 'Quiz2', 'Description2');
-    
+
       adminQuizRemove(authUser.authUserId, quiz1.quizId);
       const quizList = adminQuizList(authUser.authUserId);
-      const expectedQuizList = [
-        { quizId: quiz2.quizId, name: 'Quiz2' }
-      ];
-    
+      const expectedQuizList = [{ quizId: quiz2.quizId, name: 'Quiz2' }];
+
       expect(quizList.quizzes).toEqual(expectedQuizList);
     });
   });

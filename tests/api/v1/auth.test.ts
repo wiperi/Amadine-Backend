@@ -8,7 +8,7 @@ import {
   userUpdatePassword,
   quizGetDetails,
   quizCreate,
-  questionCreate
+  questionCreate,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -46,8 +46,8 @@ describe('DELETE /v1/clear', () => {
       points: 5,
       answers: [
         { answer: 'Correct answer', correct: true },
-        { answer: 'Wrong answer', correct: false }
-      ]
+        { answer: 'Wrong answer', correct: false },
+      ],
     });
     expect(createQuestionRes.statusCode).toBe(200);
 
@@ -69,34 +69,68 @@ describe('DELETE /v1/clear', () => {
 });
 
 const invalidNames = [
-  'a', 'a'.repeat(21), 'Tommy1', 'Tommy!', 'Tommy@', 'Tommy#', 'Tommy$',
-  'Tommy,', 'Tommy.', 'Tommy?', 'Tommy<', 'Tommy>', 'Tommy/', 'Tommy\\',
-  '你好', '김철수', 'Алексей', '😊', '<script>alert("XSS")</script>'
+  'a',
+  'a'.repeat(21),
+  'Tommy1',
+  'Tommy!',
+  'Tommy@',
+  'Tommy#',
+  'Tommy$',
+  'Tommy,',
+  'Tommy.',
+  'Tommy?',
+  'Tommy<',
+  'Tommy>',
+  'Tommy/',
+  'Tommy\\',
+  '你好',
+  '김철수',
+  'Алексей',
+  '😊',
+  '<script>alert("XSS")</script>',
 ];
 
 const validNames = [
-  'Tommy', 'Tommy-Junior', 'Tommy\'Junior', 'Tommy Junior',
-  'Tommy' + ' '.repeat(10) + 'J', 'aa', 'a'.repeat(20), '---', '\'\'\'', '   '
+  'Tommy',
+  'Tommy-Junior',
+  "Tommy'Junior",
+  'Tommy Junior',
+  'Tommy' + ' '.repeat(10) + 'J',
+  'aa',
+  'a'.repeat(20),
+  '---',
+  "'''",
+  '   ',
 ];
 
 const invalidPasswords = [
-  '', 'a'.repeat(6) + '1', 'badpassword', 'BadPassword', 'BADPASSWORD',
-  'abc!@#$%^&*)&^', '12345678', '0'.repeat(8)
+  '',
+  'a'.repeat(6) + '1',
+  'badpassword',
+  'BadPassword',
+  'BADPASSWORD',
+  'abc!@#$%^&*)&^',
+  '12345678',
+  '0'.repeat(8),
 ];
 
 const validPasswords = [
-  'GoodPassword123', 'GoodPassword123' + ' '.repeat(10),
-  'a'.repeat(100) + '1', 'a1@!@#$@$%&$^%*%*)(+_}{":?></.,\\-=[]<>'
+  'GoodPassword123',
+  'GoodPassword123' + ' '.repeat(10),
+  'a'.repeat(100) + '1',
+  'a1@!@#$@$%&$^%*%*)(+_}{":?></.,\\-=[]<>',
 ];
 
 const invalidEmails = [
-  '', 'invalid-email', 'plainaddress', '@missingusername.com',
-  'username@.com', 'username@domain..com'
+  '',
+  'invalid-email',
+  'plainaddress',
+  '@missingusername.com',
+  'username@.com',
+  'username@domain..com',
 ];
 
-const validEmails = [
-  'goodemail@gmail.com', 'user@example.com', 'test.user@domain.co'
-];
+const validEmails = ['goodemail@gmail.com', 'user@example.com', 'test.user@domain.co'];
 
 describe('POST /v1/admin/auth/register', () => {
   const CORRECT_RESPONSE = { statusCode: 200, body: { token: expect.any(String) } };
@@ -107,9 +141,14 @@ describe('POST /v1/admin/auth/register', () => {
   const validInputs = ['goodemail@gmail.com', 'GoodPassword123', 'Tommy', 'Smith'];
 
   // Helper function for testing different inputs on one parameter
-  function runTestsForOneParam(groupName: string, inputData: string[], paramIndex: number, expectOutput: { statusCode: number, body: any }) {
+  function runTestsForOneParam(
+    groupName: string,
+    inputData: string[],
+    paramIndex: number,
+    expectOutput: { statusCode: number; body: any }
+  ) {
     describe(groupName, () => {
-      test.each(inputData)('%s', (data) => {
+      test.each(inputData)('%s', data => {
         const inputs = [...validInputs];
         inputs[paramIndex] = data;
 
@@ -249,7 +288,7 @@ describe('PUT /v1/admin/user/password', () => {
       expect(res2.body).toStrictEqual(ERROR);
     });
 
-    test.each(invalidPasswords)('new password is invalid: %s', (password) => {
+    test.each(invalidPasswords)('new password is invalid: %s', password => {
       const res = userUpdatePassword(token, 'OldPassword123', password);
       expect(res.statusCode).toBe(400);
       expect(res.body).toStrictEqual(ERROR);
@@ -318,8 +357,8 @@ describe('GET /v1/admin/user/details', () => {
           name: 'John Wick',
           email: 'wick@example.com',
           numSuccessfulLogins: 2,
-          numFailedPasswordsSinceLastLogin: 2
-        }
+          numFailedPasswordsSinceLastLogin: 2,
+        },
       });
     });
 
@@ -342,7 +381,7 @@ describe('GET /v1/admin/user/details', () => {
           email: 'lucy@example.com',
           numSuccessfulLogins: 2,
           numFailedPasswordsSinceLastLogin: 0,
-        }
+        },
       });
     });
 
@@ -362,7 +401,7 @@ describe('GET /v1/admin/user/details', () => {
           email: 'artoria@example.com',
           numSuccessfulLogins: 2,
           numFailedPasswordsSinceLastLogin: 0,
-        }
+        },
       });
     });
   });
@@ -414,7 +453,7 @@ describe('PUT /v1/admin/user/details', () => {
   });
 
   describe('Invalid email cases and used email', () => {
-    test.each(invalidEmails)('error for invalid email: %s', (invalidEmail) => {
+    test.each(invalidEmails)('error for invalid email: %s', invalidEmail => {
       const res = userUpdateDetails(token, invalidEmail, 'Johnny', 'Smith');
       expect(res.statusCode).toBe(400); // Expect 400 for invalid email
       expect(res.body).toStrictEqual(ERROR);
@@ -432,7 +471,7 @@ describe('PUT /v1/admin/user/details', () => {
   });
 
   describe('Invalid first name cases', () => {
-    test.each(invalidNames)('error for invalid first name: %s', (invalidName) => {
+    test.each(invalidNames)('error for invalid first name: %s', invalidName => {
       const res = userUpdateDetails(token, 'validemail@example.com', invalidName, 'Smith');
       expect(res.statusCode).toBe(400);
       expect(res.body).toStrictEqual(ERROR);
@@ -440,7 +479,7 @@ describe('PUT /v1/admin/user/details', () => {
   });
 
   describe('Invalid last name cases', () => {
-    test.each(invalidNames)('error for invalid last name: %s', (invalidName) => {
+    test.each(invalidNames)('error for invalid last name: %s', invalidName => {
       const res = userUpdateDetails(token, 'validemail@example.com', 'Johnny', invalidName);
       expect(res.statusCode).toBe(400); // Expect 400 for invalid name
       expect(res.body).toStrictEqual(ERROR);
