@@ -490,52 +490,52 @@ export function adminQuizQuestionDuplicate(
   return { newQuestionId: newQuestionId };
 }
 
-// export function adminQuizSessionUpdate(
-//   authUserId: number,
-//   quizId: number,
-//   sessionId: number,
-//   action: string
-// ): EmptyObject {
-//   const data = getData();
+export function adminQuizSessionUpdate(
+  authUserId: number,
+  quizId: number,
+  sessionId: number,
+  action: string
+): EmptyObject {
+  const data = getData();
 
-//   // Valid token is provided, but user is not an owner of this quiz or quiz doesn't exist
-//   const quiz = findQuizById(quizId);
-//   if (!quiz) {
-//     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
-//   }
+  // Valid token is provided, but user is not an owner of this quiz or quiz doesn't exist
+  const quiz = findQuizById(quizId);
+  if (!quiz) {
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  }
 
-//   if (!quiz.active) {
-//     throw new HttpError(403, ERROR_MESSAGES.QUIZ_INACTIVE);
-//   }
+  if (!quiz.active) {
+    throw new HttpError(403, ERROR_MESSAGES.QUIZ_INACTIVE);
+  }
 
-//   if (quiz.authUserId !== authUserId) {
-//     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
-//   }
+  if (quiz.authUserId !== authUserId) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
 
-//   // Session Id does not refer to a valid session within this quiz
-//   const session = data.quizSessions.find(session => session.sessionId === sessionId);
-//   if (!session) {
-//     throw new HttpError(403, ERROR_MESSAGES.QUIZ_SESSION_NOT_EXIST);
-//   }
+  // Session Id does not refer to a valid session within this quiz
+  const session = data.quizSessions.find(session => session.sessionId === sessionId);
+  if (!session) {
+    throw new HttpError(403, ERROR_MESSAGES.QUIZ_SESSION_NOT_EXIST);
+  }
 
-//   if (session.quizId !== quizId) {
-//     throw new HttpError(403, ERROR_MESSAGES.QUIZ_SESSION_NOT_IN_QUIZ);
-//   }
+  if (session.quizId !== quizId) {
+    throw new HttpError(403, ERROR_MESSAGES.QUIZ_SESSION_NOT_IN_QUIZ);
+  }
 
-//   // Action provided is not a valid Action enum
-//   if (!(action in PlayerAction)) {
-//     throw new HttpError(400, ERROR_MESSAGES.INVALID_ACTION);
-//   }
+  // Action provided is not a valid Action enum
+  if (!(action in PlayerAction)) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_ACTION);
+  }
 
-//   // Action enum cannot be applied in the current state (see spec for details)
-//   try {
-//     session.dispatch(PlayerAction[action as keyof typeof PlayerAction]);
-//   } catch (error) {
-//     throw new HttpError(400, error.message);
-//   }
+  // Action enum cannot be applied in the current state (see spec for details)
+  try {
+    session.dispatch(PlayerAction[action as keyof typeof PlayerAction]);
+  } catch (error) {
+    throw new HttpError(400, error.message);
+  }
 
-//   return {};
-// }
+  return {};
+}
 
 export function adminQuizSessionStart(
   authUserId: number,
