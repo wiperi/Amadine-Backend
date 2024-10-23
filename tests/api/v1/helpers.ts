@@ -6,9 +6,9 @@ const QUIZ_URL = `${config.url}:${config.port}/v1/admin/quiz`;
 const USER_URL = `${config.url}:${config.port}/v1/admin/user`;
 const PLAYER_URL = `${config.url}:${config.port}/v1/player`;
 
-type ParsedResponse = Omit<Response, 'body'> & { body: Record<string, any> };
+export type ParsedResponse = Omit<Response, 'body'> & { body: Record<string, any> };
 
-function parse(res: Response): ParsedResponse {
+export function parse(res: Response): ParsedResponse {
   return {
     ...res,
     body: JSON.parse(res.body.toString()),
