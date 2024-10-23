@@ -16,7 +16,7 @@ import {
   adminQuizTransfer,
   adminQuizQuestionUpdate,
   adminQuizSessionStart,
-  adminQuizSessionActivity
+  adminQuizSessionActivity,
 } from '@/services/quiz';
 import { tryCatch } from '@/utils/helper';
 
