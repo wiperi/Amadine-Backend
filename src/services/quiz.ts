@@ -11,6 +11,8 @@ import {
   isValidQuizName,
   isValidQuizDescription,
   recursiveFind,
+  getInactiveQuizSession,
+  getActiveQuizSession,
 } from '@/utils/helper';
 import { PlayerAction, QuizSessionState } from '@/models/Enums';
 
@@ -574,4 +576,35 @@ export function adminQuizSessionStart(
   setData(data);
 
   return { newSessionId: newSessionId };
+}
+
+export function adminQuizSessionActivity(
+  authUserId: number,
+  quizId: number
+): {
+  activeSessions: number[];
+  inactiveSessions: number[];
+} {
+  if (!isValidQuizId(quizId)) {
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  }
+
+  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
+
+  const data = getData();
+
+  const quizSessions = data.quizSessions.filter(
+    (session: QuizSession) => session.quizId === quizId
+  );
+
+  const activeSessions = getActiveQuizSession(quizSessions);
+
+  const inactiveSessions = getInactiveQuizSession(quizSessions);
+
+  return {
+    activeSessions,
+    inactiveSessions,
+  };
 }
