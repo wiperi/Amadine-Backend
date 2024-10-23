@@ -145,20 +145,20 @@ export class Question {
     questionId: number,
     question: string,
     duration: number,
-    // thumbnailUrl?: string,
     points: number,
-    answers: Answer[]
+    answers: Answer[],
+    thumbnailUrl?: string
   ) {
     this.questionId = questionId;
     this.question = question;
     this.duration = duration;
-    // this.thumbnailUrl = thumbnailUrl;
     this.points = points;
 
     answers.forEach(answer => {
       answer.colour = this.getRandomUniqueColor();
     });
     this.answers = answers;
+    this.thumbnailUrl = thumbnailUrl;
   }
 }
 
