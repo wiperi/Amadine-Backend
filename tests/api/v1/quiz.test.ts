@@ -1,3 +1,4 @@
+import { adminQuizQuestionDuplicate } from '@/services/quiz';
 import {
   userRegister,
   userLogin,
@@ -17,7 +18,8 @@ import {
   questionDelete,
   quizTransfer,
   questionUpdate,
-  quizSessionCreate
+  quizSessionCreate,
+  quizSessionGetStatus,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -1763,5 +1765,65 @@ describe('POST /v1/admin/quiz/:quizId/session/start', () => {
       expect(res.statusCode).toStrictEqual(200);
       expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
     });
+  });
+});
+/////////////////////////////////////////////
+// Test for AdminQuizSessionGetStatus /////////////
+/////////////////////////////////////////////
+describe('GET /v1/admin/quiz/:quizId/session/:sessionId/status', () => {
+  let quizId: number;
+  beforeEach(() => {
+    const createQuizRes = quizCreate(token, 'Test Quiz', 'A test quiz');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = createQuizRes.body.quizId;
+
+    const createQuestionRes = questionCreate(token, quizId, {
+      question: 'Are you my master?',
+      duration: 60,
+      points: 6,
+      answers: [
+        { answer: 'Yes', correct: true },
+        { answer: 'No', correct: false },
+        { answer: 'Maybe', correct: false },
+      ],
+    });
+    expect(createQuestionRes.statusCode).toBe(200);
+
+  });
+  test('empty token', () => {
+    const res = quizSessionGetStatus('', 1, 1);
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toStrictEqual(ERROR);
+  });
+  test('invalid token', () => {
+    const res = quizSessionGetStatus('invalid token', 1, 1);
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toStrictEqual(ERROR);
+  });
+
+  test('user is not the owner of the quiz', () => {
+    const userRegisterRes = userRegister('cheong1024@mail.com', 'Cheong1024', 'Cheong', 'Zhang');
+    expect(userRegisterRes.statusCode).toBe(200);
+    const token1 = userRegisterRes.body.token;
+    const res = quizSessionGetStatus(token1, quizId, 1);
+    expect(res.statusCode).toBe(403);   
+  }); 
+
+  test('Session Id does not refer to a valid session within this quiz',() => {
+    const res = quizSessionCreate(token, quizId, 2);
+    expect(res.statusCode).toStrictEqual(200);
+    expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
+    const sessionId = res.body.newSessionId;  
+    const res1 = quizSessionGetStatus(token, quizId, sessionId + 1);
+    expect(res1.statusCode).toBe(400);
+  })  
+
+  test('valid cases', () => {
+    const res = quizSessionCreate(token, quizId, 2);
+    expect(res.statusCode).toStrictEqual(200);
+    expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
+    const sessionId = res.body.newSessionId;  
+    const res1 = quizSessionGetStatus(token, quizId, sessionId);
+    expect(res1.statusCode).toBe(200);
   });
 });
