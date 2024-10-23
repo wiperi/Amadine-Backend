@@ -18,6 +18,8 @@ import {
   quizSessionGetStatus,
   questionCreate,
 } from './helpers';
+import exp from 'constants';
+import { string } from 'yaml/dist/schema/common/string';
 
 const ERROR = { error: expect.any(String) };
 
@@ -794,5 +796,8 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
     const sessionId = res.body.newSessionId;  
     const res1 = quizSessionGetStatus(token, quizId, sessionId);
     expect(res1.statusCode).toBe(200);
+    //WARNING: the following test is not correct, because the players array is empty
+    // console.log(res1.body);
+    // will be discussed with in Oct 24
   });
 });
