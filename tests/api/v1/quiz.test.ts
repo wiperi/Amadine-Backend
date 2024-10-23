@@ -12,6 +12,7 @@ import {
   quizRequestNameUpdate,
   trashEmpty,
   quizTransfer,
+  quizUpdateThumbnail,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -727,6 +728,88 @@ describe('POST /v1/admin/quiz/:quizid/transfer', () => {
       const transferRes = quizTransfer(token, quizId, 'newuser@example.com');
       expect(transferRes.statusCode).toBe(400);
       expect(transferRes.body).toStrictEqual(ERROR);
+    });
+  });
+});
+
+///////////////////////////////////////////////
+// Test for adminQuizThumbnail ////////////////
+///////////////////////////////////////////////
+describe('PUT /v1/admin/quiz/:quizId/thumbnail', () => {
+  let quizId: number;
+  beforeEach(() => {
+    // create a quiz
+    const createQuizRes = quizCreate(token, 'Test Quiz', 'A test quiz');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = createQuizRes.body.quizId;
+  });
+
+  describe('invalid cases', () => {
+    test('invalid url', () => {
+      const res1 = quizUpdateThumbnail(token, quizId, 'https://teachyourselfcs.com');
+      expect(res1.statusCode).toBe(400);
+      expect(res1.body).toStrictEqual(ERROR);
+
+      const res2 = quizUpdateThumbnail(token, quizId, 'webcms3.cse.unsw.edu.au/DPST1093/24C3');
+      expect(res1.statusCode).toBe(400);
+      expect(res1.body).toStrictEqual(ERROR);
+    });
+
+    test('token is empty', () => {
+      const res = quizUpdateThumbnail('', quizId, 'http://google.com/some/image/path.jpg');
+      expect(res.statusCode).toBe(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('token does not refer to valid logged in user session', () => {
+      const res = quizUpdateThumbnail('invalidToken', quizId, 'http://google.com/some/image/path.jpg');
+      expect(res.statusCode).toBe(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('user is not an owner of the quiz', () => {
+      const registerRes = userRegister('peter@gmail.com', 'PumpkinEater123', 'Peter', 'Griffin');
+      expect(registerRes.statusCode).toBe(200);
+      const token1 = registerRes.body.token;
+      const res = quizUpdateThumbnail(token, quizId, 'http://google.com/some/image/path.jpg');
+      expect(res.statusCode).toBe(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('quiz does not exist', () => {
+      const res = quizUpdateThumbnail(token, 0, 'http://google.com/some/image/path.jpg');
+      expect(res.statusCode).toBe(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+  });
+
+  describe('valid cases', () => {
+    test('has correct return type', () => {
+      const res = quizUpdateThumbnail(token, quizId, 'http://google.com/some/image/path.jpg');
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({});
+    });
+
+    test('time last edited time updated', async () => {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const res = quizUpdateThumbnail(token, quizId, 'http://google.com/some/image/path.jpg');
+      expect(res.statusCode).toBe(200);
+      const infoRes = quizGetDetails(token, quizId);
+      expect(infoRes.statusCode).toBe(200);
+      expect(infoRes.body.timeLastEdited).not.toStrictEqual(infoRes.body.timeCreated);
+    });
+
+    test('success update url', async () => {
+      const beforeInfoRes = quizGetDetails(token, quizId);
+      expect(beforeInfoRes.statusCode).toBe(200);
+
+      await new Promise(resolve => setTimeout(resolve, 50)); // set time out incase file overwritting
+      const res = quizUpdateThumbnail(token, quizId, 'http://google.com/some/image/path.jpg');
+      expect(res.statusCode).toBe(200);
+
+      const afterInfoRes = quizGetDetails(token, quizId);
+      expect(afterInfoRes.statusCode).toBe(200);
+      expect(afterInfoRes.body.thumbnailUrl).not.toStrictEqual(beforeInfoRes.body.thumbnailUrl);
     });
   });
 });
