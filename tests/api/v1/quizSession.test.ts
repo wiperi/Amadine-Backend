@@ -5,6 +5,7 @@ import {
   questionCreate,
   quizSessionCreate,
   quizDelete,
+  quizSessionGetActivity,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -190,5 +191,44 @@ describe('POST /v1/admin/quiz/:quizId/session/:sessionId/update', () => {
 
   describe('ANSWER_SHOW state', () => {
     // Tests for ANSWER_SHOW state will be added here by yibin
+  });
+});
+
+describe('GET /v1/admin/quiz/:quizId/sessions', () => {
+  describe('valid cases', () => {
+    test('valid request should return active and inactive sessions', () => {
+      const res = quizSessionGetActivity(token, quizId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({
+        activeSessions: expect.any(Array),
+        inactiveSessions: expect.any(Array),
+      });
+
+      expect(res.body.activeSessions.length).toBeGreaterThan(0);
+      expect(res.body.inactiveSessions.length).toBe(0);
+    });
+  });
+
+  describe('invalid cases', () => {
+    test('token is invalid', () => {
+      const res = quizSessionGetActivity('invalid token', quizId);
+      expect(res.statusCode).toStrictEqual(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('user is not an owner of this quiz', () => {
+      const userRegisterRes = userRegister('wick@gmail.com', 'JohnWich123', 'John', 'Wick');
+      expect(userRegisterRes.statusCode).toStrictEqual(200);
+      const token1 = userRegisterRes.body.token;
+      const res = quizSessionGetActivity(token1, quizId);
+      expect(res.statusCode).toStrictEqual(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('quiz does not exist', () => {
+      const res = quizSessionGetActivity(token, 0);
+      expect(res.statusCode).toStrictEqual(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
   });
 });
