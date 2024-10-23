@@ -9,35 +9,33 @@ import { echo } from '../../src/utils/echo';
 // Variables defined here are available in all tests and test blocks
 const testVar1 = '1';
 describe('Echo tests', () => {
+  // to use variables that are modified in beforeEach, define them prior to the beforeEach statement in each block
+  let ourTestCounter = 0;
+  beforeEach(() => {
+    // This will execute before each test in THIS block.
+    // It is useful for resetting the state and setting up the default test state
+    ourTestCounter++;
+  });
 
-    // to use variables that are modified in beforeEach, define them prior to the beforeEach statement in each block
-    let ourTestCounter = 0;
-    beforeEach(() => {
-        // This will execute before each test in THIS block.
-        // It is useful for resetting the state and setting up the default test state
-        ourTestCounter++;
-    });
+  test('Test successful echo', () => {
+    // Accessing a variable that was defined outside this block is possible if it is in a parent block
+    console.log(`Test Counter: ${ourTestCounter}`);
 
-    test('Test successful echo', () => {
-        // Accessing a variable that was defined outside this block is possible if it is in a parent block
-        console.log(`Test Counter: ${ourTestCounter}`);
+    // Variables defined here are only available in this test block.
+    const testVarABC = 'abc';
 
-        // Variables defined here are only available in this test block.
-        const testVarABC = 'abc';
-    
-        // When we know the exact value of a result, we can use the expect().toBe() structure
-        let result = echo(testVar1);
-        expect(result).toBe(testVar1);
-        result = echo(testVarABC);
-        expect(result).toBe(testVarABC);
-      });
-      
-      test('Test invalid echo', () => {
-        console.log(`Test Counter: ${ourTestCounter}`);
+    // When we know the exact value of a result, we can use the expect().toBe() structure
+    let result = echo(testVar1);
+    expect(result).toBe(testVar1);
+    result = echo(testVarABC);
+    expect(result).toBe(testVarABC);
+  });
 
-        // When we do not know the value of a result, but we do know the structure and type of the object response, we can use the expect().toMatchObject({objectStruture})
-        // inside the objectStructure, we can match expected types like String or Number using expect.any(String) or expect.any(Number)
-        expect(echo({ echo: 'echo' })).toMatchObject({ error: expect.any(String) });
-      });
-      
+  test('Test invalid echo', () => {
+    console.log(`Test Counter: ${ourTestCounter}`);
+
+    // When we do not know the value of a result, but we do know the structure and type of the object response, we can use the expect().toMatchObject({objectStruture})
+    // inside the objectStructure, we can match expected types like String or Number using expect.any(String) or expect.any(Number)
+    expect(echo({ echo: 'echo' })).toMatchObject({ error: expect.any(String) });
+  });
 });

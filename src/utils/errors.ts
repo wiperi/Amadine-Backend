@@ -7,7 +7,8 @@ const ERROR_MESSAGES = {
   USED_EMAIL: 'Email address already in use.',
   // Name
   INVALID_NAME: 'Invalid name format',
-  QUIZ_NAME_CONFLICT: 'Quiz ID refers to a quiz that has a name that is already used by the target user.',
+  QUIZ_NAME_CONFLICT:
+    'Quiz ID refers to a quiz that has a name that is already used by the target user.',
   // Description
   INVALID_DESCRIPTION: 'Invalid description format',
   // Quiz ID
@@ -44,6 +45,9 @@ const ERROR_MESSAGES = {
   QUIZ_NO_QUESTIONS: 'Quiz do not have any questions',
   // quiz do have too many sessions
   QUIZ_TOO_MANY_SESSIONS: 'Quiz has too many sessions',
+  QUIZ_SESSION_NOT_EXIST: 'Quiz session does not exist',
+  QUIZ_SESSION_NOT_IN_QUIZ: 'Quiz session does not belong to this quiz',
+  INVALID_ACTION: 'Action provided is not a valid Action enum',
 };
 
 export { ERROR_MESSAGES };
