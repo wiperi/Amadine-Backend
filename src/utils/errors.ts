@@ -37,7 +37,7 @@ const ERROR_MESSAGES = {
   // Duration
   INVALID_DURATION: 'sum of the question durations in the quiz exceeds 3 minutes',
   // autoStartNum
-  INVALID_AUTO_START_NUM: 'autoStartNum is a number greater than 50',
+  INVALID_AUTO_START_NUM: 'autoStartNum is a number greater than 50 or less than 0',
   // quiz inactive
   QUIZ_INACTIVE: 'Quiz is inactive',
   // quiz do not have any questions

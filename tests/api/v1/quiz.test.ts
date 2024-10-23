@@ -1674,7 +1674,7 @@ describe('PUT /v1/admin/quiz/:quizid/question/:questionid', () => {
   });
 });
 /*
- This is test for AQSS
+ This is test for AQSC
  */
 describe('POST /v1/admin/quiz/:quizId/session/start', () => {
   let quizId: number;
@@ -1714,8 +1714,11 @@ describe('POST /v1/admin/quiz/:quizId/session/start', () => {
       expect(res.statusCode).toStrictEqual(403);
       expect(res.body).toStrictEqual(ERROR);
     });
-    test('invalid number of questions', () => {
-      const res = quizSessionCreate(token, quizId, 0);
+    test('no question in quiz', () => {
+      const createQuizRes = quizCreate(token, 'Test Quizzes', 'A test quiz for quizzes');
+      expect(createQuizRes.statusCode).toBe(200);
+      quizId = createQuizRes.body.quizId;
+      const res = quizSessionCreate(token, quizId, 1);
       expect(res.statusCode).toStrictEqual(400);
       expect(res.body).toStrictEqual(ERROR);
     });
@@ -1724,8 +1727,8 @@ describe('POST /v1/admin/quiz/:quizId/session/start', () => {
       expect(res.statusCode).toStrictEqual(400);
       expect(res.body).toStrictEqual(ERROR);
     });
-    test('autoStartNum is a number less than 1', () => {
-      const res = quizSessionCreate(token, quizId, 0);
+    test('autoStartNum is a number less than 0', () => {
+      const res = quizSessionCreate(token, quizId, -1);
       expect(res.statusCode).toStrictEqual(400);
       expect(res.body).toStrictEqual(ERROR);
     });

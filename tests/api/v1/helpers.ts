@@ -257,8 +257,10 @@ export function questionUpdate(token: string, quizId: number, questionId: number
 
 export function quizSessionCreate(token: string, quizId: number, autoStartNum: number): ParsedResponse {
   const res = request('POST', `${QUIZ_URL}/${quizId}/session/start`, {
+    headers: {
+      token
+    },
     json: {
-      token,
       autoStartNum
     }
   });

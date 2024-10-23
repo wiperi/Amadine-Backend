@@ -491,7 +491,7 @@ export function adminQuizSessionStart(authUserId: number, quizId: number, autoSt
   if (quiz.authUserId !== authUserId) {
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
-  if (autoStartNum > 50 || autoStartNum < 1) {
+  if (autoStartNum > 50 || autoStartNum < 0) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_AUTO_START_NUM);
   }
   if (quiz.questions.length === 0) {
