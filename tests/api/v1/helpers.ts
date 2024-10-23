@@ -309,7 +309,7 @@ export function quizSessionCreate(
 }
 
 export function quizUpdateThumbnail(token: string, quizId: number, imgUrl: string): ParsedResponse {
-  const res = request('PUT', `${QUIZ_URL}/${quizId}/thumnail`, {
+  const res = request('PUT', `${QUIZ_URL}/${quizId}/thumbnail`, {
     headers: {
       token,
     },
