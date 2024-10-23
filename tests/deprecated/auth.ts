@@ -147,19 +147,19 @@ describe('adminAuthLogin()', () => {
         'petter@example.com',
         'PumpkinEater123',
         'Petter',
-        'Griffin',
+        'Griffin'
       );
       const user2 = auth.adminAuthRegister(
         'quagmire@example.com',
         'GiggityQuagmire123',
         'Glenn',
-        'Quagmire',
+        'Quagmire'
       );
       const user3 = auth.adminAuthRegister(
         'swason@example.com',
         'JoeSwansonPassword123',
         'Joe',
-        'Swanson',
+        'Swanson'
       );
       const login = auth.adminAuthLogin('pumpkin@example.com', 'PumpkinEater123');
       expect(login).toStrictEqual(ERROR);
@@ -170,7 +170,7 @@ describe('adminAuthLogin()', () => {
         'petter@example.com',
         'PumpkinEater123',
         'Petter',
-        'Griffin',
+        'Griffin'
       );
       const login = auth.adminAuthLogin('peter@example.com', 'IFogotMyPassword');
       expect(login).toStrictEqual(ERROR);
@@ -232,7 +232,7 @@ describe('adminUserPasswordUpdate()', () => {
     const res = auth.adminUserPasswordUpdate(
       user.authUserId,
       'WrongOldPassword123',
-      'NewPassword123',
+      'NewPassword123'
     );
     expect(res).toStrictEqual(ERROR);
   });
@@ -247,13 +247,13 @@ describe('adminUserPasswordUpdate()', () => {
       const res = auth.adminUserPasswordUpdate(
         user.authUserId,
         'GoodPassword123',
-        'NewPassword123',
+        'NewPassword123'
       );
       expect(res).toStrictEqual({});
       const res2 = auth.adminUserPasswordUpdate(
         user.authUserId,
         'NewPassword123',
-        'GoodPassword123',
+        'GoodPassword123'
       );
       expect(res2).toStrictEqual(ERROR);
     });
@@ -319,7 +319,7 @@ describe('adminUserDetails', () => {
         'artoria@example.com',
         'Artoria123',
         'Artoria',
-        'Pendragon',
+        'Pendragon'
       );
       auth.adminAuthLogin('artoria@example.com', 'Artoria123');
       const details = auth.adminUserDetails(user.authUserId);
@@ -343,7 +343,7 @@ describe('adminUserDetails', () => {
         'artoria@example.com',
         'Artoria123',
         'Artoria',
-        'Pendragon',
+        'Pendragon'
       );
       const details = auth.adminUserDetails(123);
       expect(details).toStrictEqual(ERROR);
@@ -370,7 +370,7 @@ describe('adminUserDetailsUpdate', () => {
         user.authUserId,
         'newemail@test.com',
         'Newfirst',
-        'Newlast',
+        'Newlast'
       );
       expect(result).toStrictEqual({});
       const updatedUserDetail = auth.adminUserDetails(user.authUserId);
@@ -390,7 +390,7 @@ describe('adminUserDetailsUpdate', () => {
         user.authUserId,
         'updateuser@example.com',
         'Newfirst',
-        'Newlast',
+        'Newlast'
       );
       expect(result).toStrictEqual({});
       const updatedUserDetail = auth.adminUserDetails(user.authUserId);
@@ -423,7 +423,7 @@ describe('adminUserDetailsUpdate', () => {
         user.authUserId,
         'Otheremial@test.com',
         'Newfirst',
-        'Newlast',
+        'Newlast'
       );
       expect(result).toStrictEqual(ERROR);
     });
@@ -433,7 +433,7 @@ describe('adminUserDetailsUpdate', () => {
         user.authUserId,
         'Otheremial@test.com',
         'Newfirst1',
-        'Newlast',
+        'Newlast'
       );
       expect(result).toStrictEqual(ERROR);
     });
@@ -443,7 +443,7 @@ describe('adminUserDetailsUpdate', () => {
         user.authUserId,
         'Otheremial@test.com',
         'Newfirst',
-        'Newlast1',
+        'Newlast1'
       );
       expect(result).toStrictEqual(ERROR);
     });

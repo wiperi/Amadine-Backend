@@ -61,7 +61,7 @@ export async function adminAuthRegister(
   email: string,
   password: string,
   nameFirst: string,
-  nameLast: string,
+  nameLast: string
 ): Promise<{ token: string }> {
   const data = getData();
 
@@ -141,7 +141,7 @@ export function adminUserDetailsUpdate(
   authUserId: number,
   email: string,
   nameFirst: string,
-  nameLast: string,
+  nameLast: string
 ): EmptyObject {
   if (!isValidEmail(email)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_EMAIL_FORMAT);
@@ -151,7 +151,7 @@ export function adminUserDetailsUpdate(
   const user = data.users.find(user => user.userId === authUserId);
 
   const emailUsedByOthers = data.users.find(
-    user => user.email === email && user.userId !== authUserId,
+    user => user.email === email && user.userId !== authUserId
   );
 
   if (emailUsedByOthers) {
@@ -203,7 +203,7 @@ export function adminUserDetails(authUserId: number): {
 export async function adminUserPasswordUpdate(
   authUserId: number,
   oldPassword: string,
-  newPassword: string,
+  newPassword: string
 ): Promise<EmptyObject> {
   if (!authUserId || !oldPassword || !newPassword) {
     throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);

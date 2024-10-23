@@ -213,7 +213,7 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
       const createQuizRes1 = quizCreate(
         token,
         'My Test Name',
-        'Do not have the same name as mine!',
+        'Do not have the same name as mine!'
       );
       expect(createQuizRes1.statusCode).toStrictEqual(200);
       const res = quizRequestNameUpdate(quizId, token, 'My Test Name');

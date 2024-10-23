@@ -53,9 +53,9 @@ router.put(
       () => adminQuizQuestionMove(authUserId, quizid, questionid, newPosition),
       req,
       res,
-      next,
+      next
     );
-  },
+  }
 );
 
 router.delete('/:quizid(-?\\d+)', (req: Request, res: Response, next: NextFunction) => {
@@ -100,7 +100,7 @@ router.post(
     const quizId = parseInt(req.params.quizId);
     const questionId = parseInt(req.params.questionId);
     tryCatch(() => adminQuizQuestionDuplicate(authUserId, quizId, questionId), req, res, next);
-  },
+  }
 );
 
 router.delete(
@@ -110,7 +110,7 @@ router.delete(
     const questionid = parseInt(req.params.questionid);
     const { authUserId } = req.body;
     tryCatch(() => adminQuizQuestionDelete(authUserId, quizid, questionid), req, res, next);
-  },
+  }
 );
 
 router.post('/:quizid(-?\\d+)/transfer', (req: Request, res: Response, next: NextFunction) => {
@@ -129,9 +129,9 @@ router.put(
       () => adminQuizQuestionUpdate(authUserId, quizId, questionId, questionBody),
       req,
       res,
-      next,
+      next
     );
-  },
+  }
 );
 
 router.post('/:quizid(-?\\d+)/session/start', (req: Request, res: Response, next: NextFunction) => {

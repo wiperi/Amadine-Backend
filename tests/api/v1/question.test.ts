@@ -182,7 +182,7 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
           expect.objectContaining({ answer: 'Paris', correct: true }),
           expect.objectContaining({ answer: 'Berlin', correct: false }),
           expect.objectContaining({ answer: 'Rome', correct: false }),
-        ]),
+        ])
       );
       expect(getQuizRes.body.duration).toEqual(60);
     });
@@ -748,7 +748,7 @@ describe('PUT /v1/admin/quiz/:quizid/question/:questionid', () => {
       const quizDetailsRes = quizGetDetails(token, quizId);
       expect(quizDetailsRes.statusCode).toBe(200);
       const updatedQuestion = quizDetailsRes.body.questions.find(
-        (q: any) => q.questionId === questionId,
+        (q: any) => q.questionId === questionId
       );
       expect(updatedQuestion).toBeDefined();
       expect(updatedQuestion.question).toBe(updatedQuestionBody.question);
@@ -828,7 +828,7 @@ describe('PUT /v1/admin/quiz/:quizid/question/:questionid', () => {
         'otheruser@example.com',
         'OtherValidPass123',
         'Jane',
-        'Doe',
+        'Doe'
       );
       expect(registerOtherUserRes.statusCode).toBe(200);
       const otherUserToken = registerOtherUserRes.body.token;
@@ -919,7 +919,7 @@ describe('PUT /v1/admin/quiz/:quizid/question/:questionid', () => {
         token,
         quizId,
         createQuestionRes1.body.questionId,
-        updatedQuestionBody,
+        updatedQuestionBody
       );
       expect(res.statusCode).toBe(400);
     });

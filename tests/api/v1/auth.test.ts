@@ -145,7 +145,7 @@ describe('POST /v1/admin/auth/register', () => {
     groupName: string,
     inputData: string[],
     paramIndex: number,
-    expectOutput: { statusCode: number; body: any },
+    expectOutput: { statusCode: number; body: any }
   ) {
     describe(groupName, () => {
       test.each(inputData)('%s', data => {

@@ -22,7 +22,7 @@ export class StateMachine<
     instance: INSTANCE,
     from: STATE,
     action: ACTION,
-    to: STATE,
+    to: STATE
   ) => unknown,
 > {
   // The instance object that the state machine operates on
@@ -51,7 +51,7 @@ export class StateMachine<
   constructor(
     initial: STATE,
     transitions: Transition<STATE, ACTION, CALLBACK>[],
-    instance?: INSTANCE,
+    instance?: INSTANCE
   ) {
     this.instance = instance;
     this.currentState = initial;
@@ -82,10 +82,10 @@ export class StateMachine<
       instance: INSTANCE,
       from: STATE,
       action: ACTION,
-      to: STATE,
+      to: STATE
     ) => unknown,
   >(
-    transitions: { from: STATE; action: ACTION; to: STATE; callbacks?: CALLBACK[] }[],
+    transitions: { from: STATE; action: ACTION; to: STATE; callbacks?: CALLBACK[] }[]
   ): Transition<STATE, ACTION, CALLBACK>[] {
     return transitions.map(t => ({
       from: t.from,
@@ -118,7 +118,7 @@ export class StateMachine<
     // If edge already exist, error
     if (StateMachine.transitions.get(from).has(action)) {
       throw new Error(
-        `State ${String(from)} has already an transition ${String(action)}, to ${String(to)}`,
+        `State ${String(from)} has already an transition ${String(action)}, to ${String(to)}`
       );
     }
 
@@ -154,7 +154,7 @@ export class StateMachine<
     if (!currentVertex.has(action)) {
       // action can not apply to current state
       throw new Error(
-        `Action ${String(action)} can not apply to current state ${String(this.currentState)}`,
+        `Action ${String(action)} can not apply to current state ${String(this.currentState)}`
       );
     }
 

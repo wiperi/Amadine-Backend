@@ -34,7 +34,7 @@ export class User {
     email: string,
     password: string,
     nameFirst: string,
-    nameLast: string,
+    nameLast: string
   ) {
     this.userId = userId;
     this.email = email;
@@ -101,7 +101,7 @@ export class Question {
 
     if (unusedColor.length <= 0) {
       throw new Error(
-        `Can not create more answers. Current number of answers: ${this.answers.length}`,
+        `Can not create more answers. Current number of answers: ${this.answers.length}`
       );
     }
 
@@ -141,7 +141,7 @@ export class Question {
     question: string,
     duration: number,
     points: number,
-    answers: Answer[],
+    answers: Answer[]
   ) {
     this.questionId = questionId;
     this.question = question;
@@ -199,7 +199,7 @@ export class QuizSession {
 
   private stateMachine = new StateMachine<QuizSessionState, PlayerAction>(
     QuizSessionState.LOBBY,
-    QuizSession.transitions,
+    QuizSession.transitions
   );
 
   /**
@@ -231,7 +231,7 @@ export class QuizSession {
             this.stateMachine.jumpTo(QUESTION_CLOSE);
           }
         },
-        findQuizById(this.quizId).duration() * 1000,
+        findQuizById(this.quizId).duration() * 1000
       );
     }
   }

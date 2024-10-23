@@ -64,7 +64,7 @@ export function recursiveFind(obj: any, target: any): boolean {
  * @throws Error if an invalid ID type is provided.
  */
 export function getNewID(
-  type?: 'user' | 'quiz' | 'question' | 'answer' | 'user session' | 'quiz session' | 'player',
+  type?: 'user' | 'quiz' | 'question' | 'answer' | 'user session' | 'quiz session' | 'player'
 ): number {
   const numberInRange = (start: number, end: number) => {
     return Math.floor(Math.random() * (end - start) + start);
@@ -93,7 +93,7 @@ export function getNewID(
   switch (type) {
     case undefined:
       console.log(
-        'This Id type is deprecated, you should use a specific type like user, quiz, question, etc.',
+        'This Id type is deprecated, you should use a specific type like user, quiz, question, etc.'
       );
       return numberInRange(1, 1000000000);
     case 'user':
@@ -204,7 +204,7 @@ export function isValidUserName(userName: string): boolean {
 export function isValidQuizName(
   authUserId: number,
   name: string,
-  quizId: number | undefined,
+  quizId: number | undefined
 ): boolean {
   // regex for alphanumeric and spaces
   const regex = /^[a-z0-9\s]+$/i;
@@ -221,7 +221,7 @@ export function isValidQuizName(
     quizId &&
     quizzes.some(
       q =>
-        q.name === name && q.active === true && q.authUserId === authUserId && q.quizId !== quizId,
+        q.name === name && q.active === true && q.authUserId === authUserId && q.quizId !== quizId
     )
   ) {
     return false;
@@ -283,7 +283,7 @@ export function isValidQuizId(quizId: number): boolean {
 export function isQuizIdOwnedByUser(quizId: number, authUserId: number): boolean {
   const quizList = getData().quizzes;
   return quizList.some(
-    quiz => quiz.quizId === quizId && quiz.authUserId === authUserId && quiz.active,
+    quiz => quiz.quizId === quizId && quiz.authUserId === authUserId && quiz.active
   );
 }
 
