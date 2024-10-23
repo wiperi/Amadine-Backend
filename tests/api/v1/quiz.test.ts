@@ -1770,7 +1770,7 @@ describe('POST /v1/admin/quiz/:quizId/session/start', () => {
 /////////////////////////////////////////////
 // Test for AdminQuizSessionGetStatus /////////////
 /////////////////////////////////////////////
-describe('GET /v1/admin/quiz/:quizId/session/:sessionId/status', () => {
+describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
   let quizId: number;
   beforeEach(() => {
     const createQuizRes = quizCreate(token, 'Test Quiz', 'A test quiz');
@@ -1805,7 +1805,8 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/status', () => {
     const userRegisterRes = userRegister('cheong1024@mail.com', 'Cheong1024', 'Cheong', 'Zhang');
     expect(userRegisterRes.statusCode).toBe(200);
     const token1 = userRegisterRes.body.token;
-    const res = quizSessionGetStatus(token1, quizId, 1);
+    const quizId = 1;
+    const res = quizSessionGetStatus(token1, quizId, quizId);
     expect(res.statusCode).toBe(403);   
   }); 
 

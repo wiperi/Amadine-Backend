@@ -21,7 +21,6 @@ export function adminQuizDescriptionUpdate(authUserId: number, quizId: number, d
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
-
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
@@ -514,3 +513,19 @@ export function adminQuizSessionStart(authUserId: number, quizId: number, autoSt
 
   return { newSessionId: newSessionId };
 }
+export function adminQuizSessionGetStatus(authUserId: number, quizId: number, sessionId: number): { QuizSession: object } {
+  const data = getData();
+  const quiz = findQuizById(quizId);
+  if (!quiz) {
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  }
+  if (quiz.authUserId !== authUserId) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
+  const session = data.quizSessions.find(s => s.sessionId === sessionId);
+  if (!session) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_SESSION_ID);
+  }
+  return { QuizSession: session };
+}
+

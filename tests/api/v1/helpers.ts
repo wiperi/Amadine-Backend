@@ -312,10 +312,10 @@ export function quizSessionUpdateState(token: string,  quizId: number, sessionId
   return parse(res);
 }
 
-export function quizSessionGetStatus(token: string,  quizId: number, sessionId: number): ParsedResponse {
-  const res = request('GET', `${QUIZ_URL}/${quizId}/sessions/${sessionId}`, {
+export function quizSessionGetStatus(token: string, quizId: number, sessionId: number): ParsedResponse {
+  const res = request('GET', `${QUIZ_URL}/${quizId}/session/${sessionId}`, {
     headers: {
-      token
+      token,
     },
   });
   return parse(res);
