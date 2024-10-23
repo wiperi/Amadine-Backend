@@ -93,6 +93,7 @@ export class Question {
 
   question: string;
   duration: number;
+  thumbnailUrl: string;
   points: number;
 
   private answers: Answer[] = [];
@@ -145,11 +146,13 @@ export class Question {
     question: string,
     duration: number,
     points: number,
+    thumbnailUrl: string,
     answers: Answer[]
   ) {
     this.questionId = questionId;
     this.question = question;
     this.duration = duration;
+    this.thumbnailUrl = thumbnailUrl;
     this.points = points;
 
     answers.forEach(answer => {
