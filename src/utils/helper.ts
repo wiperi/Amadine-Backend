@@ -4,6 +4,7 @@ import { User, Quiz } from '@/models/Classes';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
+import { QuizSessionState } from '@/models/Enums';
 
 /**
  * Hashes a string using bcrypt.
@@ -289,4 +290,26 @@ export function isQuizIdOwnedByUser(quizId: number, authUserId: number): boolean
 
 export function findQuizById(quizId: number): Quiz | undefined {
   return getData().quizzes.find(quiz => quiz.quizId === quizId);
+}
+
+export function isValidImgUrl(imgUrl: string): boolean {
+  if (!imgUrl.endsWith('jpg') && !imgUrl.endsWith('jpeg') && !imgUrl.endsWith('png')) {
+    return false;
+  }
+
+  if (!imgUrl.startsWith('http://') && !imgUrl.startsWith('https://')) {
+    return false;
+  }
+
+  return true;
+}
+
+export function isSessionForQuizInEndState (quizId: number): boolean {
+  const data = getData();
+  for (const key of data.quizSessions) {
+    if (key.quizId === quizId && key.state() !== QuizSessionState.END) {
+      return false;
+    }
+  }
+  return true;
 }

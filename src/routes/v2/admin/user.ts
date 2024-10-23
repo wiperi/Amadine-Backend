@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { adminUserPasswordUpdate, adminUserDetailsUpdate, adminUserDetails } from '@/services/auth';
+import { adminUserPasswordUpdate, adminUserDetailsUpdate, adminUserDetails } from '@/services/v1/auth';
 import { tryCatch } from '@/utils/helper';
 
 const router = Router();

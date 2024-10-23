@@ -1,4 +1,3 @@
-import { adminQuizQuestionDuplicate } from '@/services/v1/quiz';
 import {
   userRegister,
   userLogin,
@@ -13,14 +12,8 @@ import {
   quizRequestNameUpdate,
   trashEmpty,
   quizTransfer,
-  questionUpdate,
-  quizSessionCreate,
-  quizSessionGetStatus,
-  questionCreate,
   quizUpdateThumbnail,
 } from './helpers';
-import exp from 'constants';
-import { string } from 'yaml/dist/schema/common/string';
 
 const ERROR = { error: expect.any(String) };
 

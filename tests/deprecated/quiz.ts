@@ -7,9 +7,9 @@ import {
   adminQuizDescriptionUpdate,
   adminQuizList,
   adminQuizRemove,
-} from '../../src/services/quiz';
+} from '../../src/services/v1/quiz';
 import { clear } from '../../src/utils/other';
-import { adminAuthRegister } from '../../src/services/auth';
+import { adminAuthRegister } from '../../src/services/v1/auth';
 import { getData } from '../../src/dataStore';
 import { notStrictEqual } from 'assert';
 import { findQuizById } from '../../src/utils/helper';

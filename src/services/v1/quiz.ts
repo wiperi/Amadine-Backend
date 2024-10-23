@@ -11,6 +11,7 @@ import {
   isValidQuizName,
   isValidQuizDescription,
   recursiveFind,
+  isValidImgUrl,
 } from '@/utils/helper';
 import { PlayerAction, QuizSessionState } from '@/models/Enums';
 
@@ -602,4 +603,23 @@ export function adminQuizSessionGetStatus(
     players: playerNames,
     metadata: quizSession.metadata,
   };
+}
+
+export function adminQuizThumbnail(quizId: number, authUserId: number, imgUrl: string): EmptyObject {
+  if (!isValidImgUrl(imgUrl)) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_URL);
+  }
+
+  const quiz = findQuizById(quizId);
+  if (!quiz) {
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  }
+  if (quiz.authUserId !== authUserId) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
+
+  quiz.timeLastEdited = Math.floor(Date.now() / 1000);
+  quiz.thumbnailUrl = imgUrl;
+  setData();
+  return {};
 }

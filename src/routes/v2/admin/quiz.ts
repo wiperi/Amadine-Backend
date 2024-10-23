@@ -15,7 +15,7 @@ import {
   adminQuizRestore,
   adminQuizTransfer,
   adminQuizQuestionUpdate,
-} from '@/services/quiz';
+} from '@/services/v1/quiz';
 import { tryCatch } from '@/utils/helper';
 
 const router = Router();
