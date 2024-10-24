@@ -666,7 +666,7 @@ export function adminQuizRemoveV2(authUserId: number, quizId: number): EmptyObje
     throw new HttpError(400, ERROR_MESSAGES.QUIZ_NOT_IN_END_STATE);
   }
 
-  return adminQuizRemove;
+  return adminQuizRemove(authUserId, quizId);
 }
 
 export function adminQuizTransferV2(
@@ -678,7 +678,7 @@ export function adminQuizTransferV2(
     throw new HttpError(400, ERROR_MESSAGES.QUIZ_NOT_IN_END_STATE);
   }
 
-  return adminQuizTransfer;
+  return adminQuizTransfer(authUserId, quizId, userEmail);
 }
 
 export function adminQuizQuestionCreateV2(
@@ -845,7 +845,7 @@ export function adminQuizQuestionDeleteV2(
     throw new HttpError(400, ERROR_MESSAGES.QUIZ_NOT_IN_END_STATE);
   }
 
-  return adminQuizQuestionDelete;
+  return adminQuizQuestionDelete(authUserId, quizId, questionId);
 }
 
 export function adminQuizThumbnail(
