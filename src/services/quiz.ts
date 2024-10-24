@@ -528,7 +528,7 @@ export function adminQuizSessionUpdate(
 
   // Action enum cannot be applied in the current state (see spec for details)
   try {
-    session.dispatch(PlayerAction[action as keyof typeof PlayerAction]);
+    session.dispatch(action as PlayerAction);
   } catch (error) {
     throw new HttpError(400, error.message);
   }
@@ -592,14 +592,22 @@ export function adminQuizSessionGetStatus(
   if (!quizSession) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_SESSION_ID);
   }
-  // find the players in this session
   const players = data.players.filter(player => player.quizSessionId === sessionId);
-  // get the name of the players
   const playerNames = players.map(player => player.name);
+  // metadata should be deep copied without active and authUserId
+  const metadata = JSON.parse(JSON.stringify(quiz));
+  // delete metadata.active by using delete method
+  delete metadata.active;
+  // delete metadata.authUserId;
+  delete metadata.authUserId;
   return {
     state: quizSession.state(),
     atQuestion: quizSession.atQuestion,
     players: playerNames,
-    metadata: quizSession.metadata,
+    metadata: {
+      ...metadata,
+      numQuestions: quiz.questions.length,
+      duration: quiz.duration(),
+    },
   };
 }

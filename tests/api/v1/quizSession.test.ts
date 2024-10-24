@@ -6,6 +6,8 @@ import {
   quizSessionCreate,
   quizDelete,
   quizSessionGetStatus,
+  playerGetMessage,
+  playerSubmitAnswer,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -222,11 +224,54 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
     expect(res1.statusCode).toBe(400);
   });
 
-  test.skip('valid cases', () => {
+  test('valid cases', () => {
     const res1 = quizSessionGetStatus(token, quizId, quizSessionId);
     expect(res1.statusCode).toBe(200);
-    //WARNING: the following test is not correct, because the players array is empty
-    // console.log(res1.body);
-    // will be discussed with in Oct 24
+    console.log(res1.body);
+    expect(res1.body).toStrictEqual({
+      atQuestion: 1,
+      state: 'LOBBY',
+      players: [],
+      metadata: {
+        quizId: quizId,
+        name: 'Test Quiz',
+        description: 'A test quiz',
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number),
+        numQuestions: 1,
+        duration: 60,
+        thumbnailUrl: expect.any(String),
+        questions: [
+          {
+            questionId: expect.any(Number),
+            question: 'Are you my master?',
+            duration: 60,
+            points: 6,
+            // warning!!:
+            // thumbnailUrl: expect.any(String),
+            answers: [
+              {
+                answer: 'Yes',
+                correct: true,
+                answerId: expect.any(Number),
+                colour: expect.any(String),
+              },
+              {
+                answer: 'No',
+                correct: false,
+                answerId: expect.any(Number),
+                colour: expect.any(String),
+              },
+              {
+                answer: 'Maybe',
+                correct: false,
+                answerId: expect.any(Number),
+                colour: expect.any(String),
+              },
+            ],
+          },
+        ],
+      },
+    });
   });
 });
