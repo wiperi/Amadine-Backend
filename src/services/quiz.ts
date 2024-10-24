@@ -528,7 +528,7 @@ export function adminQuizSessionUpdate(
 
   // Action enum cannot be applied in the current state (see spec for details)
   try {
-    session.dispatch(PlayerAction[action as keyof typeof PlayerAction]);
+    session.dispatch(action as PlayerAction);
   } catch (error) {
     throw new HttpError(400, error.message);
   }
