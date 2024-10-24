@@ -620,25 +620,11 @@ export function adminQuizInfoV2(
   duration: number;
   thumbnailUrl: string;
 } {
-  if (!isValidQuizId(quizId)) {
-    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
-  }
-
-  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
-    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
-  }
 
   const quiz = findQuizById(quizId);
 
   return {
-    quizId: quiz.quizId,
-    name: quiz.name,
-    timeCreated: quiz.timeCreated,
-    timeLastEdited: quiz.timeLastEdited,
-    description: quiz.description,
-    numQuestions: quiz.questions.length,
-    questions: quiz.questions, // Include the questions array
-    duration: quiz.questions.reduce((acc, question) => acc + question.duration, 0),
+    ...adminQuizInfo(authUserId, quizId),
     thumbnailUrl: quiz.thumbnailUrl
   };
 }
@@ -652,20 +638,7 @@ export function adminQuizRemoveV2(authUserId: number, quizId: number): EmptyObje
     throw new HttpError(400, ERROR_MESSAGES.QUIZ_NOT_IN_END_STATE);
   }
 
-  if (!isValidQuizId(quizId)) {
-    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
-  }
-
-  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
-    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
-  }
-
-  const quiz = findQuizById(quizId);
-  quiz.active = false;
-  quiz.timeLastEdited = Math.floor(Date.now() / 1000);
-  setData();
-
-  return {};
+  return adminQuizRemove;
 }
 
 export function adminQuizTransferV2(
@@ -676,30 +649,8 @@ export function adminQuizTransferV2(
   if (!isQuizHasOngoingSessions(quizId)) {
     throw new HttpError(400, ERROR_MESSAGES.QUIZ_NOT_IN_END_STATE);
   }
-  if (!isValidQuizId(quizId)) {
-    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
-  }
-  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
-    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
-  }
-  const data = getData();
-  const targetuser = data.users.find(user => user.email === userEmail);
-  if (!targetuser) {
-    throw new HttpError(400, ERROR_MESSAGES.EMAIL_NOT_EXIST);
-  }
-  if (targetuser.userId === authUserId) {
-    throw new HttpError(400, ERROR_MESSAGES.USED_EMAIL);
-  }
-  const quiz = findQuizById(quizId);
-  const hasSameName = data.quizzes.some(
-    q => q.authUserId === targetuser.userId && q.name === quiz.name
-  );
-  if (hasSameName) {
-    throw new HttpError(400, ERROR_MESSAGES.QUIZ_NAME_CONFLICT);
-  }
-  quiz.authUserId = targetuser.userId;
-  setData(data);
-  return {};
+
+  return adminQuizTransfer
 }
 
 export function adminQuizQuestionCreateV2(
@@ -843,7 +794,7 @@ export function adminQuizQuestionUpdateV2(
 
   question.question = questionBody.question;
   question.duration = questionBody.duration;
-  question.thumbnailUrl = questionBody.thumbnailUrl;
+  
   question.points = questionBody.points;
 
   question.setAnswers(
@@ -866,24 +817,7 @@ export function adminQuizQuestionDeleteV2(
     throw new HttpError(400, ERROR_MESSAGES.QUIZ_NOT_IN_END_STATE);
   }
 
-  const quiz = findQuizById(quizId);
-  if (!quiz || !quiz.active) {
-    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
-  }
-
-  if (quiz.authUserId !== authUserId) {
-    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
-  }
-
-  const question = quiz.questions.find(question => question.questionId === questionId);
-  if (!question) {
-    throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION_ID);
-  }
-  const currentPosition = quiz.questions.indexOf(question);
-  quiz.questions.splice(currentPosition, 1);
-  quiz.timeLastEdited = Math.floor(Date.now() / 1000);
-  setData();
-  return {};
+  return adminQuizQuestionDelete;
 }
 
 export function adminQuizThumbnail(quizId: number, authUserId: number, imgUrl: string): EmptyObject {
