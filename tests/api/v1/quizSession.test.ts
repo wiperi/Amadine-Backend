@@ -6,8 +6,6 @@ import {
   quizSessionCreate,
   quizDelete,
   quizSessionGetStatus,
-  playerGetMessage,
-  playerSubmitAnswer,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
