@@ -227,7 +227,6 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
   test('valid cases', () => {
     const res1 = quizSessionGetStatus(token, quizId, quizSessionId);
     expect(res1.statusCode).toBe(200);
-    console.log(res1.body);
     expect(res1.body).toStrictEqual({
       atQuestion: 1,
       state: 'LOBBY',
@@ -240,8 +239,7 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
         timeLastEdited: expect.any(Number),
         numQuestions: 1,
         duration: 60,
-        // it should be defined with a default value, waiting for the implementation of player
-        // thumbnailUrl: expect.any(String);
+        thumbnailUrl: expect.any(String),
         questions: [
           {
             questionId: expect.any(Number),
@@ -249,7 +247,7 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
             duration: 60,
             points: 6,
             // warning!!:
-            // thumbnailUrl: expect.any(String),
+            thumbnailUrl: expect.any(String),
             answers: [
               {
                 answer: 'Yes',

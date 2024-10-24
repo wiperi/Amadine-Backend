@@ -63,7 +63,13 @@ export function adminQuizInfo(
   timeLastEdited: number;
   description: string;
   numQuestions: number;
-  questions: Question[];
+  questions: {
+    questionId: number;
+    question: string;
+    duration: number;
+    points: number;
+    answers: { answer: string; correct: boolean }[];
+  }[];
   duration: number;
 } {
   if (!isValidQuizId(quizId)) {
@@ -73,8 +79,14 @@ export function adminQuizInfo(
   if (!isQuizIdOwnedByUser(quizId, authUserId)) {
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
-
   const quiz = findQuizById(quizId);
+  const processedQuestions = quiz.questions.map(question => ({
+    questionId: question.questionId,
+    question: question.question,
+    duration: question.duration,
+    points: question.points,
+    answers: question.getAnswersSlice(), // Assuming getAnswersSlice() returns the answers
+  }));
 
   return {
     quizId: quiz.quizId,
@@ -83,7 +95,8 @@ export function adminQuizInfo(
     timeLastEdited: quiz.timeLastEdited,
     description: quiz.description,
     numQuestions: quiz.questions.length,
-    questions: quiz.questions, // Include the questions array
+    // it should without thumbnailUrl
+    questions: processedQuestions,
     duration: quiz.questions.reduce((acc, question) => acc + question.duration, 0),
   };
 }
