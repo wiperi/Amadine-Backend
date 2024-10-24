@@ -1,6 +1,6 @@
 import { getData } from '@/dataStore';
 import isEmail from 'validator/lib/isEmail';
-import { User, Quiz } from '@/models/Classes';
+import { User, Quiz, QuizSession, Player, UserSession } from '@/models/Classes';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
@@ -262,6 +262,17 @@ export function isValidUserId(id: number): boolean {
 export function findUserById(userId: number): User | undefined {
   return getData().users.find(user => user.userId === userId);
 }
+
+export const find = {
+  user: (id: number): User | undefined => getData().users.find(user => user.userId === id),
+  quiz: (id: number): Quiz | undefined => getData().quizzes.find(quiz => quiz.quizId === id),
+  quizSession: (id: number): QuizSession | undefined =>
+    getData().quizSessions.find(session => session.sessionId === id),
+  userSession: (id: number): UserSession | undefined =>
+    getData().userSessions.find(session => session.sessionId === id),
+  player: (id: number): Player | undefined =>
+    getData().players.find(player => player.playerId === id),
+};
 
 /**
  * Checks if the provided quizId is valid.
