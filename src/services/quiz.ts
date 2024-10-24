@@ -578,7 +578,9 @@ export function adminQuizSessionStart(
   const newSession = new QuizSession(newSessionId, quiz, autoStartNum);
 
   data.quizSessions.push(newSession);
-
+  if (autoStartNum === 0) {
+    newSession.dispatch(PlayerAction.NEXT_QUESTION);
+  }
   setData(data);
 
   return { newSessionId: newSessionId };

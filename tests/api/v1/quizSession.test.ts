@@ -139,6 +139,9 @@ describe('POST /v1/admin/quiz/:quizId/session/start', () => {
       const res = quizSessionCreate(token, quizId, 2);
       expect(res.statusCode).toStrictEqual(200);
       expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
+      const res1 = quizSessionGetStatus(token, quizId, res.body.newSessionId);
+      expect(res1.statusCode).toBe(200);
+      expect(res1.body.state).toStrictEqual('LOBBY');
     });
     test('successfully create quiz session when 9 sessions that are not in END state currently exist for this quiz', () => {
       for (let i = 0; i < 9; i++) {
@@ -148,6 +151,14 @@ describe('POST /v1/admin/quiz/:quizId/session/start', () => {
       const res = quizSessionCreate(token, quizId, 2);
       expect(res.statusCode).toStrictEqual(200);
       expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
+    });
+    test('successfully create quiz session when autoStartNum is 0', () => {
+      const res = quizSessionCreate(token, quizId, 0);
+      expect(res.statusCode).toStrictEqual(200);
+      expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
+      const res1 = quizSessionGetStatus(token, quizId, res.body.newSessionId);
+      expect(res1.statusCode).toBe(200);
+      expect(res1.body.state).toStrictEqual('QUESTION_COUNTDOWN');
     });
   });
 });
