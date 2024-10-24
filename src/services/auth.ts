@@ -9,7 +9,7 @@ import {
   isValidEmail,
   isValidPassword,
   isValidUserName,
-} from '../utils/helper';
+} from '@/utils/helper';
 import jwt from 'jsonwebtoken';
 import config from '@/config';
 import { Request, Response, NextFunction } from 'express';

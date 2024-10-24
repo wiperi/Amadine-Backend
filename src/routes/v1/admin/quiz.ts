@@ -19,6 +19,7 @@ import {
   adminQuizSessionsActivity,
   adminQuizSessionUpdate,
   adminQuizSessionGetStatus,
+  adminQuizThumbnail,
 } from '@/services/quiz';
 import { tryCatch } from '@/utils/helper';
 
@@ -168,4 +169,11 @@ router.get(
     tryCatch(() => adminQuizSessionGetStatus(authUserId, quizId, sessionId), req, res, next);
   }
 );
+
+router.put('/:quizid(-?\\d+)/thumbnail', (req: Request, res: Response, next: NextFunction) => {
+  const quizId = parseInt(req.params.quizid);
+  const { authUserId, imgUrl } = req.body;
+  tryCatch(() => adminQuizThumbnail(quizId, authUserId, imgUrl), req, res, next);
+});
+
 export default router;

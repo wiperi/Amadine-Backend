@@ -313,3 +313,22 @@ export function getInactiveQuizSession(quizId: number): number[] {
     .map(session => session.sessionId)
     .sort((a, b) => a - b);
 }
+
+export function isValidImgUrl(imgUrl: string): boolean {
+  if (!imgUrl.endsWith('jpg') && !imgUrl.endsWith('jpeg') && !imgUrl.endsWith('png')) {
+    return false;
+  }
+
+  if (!imgUrl.startsWith('http://') && !imgUrl.startsWith('https://')) {
+    return false;
+  }
+
+  return true;
+}
+
+export function isQuizHasOngoingSessions(quizId: number): boolean {
+  return (
+    getData().quizSessions.filter(s => s.quizId === quizId && s.state() !== QuizSessionState.END)
+      .length > 0
+  );
+}
