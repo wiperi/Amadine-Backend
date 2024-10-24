@@ -1,6 +1,6 @@
 import { getData } from '@/dataStore';
 import isEmail from 'validator/lib/isEmail';
-import { User, Quiz, QuizSession } from '@/models/Classes';
+import { User, Quiz } from '@/models/Classes';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
@@ -295,9 +295,7 @@ export function findQuizById(quizId: number): Quiz | undefined {
 export function getActiveQuizSession(quizId: number): number[] {
   const data = getData();
 
-  const quizSessions = data.quizSessions.filter(
-    (session: QuizSession) => session.quizId === quizId
-  );
+  const quizSessions = data.quizSessions.filter(session => session.quizId === quizId);
 
   return quizSessions
     .filter(session => session.state() !== QuizSessionState.END)
@@ -308,9 +306,7 @@ export function getActiveQuizSession(quizId: number): number[] {
 export function getInactiveQuizSession(quizId: number): number[] {
   const data = getData();
 
-  const quizSessions = data.quizSessions.filter(
-    (session: QuizSession) => session.quizId === quizId
-  );
+  const quizSessions = data.quizSessions.filter(session => session.quizId === quizId);
 
   return quizSessions
     .filter(session => session.state() === QuizSessionState.END)

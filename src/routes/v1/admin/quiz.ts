@@ -18,6 +18,7 @@ import {
   adminQuizSessionStart,
   adminQuizSessionsActivity,
   adminQuizSessionUpdate,
+  adminQuizSessionGetStatus,
 } from '@/services/quiz';
 import { tryCatch } from '@/utils/helper';
 
@@ -158,4 +159,13 @@ router.put(
   }
 );
 
+router.get(
+  '/:quizid(-?\\d+)/session/:sessionid(-?\\d+)/',
+  (req: Request, res: Response, next: NextFunction) => {
+    const quizId = parseInt(req.params.quizid);
+    const sessionId = parseInt(req.params.sessionid);
+    const { authUserId } = req.body;
+    tryCatch(() => adminQuizSessionGetStatus(authUserId, quizId, sessionId), req, res, next);
+  }
+);
 export default router;

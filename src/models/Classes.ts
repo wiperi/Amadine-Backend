@@ -63,6 +63,10 @@ export class Quiz {
     this.description = description;
   }
 
+  // numQuestions(): number {
+  //   return this.questions.length;
+  // }
+
   duration(): number {
     return this.questions.reduce((acc, question) => acc + question.duration, 0);
   }
