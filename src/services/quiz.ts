@@ -822,7 +822,7 @@ export function adminQuizQuestionUpdateV2(
 
   question.question = questionBody.question;
   question.duration = questionBody.duration;
-
+  question.thumbnailUrl = questionBody.thumbnailUrl;
   question.points = questionBody.points;
 
   question.setAnswers(
