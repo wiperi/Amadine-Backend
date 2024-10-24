@@ -55,7 +55,7 @@ export class Quiz {
   active: boolean = true;
   questions: Question[] = [];
   thumbnailUrl: string = '';
-
+  numQuestions: number = this.questions.length;
   constructor(authUserId: number, quizId: number, name: string, description: string) {
     this.authUserId = authUserId;
     this.quizId = quizId;

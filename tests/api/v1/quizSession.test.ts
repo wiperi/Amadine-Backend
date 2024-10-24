@@ -218,20 +218,12 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
   });
 
   test('Session Id does not refer to a valid session within this quiz', () => {
-    const res = quizSessionCreate(token, quizId, 2);
-    expect(res.statusCode).toStrictEqual(200);
-    expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
-    const sessionId = res.body.newSessionId;
-    const res1 = quizSessionGetStatus(token, quizId, sessionId + 1);
+    const res1 = quizSessionGetStatus(token, quizId, quizSessionId + 1);
     expect(res1.statusCode).toBe(400);
   });
 
   test.skip('valid cases', () => {
-    const res = quizSessionCreate(token, quizId, 2);
-    expect(res.statusCode).toStrictEqual(200);
-    expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
-    const sessionId = res.body.newSessionId;
-    const res1 = quizSessionGetStatus(token, quizId, sessionId);
+    const res1 = quizSessionGetStatus(token, quizId, quizSessionId);
     expect(res1.statusCode).toBe(200);
     //WARNING: the following test is not correct, because the players array is empty
     // console.log(res1.body);

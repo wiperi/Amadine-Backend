@@ -14,13 +14,7 @@ import {
   trashEmpty,
   quizTransfer,
   questionUpdate,
-  quizSessionCreate,
-  quizSessionGetStatus,
-  questionCreate,
 } from './helpers';
-import exp from 'constants';
-import { string } from 'yaml/dist/schema/common/string';
-
 const ERROR = { error: expect.any(String) };
 
 let token: string;
