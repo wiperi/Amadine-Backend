@@ -1,29 +1,20 @@
-import {
-    quizGetList,
-    quizGetDetails,
-    quizCreate,
-    quizDelete,
-    quizTransfer,
-  } from './helpers';
-  
-import {
-    userRegister,
-    clear
-} from '../v1/helpers';
+import { quizGetList, quizGetDetails, quizCreate, quizDelete, quizTransfer } from './helpers';
+
+import { userRegister, clear } from '../v1/helpers';
 
 const ERROR = { error: expect.any(String) };
 
 let token: string;
 beforeEach(() => {
-clear();
-// Register a user and get the token
-const res = userRegister('test@example.com', 'ValidPass123', 'John', 'Doe');
-expect(res.statusCode).toBe(200);
-token = res.body.token;
+  clear();
+  // Register a user and get the token
+  const res = userRegister('test@example.com', 'ValidPass123', 'John', 'Doe');
+  expect(res.statusCode).toBe(200);
+  token = res.body.token;
 });
 
 afterAll(() => {
-clear();
+  clear();
 });
 
 // test for quiz info
@@ -44,12 +35,11 @@ describe('GET /v2/admin/quiz/:quizId', () => {
         numQuestions: 0,
         questions: [],
         duration: 0,
-        thumbnailUrl: ''
+        thumbnailUrl: '',
       });
     });
   });
 });
-
 
 // test for quiz remove
 describe('DELETE /v2/admin/quiz/:quizid', () => {
@@ -66,7 +56,7 @@ describe('DELETE /v2/admin/quiz/:quizid', () => {
     // will be implemented after quizSessionUpdate
     test.todo('session for this quiz is not in END state');
   });
-}); 
+});
 
 // test for quiz transfer
 describe('POST /v2/admin/quiz/:quizid/transfer', () => {

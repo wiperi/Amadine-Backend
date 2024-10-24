@@ -51,7 +51,7 @@ const ERROR_MESSAGES = {
   QUIZ_SESSION_NOT_IN_QUIZ: 'Quiz session does not belong to this quiz',
   INVALID_ACTION: 'Action provided is not a valid Action enum',
   INVALID_URL: 'Invalid image URL',
-  QUIZ_NOT_IN_END_STATE: 'There are some session for quiz are not in END state'
+  QUIZ_NOT_IN_END_STATE: 'There are some session for quiz are not in END state',
 };
 
 export { ERROR_MESSAGES };

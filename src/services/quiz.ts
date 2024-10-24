@@ -1,7 +1,12 @@
 import { getData, setData } from '@/dataStore';
 import { HttpError } from '@/utils/HttpError';
 import { Quiz, Question, Answer, QuizSession } from '@/models/Classes';
-import { ReturnedQuizView, EmptyObject, ParamQuestionBody, ParamQuestionBodyV2 } from '@/models/Types';
+import {
+  ReturnedQuizView,
+  EmptyObject,
+  ParamQuestionBody,
+  ParamQuestionBodyV2,
+} from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import {
   getNewID,
@@ -620,12 +625,11 @@ export function adminQuizInfoV2(
   duration: number;
   thumbnailUrl: string;
 } {
-
   const quiz = findQuizById(quizId);
 
   return {
     ...adminQuizInfo(authUserId, quizId),
-    thumbnailUrl: quiz.thumbnailUrl
+    thumbnailUrl: quiz.thumbnailUrl,
   };
 }
 
@@ -650,7 +654,7 @@ export function adminQuizTransferV2(
     throw new HttpError(400, ERROR_MESSAGES.QUIZ_NOT_IN_END_STATE);
   }
 
-  return adminQuizTransfer
+  return adminQuizTransfer;
 }
 
 export function adminQuizQuestionCreateV2(
@@ -794,7 +798,7 @@ export function adminQuizQuestionUpdateV2(
 
   question.question = questionBody.question;
   question.duration = questionBody.duration;
-  
+
   question.points = questionBody.points;
 
   question.setAnswers(
@@ -820,7 +824,11 @@ export function adminQuizQuestionDeleteV2(
   return adminQuizQuestionDelete;
 }
 
-export function adminQuizThumbnail(quizId: number, authUserId: number, imgUrl: string): EmptyObject {
+export function adminQuizThumbnail(
+  quizId: number,
+  authUserId: number,
+  imgUrl: string
+): EmptyObject {
   if (!isValidImgUrl(imgUrl)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_URL);
   }

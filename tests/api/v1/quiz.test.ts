@@ -764,7 +764,11 @@ describe('PUT /v1/admin/quiz/:quizId/thumbnail', () => {
     });
 
     test('token does not refer to valid logged in user session', () => {
-      const res = quizUpdateThumbnail('invalidToken', quizId, 'http://google.com/some/image/path.jpg');
+      const res = quizUpdateThumbnail(
+        'invalidToken',
+        quizId,
+        'http://google.com/some/image/path.jpg'
+      );
       expect(res.statusCode).toBe(401);
       expect(res.body).toStrictEqual(ERROR);
     });
@@ -802,7 +806,11 @@ describe('PUT /v1/admin/quiz/:quizId/thumbnail', () => {
     });
 
     test('success update url', async () => {
-      const beforeRes = quizUpdateThumbnail(token, quizId, 'http://google.com/some/image/orgin.jpg');
+      const beforeRes = quizUpdateThumbnail(
+        token,
+        quizId,
+        'http://google.com/some/image/orgin.jpg'
+      );
       expect(beforeRes.statusCode).toBe(200);
       const beforeInfoRes = quizGetDetailsV2(token, quizId);
       expect(beforeInfoRes.statusCode).toBe(200);

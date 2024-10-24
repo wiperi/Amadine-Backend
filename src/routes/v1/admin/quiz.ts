@@ -17,7 +17,7 @@ import {
   adminQuizQuestionUpdate,
   adminQuizSessionStart,
   adminQuizSessionGetStatus,
-  adminQuizThumbnail
+  adminQuizThumbnail,
 } from '@/services/quiz';
 import { tryCatch } from '@/utils/helper';
 
