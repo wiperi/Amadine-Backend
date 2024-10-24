@@ -13,6 +13,7 @@ import {
   trashEmpty,
   quizTransfer,
   quizUpdateThumbnail,
+  questionUpdate,
 } from './helpers';
 
 import { quizGetDetails as quizGetDetailsV2 } from '../v2/helpers';

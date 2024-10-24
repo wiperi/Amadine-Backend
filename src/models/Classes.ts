@@ -54,7 +54,7 @@ export class Quiz {
   timeLastEdited: number = Math.floor(Date.now() / 1000);
   active: boolean = true;
   questions: Question[] = [];
-  thumbnailUrl?: string;
+  thumbnailUrl: string = '#';
 
   constructor(authUserId: number, quizId: number, name: string, description: string) {
     this.authUserId = authUserId;
@@ -93,7 +93,7 @@ export class Question {
 
   question: string;
   duration: number;
-  thumbnailUrl?: string;
+  thumbnailUrl: string = '#';
   points: number;
 
   private answers: Answer[] = [];
@@ -147,7 +147,7 @@ export class Question {
     duration: number,
     points: number,
     answers: Answer[],
-    thumbnailUrl?: string
+    thumbnailUrl: string = '#'
   ) {
     this.questionId = questionId;
     this.question = question;

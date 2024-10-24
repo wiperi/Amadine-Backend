@@ -356,3 +356,83 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
     // will be discussed with in Oct 24
   });
 });
+
+/////////////////////////////////////////////
+// Test for AdminQuizSessionGetStatus /////////////
+/////////////////////////////////////////////
+describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
+  test('empty token', () => {
+    const res = quizSessionGetStatus('', 1, 1);
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toStrictEqual(ERROR);
+  });
+  test('invalid token', () => {
+    const res = quizSessionGetStatus('invalid token', 1, 1);
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toStrictEqual(ERROR);
+  });
+
+  test('user is not the owner of the quiz', () => {
+    const userRegisterRes = userRegister('cheong1024@mail.com', 'Cheong1024', 'Cheong', 'Zhang');
+    expect(userRegisterRes.statusCode).toBe(200);
+    const token1 = userRegisterRes.body.token;
+    const quizId = 1;
+    const res = quizSessionGetStatus(token1, quizId, quizId);
+    expect(res.statusCode).toBe(403);
+  });
+
+  test('Session Id does not refer to a valid session within this quiz', () => {
+    const res1 = quizSessionGetStatus(token, quizId, quizSessionId + 1);
+    expect(res1.statusCode).toBe(400);
+  });
+
+  test('valid cases', () => {
+    const res1 = quizSessionGetStatus(token, quizId, quizSessionId);
+    expect(res1.statusCode).toBe(200);
+    expect(res1.body).toStrictEqual({
+      atQuestion: 1,
+      state: 'LOBBY',
+      players: [],
+      metadata: {
+        quizId: quizId,
+        name: 'Test Quiz',
+        description: 'A test quiz',
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number),
+        numQuestions: 1,
+        duration: 60,
+        thumbnailUrl: expect.any(String),
+        questions: [
+          {
+            questionId: expect.any(Number),
+            question: 'Are you my master?',
+            duration: 60,
+            points: 6,
+            // warning!!:
+            thumbnailUrl: expect.any(String),
+            answers: [
+              {
+                answer: 'Yes',
+                correct: true,
+                answerId: expect.any(Number),
+                colour: expect.any(String),
+              },
+              {
+                answer: 'No',
+                correct: false,
+                answerId: expect.any(Number),
+                colour: expect.any(String),
+              },
+              {
+                answer: 'Maybe',
+                correct: false,
+                answerId: expect.any(Number),
+                colour: expect.any(String),
+              },
+            ],
+          },
+        ],
+      },
+    });
+  });
+});
