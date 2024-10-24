@@ -5,6 +5,8 @@ import {
   questionCreate,
   quizSessionCreate,
   quizDelete,
+  quizSessionGetActivity,
+  quizSessionUpdateState,
   quizSessionGetStatus,
 } from './helpers';
 
@@ -150,7 +152,7 @@ describe('POST /v1/admin/quiz/:quizId/session/start', () => {
   });
 });
 
-describe('POST /v1/admin/quiz/:quizId/session/:sessionId/update', () => {
+describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
   describe('LOBBY state', () => {
     // Tests for LOBBY state will be added here by guangwei
 
@@ -191,6 +193,111 @@ describe('POST /v1/admin/quiz/:quizId/session/:sessionId/update', () => {
 
   describe('ANSWER_SHOW state', () => {
     // Tests for ANSWER_SHOW state will be added here by yibin
+  });
+});
+
+describe('GET /v1/admin/quiz/:quizId/sessions', () => {
+  beforeEach(() => {
+    clear();
+    // Register a user and get the token
+    const res = userRegister('test@example.com', 'ValidPass123', 'John', 'Doe');
+    expect(res.statusCode).toBe(200);
+    token = res.body.token;
+
+    // Create a quiz and a question
+    const createQuizRes = quizCreate(token, 'Test Quiz', 'A test quiz');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = createQuizRes.body.quizId;
+
+    const createQuestionRes = questionCreate(token, quizId, {
+      question: 'What is your favorite color?',
+      duration: 60,
+      points: 6,
+      answers: [
+        { answer: 'Red', correct: true },
+        { answer: 'Blue', correct: false },
+        { answer: 'Green', correct: false },
+      ],
+    });
+    expect(createQuestionRes.statusCode).toBe(200);
+  });
+  describe('valid cases', () => {
+    test('valid request should return active and inactive sessions', () => {
+      // Create a session for this test
+      const createQuizSessionRes = quizSessionCreate(token, quizId, 2);
+      expect(createQuizSessionRes.statusCode).toBe(200);
+      quizSessionId = createQuizSessionRes.body.newSessionId;
+
+      const res = quizSessionGetActivity(token, quizId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({
+        activeSessions: expect.any(Array),
+        inactiveSessions: expect.any(Array),
+      });
+      expect(res.body.activeSessions.length).toBeGreaterThan(0);
+      expect(res.body.inactiveSessions.length).toBe(0);
+    });
+
+    test('valid request with no sessions should return empty arrays', () => {
+      const res = quizSessionGetActivity(token, quizId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({
+        activeSessions: [],
+        inactiveSessions: [],
+      });
+    });
+    test('valid request with multiple active and inactive sessions', () => {
+      // Create 3 active sessions
+      const activeSessionIds = [];
+      for (let i = 0; i < 3; i++) {
+        const createSessionRes = quizSessionCreate(token, quizId, 2);
+        expect(createSessionRes.statusCode).toBe(200);
+        activeSessionIds.push(createSessionRes.body.newSessionId);
+      }
+
+      // Create 2 sessions and mark them as inactive using quizSessionUpdateState
+      const inactiveSessionIds = [];
+      for (let i = 0; i < 2; i++) {
+        const createSessionRes = quizSessionCreate(token, quizId, 2); // Create session
+        expect(createSessionRes.statusCode).toBe(200);
+        const sessionId = createSessionRes.body.newSessionId;
+        inactiveSessionIds.push(sessionId);
+
+        // Mark this session as inactive using quizSessionUpdateState
+        const updateRes = quizSessionUpdateState(token, quizId, sessionId, 'END');
+        expect(updateRes.statusCode).toBe(200);
+      }
+
+      const res = quizSessionGetActivity(token, quizId);
+      expect(res.statusCode).toBe(200);
+
+      // Ensure that active and inactive sessions are returned correctly and sorted
+      expect(res.body.activeSessions).toStrictEqual(activeSessionIds.sort((a, b) => a - b));
+      expect(res.body.inactiveSessions).toStrictEqual(inactiveSessionIds.sort((a, b) => a - b));
+    });
+  });
+
+  describe('invalid cases', () => {
+    test('token is invalid', () => {
+      const res = quizSessionGetActivity('invalid token', quizId);
+      expect(res.statusCode).toStrictEqual(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('user is not an owner of this quiz', () => {
+      const userRegisterRes = userRegister('wick@gmail.com', 'JohnWich123', 'John', 'Wick');
+      expect(userRegisterRes.statusCode).toStrictEqual(200);
+      const newToken = userRegisterRes.body.token;
+      const res = quizSessionGetActivity(newToken, quizId);
+      expect(res.statusCode).toStrictEqual(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('quiz does not exist', () => {
+      const res = quizSessionGetActivity(token, 0);
+      expect(res.statusCode).toStrictEqual(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
   });
 });
 /////////////////////////////////////////////

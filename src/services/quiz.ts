@@ -16,6 +16,8 @@ import {
   isValidQuizName,
   isValidQuizDescription,
   recursiveFind,
+  getInactiveQuizSession,
+  getActiveQuizSession,
   isValidImgUrl,
   isQuizHasOngoingSessions,
 } from '@/utils/helper';
@@ -582,6 +584,28 @@ export function adminQuizSessionStart(
   return { newSessionId: newSessionId };
 }
 
+export function adminQuizSessionsActivity(
+  authUserId: number,
+  quizId: number
+): {
+  activeSessions: number[];
+  inactiveSessions: number[];
+} {
+  if (!isValidQuizId(quizId)) {
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  }
+
+  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
+
+  const activeSessions = getActiveQuizSession(quizId);
+  const inactiveSessions = getInactiveQuizSession(quizId);
+  return {
+    activeSessions,
+    inactiveSessions,
+  };
+}
 export function adminQuizSessionGetStatus(
   authUserId: number,
   quizId: number,
