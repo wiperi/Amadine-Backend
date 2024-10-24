@@ -15,7 +15,7 @@ import http from 'http';
 import router from './routes';
 
 import { loadData } from './dataStore';
-import { authorizeToken } from './services/v1/auth';
+import { authorizeToken } from './services/auth';
 import { HttpError } from './utils/HttpError';
 import { cleanupLogsWeekly } from './utils/logCleanup';
 

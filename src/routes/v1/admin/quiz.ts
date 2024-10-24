@@ -18,7 +18,7 @@ import {
   adminQuizSessionStart,
   adminQuizSessionGetStatus,
   adminQuizThumbnail
-} from '@/services/v1/quiz';
+} from '@/services/quiz';
 import { tryCatch } from '@/utils/helper';
 
 const router = Router();
