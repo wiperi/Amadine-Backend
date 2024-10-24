@@ -95,7 +95,7 @@ export function adminQuizInfo(
     timeLastEdited: quiz.timeLastEdited,
     description: quiz.description,
     numQuestions: quiz.questions.length,
-    //it should without thumbnailUrl
+    // it should without thumbnailUrl
     questions: processedQuestions,
     duration: quiz.questions.reduce((acc, question) => acc + question.duration, 0),
   };
