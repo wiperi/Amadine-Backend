@@ -6,7 +6,7 @@ import {
   quizSessionCreate,
   playerJoinSession,
   quizSessionUpdateState,
-  quizSessionGetStatus
+  quizSessionGetStatus,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -103,7 +103,7 @@ describe('POST /v1/player/join', () => {
       expect(res.statusCode).toBe(200);
       const getInfoRes = quizSessionGetStatus(token, quizId, quizSessionId);
       expect(getInfoRes.statusCode).toBe(200);
-      expect(getInfoRes.body.players).toStrictEqual([ 'Peter Griffin' ]);
+      expect(getInfoRes.body.players).toStrictEqual(['Peter Griffin']);
     });
 
     test('multiple players sucessfully joined quizSession', () => {
@@ -113,7 +113,7 @@ describe('POST /v1/player/join', () => {
       expect(res2.statusCode).toBe(200);
       const getInfoRes = quizSessionGetStatus(token, quizId, quizSessionId);
       expect(getInfoRes.statusCode).toBe(200);
-      expect(getInfoRes.body.players).toStrictEqual([ 'Peter Griffin', 'Glen Quagmire' ]);
+      expect(getInfoRes.body.players).toStrictEqual(['Peter Griffin', 'Glen Quagmire']);
     });
   });
 });
