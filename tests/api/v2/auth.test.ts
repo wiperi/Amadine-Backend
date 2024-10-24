@@ -1,14 +1,10 @@
 import {
-  clear,
   userLogout,
   userGetDetails,
   userUpdateDetails,
   userUpdatePassword,
-  quizGetDetails,
-  quizCreate,
-  questionCreate,
 } from './helpers';
-import { userRegister, userLogin } from '../v1/helpers';
+import { clear ,userRegister, userLogin } from '../v1/helpers';
 
 const ERROR = { error: expect.any(String) };
 
