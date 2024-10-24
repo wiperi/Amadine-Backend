@@ -304,12 +304,6 @@ export function isValidImgUrl(imgUrl: string): boolean {
   return true;
 }
 
-export function isSessionForQuizInEndState (quizId: number): boolean {
-  const data = getData();
-  for (const key of data.quizSessions) {
-    if (key.quizId === quizId && key.state() !== QuizSessionState.END) {
-      return false;
-    }
-  }
-  return true;
+export function isQuizHasOngoingSessions (quizId: number): boolean {
+  return getData().quizSessions.filter(s => s.quizId === quizId && s.state() !== QuizSessionState.END).length > 0;
 }

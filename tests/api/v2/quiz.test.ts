@@ -63,6 +63,7 @@ describe('DELETE /v2/admin/quiz/:quizid', () => {
   });
 
   describe('invalid cases', () => {
+    // will be implemented after quizSessionUpdate
     test.todo('session for this quiz is not in END state');
   });
 }); 
@@ -79,6 +80,7 @@ describe('POST /v2/admin/quiz/:quizid/transfer', () => {
   });
 
   describe('invalid cases', () => {
+    // will be implemented after quizSessionUpdate
     test.todo('session for this quiz is not in END state');
   });
 });

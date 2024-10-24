@@ -107,8 +107,54 @@ import {
       expect(getQuizRes.body.duration).toEqual(120);
     });
   });
+
   describe('invalid cases', () => {
-    test.todo('invalid thumbnail url');
+    test('invalid thumbnail url', () => {
+        const questionBody1 = {
+          question: 'What is the capital of France?',
+          duration: 60,
+          points: 5,
+          answers: [
+            { answer: 'Paris', correct: true },
+            { answer: 'Berlin', correct: false },
+            { answer: 'Rome', correct: false },
+          ],
+          thumbnailUrl: "http://google.com/some/image/path.com"
+        };
+        const res1 = questionCreate(token, quizId, questionBody1);
+        expect(res1.statusCode).toBe(400);
+        expect(res1.body).toStrictEqual(ERROR);
+
+        const questionBody2 = {
+          question: 'What is the capital of France?',
+          duration: 60,
+          points: 5,
+          answers: [
+            { answer: 'Paris', correct: true },
+            { answer: 'Berlin', correct: false },
+            { answer: 'Rome', correct: false },
+          ],
+          thumbnailUrl: ''
+        };
+        const res2 = questionCreate(token, quizId, questionBody2);
+        expect(res2.statusCode).toBe(400);
+        expect(res2.body).toStrictEqual(ERROR);
+
+        const questionBody3 = {
+          question: 'What is the capital of France?',
+          duration: 60,
+          points: 5,
+          answers: [
+            { answer: 'Paris', correct: true },
+            { answer: 'Berlin', correct: false },
+            { answer: 'Rome', correct: false },
+          ],
+          thumbnailUrl: 'webcms3.cse.unsw.edu.au.png'
+        };
+        const res3 = questionCreate(token, quizId, questionBody3);
+        expect(res3.statusCode).toBe(400);
+        expect(res3.body).toStrictEqual(ERROR);
+    });
   });
 });
 
@@ -194,7 +240,49 @@ describe('PUT /v2/admin/quiz/:quizid/question/:questionid', () => {
   });
 
   describe('Error Cases', () => {
-    test.todo('invalid thumbnail url');
+    test('invalid thumbnail url', () => {
+      const updatedQuestionBody = {
+        question: 'What is the largest country in the world?',
+        duration: 120,
+        points: 7,
+        answers: [
+          { answer: 'Russia', correct: true },
+          { answer: 'Canada', correct: false },
+        ],
+        thumbnailUrl: ""
+      };
+      const res = questionUpdate(token, quizId, questionId, updatedQuestionBody);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+
+      const updatedQuestionBody1 = {
+        question: 'What is the largest country in the world?',
+        duration: 120,
+        points: 7,
+        answers: [
+          { answer: 'Russia', correct: true },
+          { answer: 'Canada', correct: false },
+        ],
+        thumbnailUrl: "http://google.com/some/image/path.com"
+      };
+      const res1 = questionUpdate(token, quizId, questionId, updatedQuestionBody1);
+      expect(res1.statusCode).toBe(400);
+      expect(res1.body).toStrictEqual(ERROR);
+
+      const updatedQuestionBody2 = {
+        question: 'What is the largest country in the world?',
+        duration: 120,
+        points: 7,
+        answers: [
+          { answer: 'Russia', correct: true },
+          { answer: 'Canada', correct: false },
+        ],
+        thumbnailUrl: "google.com/some/image/path.jpg"
+      };
+      const res2 = questionUpdate(token, quizId, questionId, updatedQuestionBody2);
+      expect(res2.statusCode).toBe(400);
+      expect(res2.body).toStrictEqual(ERROR);
+    });
   });
 });
 
@@ -224,6 +312,7 @@ describe('DELETE /v1/admin/quiz/:quizId/question/:questionId', () => {
 
 
   describe('invalid cases', () => {
+    // will be implemented after finished quizSessionUpdate
     test.todo('session for this quiz is not in END state');
   });
 });

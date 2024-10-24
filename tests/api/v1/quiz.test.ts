@@ -15,6 +15,8 @@ import {
   quizUpdateThumbnail,
 } from './helpers';
 
+import { quizGetDetails as quizGetDetailsV2 } from '../v2/helpers';
+
 const ERROR = { error: expect.any(String) };
 
 let token: string;
@@ -799,18 +801,17 @@ describe('PUT /v1/admin/quiz/:quizId/thumbnail', () => {
       expect(infoRes.body.timeLastEdited).not.toStrictEqual(infoRes.body.timeCreated);
     });
 
-    // This test skip because some v2 function has not update yet
-    test.skip('success update url', async () => {
+    test('success update url', async () => {
       const beforeRes = quizUpdateThumbnail(token, quizId, 'http://google.com/some/image/orgin.jpg');
       expect(beforeRes.statusCode).toBe(200);
-      const beforeInfoRes = quizGetDetails(token, quizId);
+      const beforeInfoRes = quizGetDetailsV2(token, quizId);
       expect(beforeInfoRes.statusCode).toBe(200);
 
       await new Promise(resolve => setTimeout(resolve, 50)); // set time out incase file overwritting
       const res = quizUpdateThumbnail(token, quizId, 'http://google.com/some/image/path.jpg');
       expect(res.statusCode).toBe(200);
 
-      const afterInfoRes = quizGetDetails(token, quizId);
+      const afterInfoRes = quizGetDetailsV2(token, quizId);
       expect(afterInfoRes.statusCode).toBe(200);
       expect(afterInfoRes.body.thumbnailUrl).not.toStrictEqual(beforeInfoRes.body.thumbnailUrl);
     });
