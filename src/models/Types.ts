@@ -11,3 +11,5 @@ export type ParamQuestionBody = {
   points: number;
   answers: Array<{ answer: string; correct: boolean }>;
 };
+
+export type ParamQuestionBodyV2 = ParamQuestionBody & { thumbnailUrl: string };

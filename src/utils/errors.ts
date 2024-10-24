@@ -43,13 +43,15 @@ const ERROR_MESSAGES = {
   QUIZ_INACTIVE: 'Quiz is inactive',
   // quiz do not have any questions
   QUIZ_NO_QUESTIONS: 'Quiz do not have any questions',
-  // quiz do have too many sessions
+  // quiz have too many sessions
   QUIZ_TOO_MANY_SESSIONS: 'Quiz has too many sessions',
   // Session not found
   INVALID_SESSION_ID: 'Invalid session id',
   QUIZ_SESSION_NOT_EXIST: 'Quiz session does not exist',
   QUIZ_SESSION_NOT_IN_QUIZ: 'Quiz session does not belong to this quiz',
   INVALID_ACTION: 'Action provided is not a valid Action enum',
+  INVALID_URL: 'Invalid image URL',
+  QUIZ_NOT_IN_END_STATE: 'There are some session for quiz are not in END state',
 };
 
 export { ERROR_MESSAGES };

@@ -1,21 +1,22 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import {
   adminQuizCreate,
-  adminQuizInfo,
   adminQuizNameUpdate,
   adminQuizList,
   adminQuizQuestionMove,
   adminQuizDescriptionUpdate,
-  adminQuizRemove,
-  adminQuizQuestionCreate,
   adminQuizTrashView,
   adminQuizTrashEmpty,
-  adminQuizQuestionDelete,
   adminQuizQuestionDuplicate,
   adminQuizRestore,
-  adminQuizTransfer,
-  adminQuizQuestionUpdate,
+  adminQuizQuestionCreateV2,
+  adminQuizInfoV2,
+  adminQuizRemoveV2,
+  adminQuizTransferV2,
+  adminQuizQuestionUpdateV2,
+  adminQuizQuestionDeleteV2,
 } from '@/services/quiz';
+
 import { tryCatch } from '@/utils/helper';
 
 const router = Router();
@@ -33,7 +34,7 @@ router.get('/list', (req: Request, res: Response, next: NextFunction) => {
 router.get('/:quizid(-?\\d+)', (req: Request, res: Response, next: NextFunction) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId } = req.body;
-  tryCatch(() => adminQuizInfo(authUserId, quizid), req, res, next);
+  tryCatch(() => adminQuizInfoV2(authUserId, quizid), req, res, next);
 });
 
 router.put('/:quizid(-?\\d+)/name', (req: Request, res: Response, next: NextFunction) => {
@@ -60,7 +61,7 @@ router.put(
 router.delete('/:quizid(-?\\d+)', (req: Request, res: Response, next: NextFunction) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId } = req.body;
-  tryCatch(() => adminQuizRemove(authUserId, quizid), req, res, next);
+  tryCatch(() => adminQuizRemoveV2(authUserId, quizid), req, res, next);
 });
 
 router.put('/:quizid(-?\\d+)/description', (req: Request, res: Response, next: NextFunction) => {
@@ -72,7 +73,7 @@ router.put('/:quizid(-?\\d+)/description', (req: Request, res: Response, next: N
 router.post('/:quizId(-?\\d+)/question', (req: Request, res: Response, next: NextFunction) => {
   const { authUserId, questionBody } = req.body;
   const quizId = parseInt(req.params.quizId);
-  tryCatch(() => adminQuizQuestionCreate(authUserId, quizId, questionBody), req, res, next);
+  tryCatch(() => adminQuizQuestionCreateV2(authUserId, quizId, questionBody), req, res, next);
 });
 
 router.get('/trash', (req: Request, res: Response, next: NextFunction) => {
@@ -108,14 +109,14 @@ router.delete(
     const quizid = parseInt(req.params.quizid);
     const questionid = parseInt(req.params.questionid);
     const { authUserId } = req.body;
-    tryCatch(() => adminQuizQuestionDelete(authUserId, quizid, questionid), req, res, next);
+    tryCatch(() => adminQuizQuestionDeleteV2(authUserId, quizid, questionid), req, res, next);
   }
 );
 
 router.post('/:quizid(-?\\d+)/transfer', (req: Request, res: Response, next: NextFunction) => {
   const quizid = parseInt(req.params.quizid);
   const { authUserId, userEmail } = req.body;
-  tryCatch(() => adminQuizTransfer(authUserId, quizid, userEmail), req, res, next);
+  tryCatch(() => adminQuizTransferV2(authUserId, quizid, userEmail), req, res, next);
 });
 
 router.put(
@@ -125,7 +126,7 @@ router.put(
     const questionId = parseInt(req.params.questionid);
     const { authUserId, questionBody } = req.body;
     tryCatch(
-      () => adminQuizQuestionUpdate(authUserId, quizId, questionId, questionBody),
+      () => adminQuizQuestionUpdateV2(authUserId, quizId, questionId, questionBody),
       req,
       res,
       next

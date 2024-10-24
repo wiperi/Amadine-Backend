@@ -1,6 +1,6 @@
 // @ts-nocheck
 // jest.ignore
-import * as auth from '../../src/services/auth';
+import * as auth from '../../src/services/v1/auth';
 import { clear } from '../../src/utils/other';
 
 /////////////////////////////////////////////////////////////////////

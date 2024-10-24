@@ -1,6 +1,6 @@
 import request, { Response } from 'sync-request-curl';
 import config from '../../../src/config';
-import { parse, ParsedResponse } from '../../../tests/api/v1/helpers';
+import { parse, ParsedResponse } from '../v1/helpers';
 
 const AUTH_URL = `${config.url}:${config.port}/v2/admin/auth`;
 const QUIZ_URL = `${config.url}:${config.port}/v2/admin/quiz`;

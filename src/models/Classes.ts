@@ -54,7 +54,7 @@ export class Quiz {
   timeLastEdited: number = Math.floor(Date.now() / 1000);
   active: boolean = true;
   questions: Question[] = [];
-  thumbnailUrl: string = '';
+  thumbnailUrl?: string;
 
   constructor(authUserId: number, quizId: number, name: string, description: string) {
     this.authUserId = authUserId;
@@ -93,6 +93,7 @@ export class Question {
 
   question: string;
   duration: number;
+  thumbnailUrl?: string;
   points: number;
 
   private answers: Answer[] = [];
@@ -145,7 +146,8 @@ export class Question {
     question: string,
     duration: number,
     points: number,
-    answers: Answer[]
+    answers: Answer[],
+    thumbnailUrl?: string
   ) {
     this.questionId = questionId;
     this.question = question;
@@ -156,6 +158,7 @@ export class Question {
       answer.colour = this.getRandomUniqueColor();
     });
     this.answers = answers;
+    this.thumbnailUrl = thumbnailUrl;
   }
 }
 

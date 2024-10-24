@@ -4,6 +4,7 @@ import { User, Quiz } from '@/models/Classes';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
+import { QuizSessionState } from '@/models/Enums';
 
 /**
  * Hashes a string using bcrypt.
@@ -289,4 +290,45 @@ export function isQuizIdOwnedByUser(quizId: number, authUserId: number): boolean
 
 export function findQuizById(quizId: number): Quiz | undefined {
   return getData().quizzes.find(quiz => quiz.quizId === quizId);
+}
+
+export function getActiveQuizSession(quizId: number): number[] {
+  const data = getData();
+
+  const quizSessions = data.quizSessions.filter(session => session.quizId === quizId);
+
+  return quizSessions
+    .filter(session => session.state() !== QuizSessionState.END)
+    .map(session => session.sessionId)
+    .sort((a, b) => a - b);
+}
+
+export function getInactiveQuizSession(quizId: number): number[] {
+  const data = getData();
+
+  const quizSessions = data.quizSessions.filter(session => session.quizId === quizId);
+
+  return quizSessions
+    .filter(session => session.state() === QuizSessionState.END)
+    .map(session => session.sessionId)
+    .sort((a, b) => a - b);
+}
+
+export function isValidImgUrl(imgUrl: string): boolean {
+  if (!imgUrl.endsWith('jpg') && !imgUrl.endsWith('jpeg') && !imgUrl.endsWith('png')) {
+    return false;
+  }
+
+  if (!imgUrl.startsWith('http://') && !imgUrl.startsWith('https://')) {
+    return false;
+  }
+
+  return true;
+}
+
+export function isQuizHasOngoingSessions(quizId: number): boolean {
+  return (
+    getData().quizSessions.filter(s => s.quizId === quizId && s.state() !== QuizSessionState.END)
+      .length > 0
+  );
 }

@@ -16,7 +16,10 @@ import {
   adminQuizTransfer,
   adminQuizQuestionUpdate,
   adminQuizSessionStart,
+  adminQuizSessionsActivity,
+  adminQuizSessionUpdate,
   adminQuizSessionGetStatus,
+  adminQuizThumbnail,
 } from '@/services/quiz';
 import { tryCatch } from '@/utils/helper';
 
@@ -141,6 +144,22 @@ router.post('/:quizid(-?\\d+)/session/start', (req: Request, res: Response, next
   tryCatch(() => adminQuizSessionStart(authUserId, quizId, autoStartNum), req, res, next);
 });
 
+router.get('/:quizid(-?\\d+)/sessions', (req: Request, res: Response, next: NextFunction) => {
+  const quizId = parseInt(req.params.quizid);
+  const { authUserId } = req.body;
+  tryCatch(() => adminQuizSessionsActivity(authUserId, quizId), req, res, next);
+});
+
+router.put(
+  '/:quizid(-?\\d+)/session/:sessionid(-?\\d+)',
+  (req: Request, res: Response, next: NextFunction) => {
+    const quizId = parseInt(req.params.quizid);
+    const sessionId = parseInt(req.params.sessionid);
+    const { authUserId, action } = req.body;
+    tryCatch(() => adminQuizSessionUpdate(authUserId, quizId, sessionId, action), req, res, next);
+  }
+);
+
 router.get(
   '/:quizid(-?\\d+)/session/:sessionid(-?\\d+)/',
   (req: Request, res: Response, next: NextFunction) => {
@@ -150,4 +169,11 @@ router.get(
     tryCatch(() => adminQuizSessionGetStatus(authUserId, quizId, sessionId), req, res, next);
   }
 );
+
+router.put('/:quizid(-?\\d+)/thumbnail', (req: Request, res: Response, next: NextFunction) => {
+  const quizId = parseInt(req.params.quizid);
+  const { authUserId, imgUrl } = req.body;
+  tryCatch(() => adminQuizThumbnail(quizId, authUserId, imgUrl), req, res, next);
+});
+
 export default router;
