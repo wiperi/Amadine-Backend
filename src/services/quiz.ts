@@ -658,12 +658,17 @@ export function adminQuizInfoV2(
   timeLastEdited: number;
   description: string;
   numQuestions: number;
-  questions: (Pick<Question, 'questionId' | 'question' | 'duration' | 'points'> & {
-    answers: Answer[];
-  })[];
+  questions: Question[];
   duration: number;
   thumbnailUrl: string;
 } {
+  if (!isValidQuizId(quizId)) {
+    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
+  }
+  adminQuizInfo(authUserId, quizId);
+  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
   const quiz = findQuizById(quizId);
 
   return {
