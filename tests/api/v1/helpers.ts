@@ -334,7 +334,7 @@ export function quizStartNewSession(
   quizId: number,
   autoStartNum: number
 ): ParsedResponse {
-  const res = request('POST', `${QUIZ_URL}/${quizId}/sessions/start`, {
+  const res = request('POST', `${QUIZ_URL}/${quizId}/session/start`, {
     headers: {
       token,
     },
@@ -351,7 +351,7 @@ export function quizSessionUpdateState(
   sessionId: number,
   action: string
 ): ParsedResponse {
-  const res = request('PUT', `${QUIZ_URL}/${quizId}/sessions/${sessionId}`, {
+  const res = request('PUT', `${QUIZ_URL}/${quizId}/session/${sessionId}`, {
     headers: {
       token,
     },
@@ -380,7 +380,7 @@ export function quizSessionGetFinalResult(
   quizId: number,
   sessionId: number
 ): ParsedResponse {
-  const res = request('GET', `${QUIZ_URL}/${quizId}/sessions/${sessionId}/result`, {
+  const res = request('GET', `${QUIZ_URL}/${quizId}/session/${sessionId}/result`, {
     headers: {
       token,
     },
@@ -393,7 +393,7 @@ export function quizSessionGetFinalResultCsvFormat(
   quizId: number,
   sessionId: number
 ): ParsedResponse {
-  const res = request('GET', `${QUIZ_URL}/${quizId}/sessions/${sessionId}/result/csv`, {
+  const res = request('GET', `${QUIZ_URL}/${quizId}/session/${sessionId}/result/csv`, {
     headers: {
       token,
     },
