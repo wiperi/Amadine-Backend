@@ -667,7 +667,14 @@ export function adminQuizInfoV2(
   const quiz = findQuizById(quizId);
 
   return {
-    ...adminQuizInfo(authUserId, quizId),
+    quizId: quiz.quizId,
+    name: quiz.name,
+    timeCreated: quiz.timeCreated,
+    timeLastEdited: quiz.timeLastEdited,
+    description: quiz.description,
+    numQuestions: quiz.questions.length,
+    questions: quiz.questions,
+    duration: quiz.duration(),
     thumbnailUrl: quiz.thumbnailUrl,
   };
 }

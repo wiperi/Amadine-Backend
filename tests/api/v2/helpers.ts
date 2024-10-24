@@ -6,10 +6,25 @@ const AUTH_URL = `${config.url}:${config.port}/v2/admin/auth`;
 const QUIZ_URL = `${config.url}:${config.port}/v2/admin/quiz`;
 const USER_URL = `${config.url}:${config.port}/v2/admin/user`;
 
+export function clear(): ParsedResponse {
+  const res = request('DELETE', `${config.url}:${config.port}/v1/clear`);
+  return parse(res);
+}
+
 export function userLogout(token: string): ParsedResponse {
   const res = request('POST', `${AUTH_URL}/logout`, {
     headers: {
       token,
+    },
+  });
+  return parse(res);
+}
+
+export function userLogin(email: string, password: string): ParsedResponse {
+  const res = request('POST', `${AUTH_URL}/login`, {
+    json: {
+      email,
+      password,
     },
   });
   return parse(res);
