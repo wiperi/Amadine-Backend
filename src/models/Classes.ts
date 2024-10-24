@@ -54,7 +54,7 @@ export class Quiz {
   timeLastEdited: number = Math.floor(Date.now() / 1000);
   active: boolean = true;
   questions: Question[] = [];
-  thumbnailUrl: string = '';
+  thumbnailUrl?: string;
 
   constructor(authUserId: number, quizId: number, name: string, description: string) {
     this.authUserId = authUserId;

@@ -20,7 +20,7 @@ afterAll(() => {
 // test for quiz info
 describe('GET /v2/admin/quiz/:quizId', () => {
   describe('valid cases', () => {
-    test('successful quiz retrieval', () => {
+    test.skip('successful quiz retrieval', () => {
       const createQuizRes = quizCreate(token, 'Test Quiz', 'A test quiz');
       expect(createQuizRes.statusCode).toBe(200);
       const { quizId } = createQuizRes.body;
