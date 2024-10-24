@@ -181,10 +181,13 @@ export class QuizSession {
   sessionId: number;
   quizId: number;
   autoStartNum: number;
-  metadata: object; // deep copy of quiz
+  metadata: Omit<
+    Quiz,
+    keyof { [K in keyof Quiz as Quiz[K] extends Function ? K : never]: never } // remove functions from Quiz type
+  > & { duration: number }; // deep copy of quiz without functions
 
   messages: Message[] = [];
-  atQuestion: number = 1; // Question index starting from 1
+  atQuestion: number = 0; // Question index starting from 1, 0 means not started
   timeCreated: number = Math.floor(Date.now() / 1000);
 
   private static transitions = StateMachine.parseTransitions<QuizSessionState, PlayerAction>([
@@ -225,6 +228,7 @@ export class QuizSession {
   dispatch(action: PlayerAction): void {
     this.stateMachine.dispatch(action);
     if (this.state() === QUESTION_COUNTDOWN) {
+      this.atQuestion++;
       setTimeout(() => {
         if (this.state() === QUESTION_COUNTDOWN) {
           this.stateMachine.jumpTo(QUESTION_OPEN);
@@ -238,15 +242,18 @@ export class QuizSession {
             this.stateMachine.jumpTo(QUESTION_CLOSE);
           }
         },
-        findQuizById(this.quizId).duration() * 1000
+        this.metadata.duration * 1000
       );
+    }
+    if (this.state() === END) {
+      this.atQuestion = 0;
     }
   }
 
   constructor(sessionId: number, quiz: Quiz, autoStartNum: number) {
     this.sessionId = sessionId;
     this.quizId = quiz.quizId;
-    this.metadata = { ...quiz };
+    this.metadata = { ...quiz, duration: quiz.duration() };
     this.autoStartNum = autoStartNum;
   }
 }
