@@ -1,76 +1,7 @@
 {
-  "users": [
-    {
-      "numSuccessfulLogins": 1,
-      "numFailedPasswordsSinceLastLogin": 0,
-      "oldPasswords": [],
-      "userId": 7257909205,
-      "email": "hayden@unsw.edu.au",
-      "password": "$2b$04$EO3WCtm/awBS7vMOPjpl1eYFq3YG7eM0dMXinezn3v7ZOQgUEFOvy",
-      "nameFirst": "Hayden",
-      "nameLast": "Smith"
-    }
-  ],
-  "quizzes": [
-    {
-      "timeCreated": 1729748519,
-      "timeLastEdited": 1729748726,
-      "active": true,
-      "questions": [
-        {
-          "answers": [
-            {
-              "answerId": 419664820508,
-              "answer": "Example 1",
-              "correct": true,
-              "colour": "red"
-            },
-            {
-              "answerId": 408205342843,
-              "answer": "Example 2",
-              "correct": false,
-              "colour": "purple"
-            }
-          ],
-          "questionId": 62307962627,
-          "question": "safsdf",
-          "duration": 5,
-          "points": 5
-        },
-        {
-          "answers": [
-            {
-              "answerId": 143676200161,
-              "answer": "Example 1",
-              "correct": true,
-              "colour": "orange"
-            },
-            {
-              "answerId": 196244194655,
-              "answer": "Example 2",
-              "correct": false,
-              "colour": "green"
-            }
-          ],
-          "questionId": 58583881813,
-          "question": "safsdf44",
-          "duration": 5,
-          "points": 5
-        }
-      ],
-      "authUserId": 7257909205,
-      "quizId": 42141954304,
-      "name": "asdf",
-      "description": "sdff"
-    }
-  ],
-  "userSessions": [
-    {
-      "sessionId": 771665878495,
-      "authUserId": 7257909205,
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXlsb2FkIjowLjE1MDQzOTQ1Mjg5Mzg2MzMsImlhdCI6MTcyOTc0ODQ5MH0.uwpkyxnWcpPPQkkzzqqgQ6PyA7Yeyc39OHl-P8_L9xU"
-    }
-  ],
+  "users": [],
+  "quizzes": [],
+  "userSessions": [],
   "quizSessions": [],
   "players": []
 }

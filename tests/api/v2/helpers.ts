@@ -1,15 +1,10 @@
-import request, { Response } from 'sync-request-curl';
+import request from 'sync-request-curl';
 import config from '../../../src/config';
 import { parse, ParsedResponse } from '../v1/helpers';
 
 const AUTH_URL = `${config.url}:${config.port}/v2/admin/auth`;
 const QUIZ_URL = `${config.url}:${config.port}/v2/admin/quiz`;
 const USER_URL = `${config.url}:${config.port}/v2/admin/user`;
-
-export function clear(): ParsedResponse {
-  const res = request('DELETE', `${config.url}:${config.port}/v1/clear`);
-  return parse(res);
-}
 
 export function userLogout(token: string): ParsedResponse {
   const res = request('POST', `${AUTH_URL}/logout`, {
@@ -180,22 +175,6 @@ export function questionCreate(
     },
   });
   return parse(res);
-}
-
-export function quizRequestNameUpdate(quizId: number, token: string, name: string) {
-  const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/name`, {
-    headers: {
-      token,
-    },
-    json: {
-      name,
-    },
-  });
-
-  if (res.statusCode === 200) {
-    return JSON.parse(res.body.toString());
-  }
-  return res.statusCode;
 }
 
 export function questionDuplicate(

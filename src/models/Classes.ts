@@ -236,14 +236,11 @@ export class QuizSession {
       }, 3000);
     }
     if (this.state() === QUESTION_OPEN) {
-      setTimeout(
-        () => {
-          if (this.state() === QUESTION_OPEN) {
-            this.stateMachine.jumpTo(QUESTION_CLOSE);
-          }
-        },
-        this.metadata.duration * 1000
-      );
+      setTimeout(() => {
+        if (this.state() === QUESTION_OPEN) {
+          this.stateMachine.jumpTo(QUESTION_CLOSE);
+        }
+      }, this.metadata.duration * 1000);
     }
     if (this.state() === END) {
       this.atQuestion = 0;
@@ -253,7 +250,6 @@ export class QuizSession {
   constructor(sessionId: number, quiz: Quiz, autoStartNum: number) {
     this.sessionId = sessionId;
     this.quizId = quiz.quizId;
-
 
     const questions = quiz.questions.map(question => ({
       ...question,
