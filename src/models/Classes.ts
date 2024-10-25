@@ -1,6 +1,6 @@
-import { findQuizById } from '@/utils/helper';
 import { QuizSessionState, Color, PlayerAction } from './Enums';
 import { StateMachine } from './StateMachine';
+
 const {
   LOBBY,
   QUESTION_COUNTDOWN,
@@ -63,10 +63,6 @@ export class Quiz {
     this.description = description;
   }
 
-  // numQuestions(): number {
-  //   return this.questions.length;
-  // }
-
   duration(): number {
     return this.questions.reduce((acc, question) => acc + question.duration, 0);
   }
@@ -92,7 +88,7 @@ export class Question {
   questionId: number;
 
   question: string;
-  duration: number;
+  duration: number; // in seconds
   thumbnailUrl: string = '#';
   points: number;
 
@@ -181,10 +177,7 @@ export class QuizSession {
   sessionId: number;
   quizId: number;
   autoStartNum: number;
-  metadata: Omit<
-    Quiz,
-    keyof { [K in keyof Quiz as Quiz[K] extends Function ? K : never]: never } // remove functions from Quiz type
-  > & { duration: number }; // deep copy of quiz without functions
+  metadata: Quiz;
 
   messages: Message[] = [];
   atQuestion: number = 0; // Question index starting from 1, 0 means not started
@@ -227,6 +220,7 @@ export class QuizSession {
    */
   dispatch(action: PlayerAction): void {
     this.stateMachine.dispatch(action);
+
     if (this.state() === QUESTION_COUNTDOWN) {
       this.atQuestion++;
       setTimeout(() => {
@@ -235,13 +229,17 @@ export class QuizSession {
         }
       }, 3000);
     }
+
     if (this.state() === QUESTION_OPEN) {
+      // Get question duration
+      const duration = this.metadata.questions[this.atQuestion - 1].duration;
       setTimeout(() => {
         if (this.state() === QUESTION_OPEN) {
           this.stateMachine.jumpTo(QUESTION_CLOSE);
         }
-      }, this.metadata.duration * 1000);
+      }, duration * 1000);
     }
+
     if (this.state() === END) {
       this.atQuestion = 0;
     }
@@ -251,12 +249,10 @@ export class QuizSession {
     this.sessionId = sessionId;
     this.quizId = quiz.quizId;
 
-    const questions = quiz.questions.map(question => ({
-      ...question,
-      answers: question.getAnswersSlice(),
-    }));
+    // deep copy quiz
+    this.metadata = JSON.parse(JSON.stringify(quiz));
+    Object.setPrototypeOf(this.metadata, Quiz.prototype);
 
-    this.metadata = { ...quiz, duration: quiz.duration() };
     this.autoStartNum = autoStartNum;
   }
 }

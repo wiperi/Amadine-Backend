@@ -33,10 +33,10 @@ export function adminPlayerSubmitAnswers(
   }
 
   // Answer IDs are not valid for this particular question
-  // const question = quizSession.metadata.questions[questionPosition - 1];
-  // if (answerIds.some(answerId => !question.answers.map(answer => answer.id).includes(answerId))) {
-  //   throw new Error('Answer IDs are not valid for this particular question');
-  // }
+  const question = quizSession.metadata.questions[questionPosition - 1];
+  if (!question.getAnswersSlice().some(answer => answerIds.includes(answer.answerId))) {
+    throw new Error('Answer IDs are not valid for this particular question');
+  }
   // There are duplicate answer IDs provided
   // Less than 1 answer ID was submitted
 

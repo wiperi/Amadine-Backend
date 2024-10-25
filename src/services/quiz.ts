@@ -6,6 +6,8 @@ import {
   EmptyObject,
   ParamQuestionBody,
   ParamQuestionBodyV2,
+  QuizReturnedV2,
+  QuizReturned,
 } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import {
@@ -57,18 +59,7 @@ export function adminQuizDescriptionUpdate(
 export function adminQuizInfo(
   authUserId: number,
   quizId: number
-): {
-  quizId: number;
-  name: string;
-  timeCreated: number;
-  timeLastEdited: number;
-  description: string;
-  numQuestions: number;
-  questions: (Pick<Question, 'questionId' | 'question' | 'duration' | 'points'> & {
-    answers: Answer[];
-  })[];
-  duration: number;
-} {
+): QuizReturned {
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -614,11 +605,12 @@ export function adminQuizSessionsActivity(
     inactiveSessions,
   };
 }
+
 export function adminQuizSessionGetStatus(
   authUserId: number,
   quizId: number,
   quizSessionId: number
-): { state: QuizSessionState; atQuestion: number; players: string[]; metadata: object } {
+): { state: QuizSessionState; atQuestion: number; players: string[]; metadata: QuizReturnedV2 } {
   const data = getData();
   const quiz = findQuizById(quizId);
   if (!quiz) {
@@ -644,6 +636,10 @@ export function adminQuizSessionGetStatus(
       ...metadata,
       numQuestions: quiz.questions.length,
       duration: quiz.duration(),
+      questions: quiz.questions.map(question => ({
+        ...question,
+        answers: question.getAnswersSlice(),
+      })),
     },
   };
 }
@@ -651,19 +647,7 @@ export function adminQuizSessionGetStatus(
 export function adminQuizInfoV2(
   authUserId: number,
   quizId: number
-): {
-  quizId: number;
-  name: string;
-  timeCreated: number;
-  timeLastEdited: number;
-  description: string;
-  numQuestions: number;
-  questions: (Pick<Question, 'questionId' | 'question' | 'duration' | 'points' | 'thumbnailUrl'> & {
-    answers: Answer[];
-  })[];
-  duration: number;
-  thumbnailUrl: string;
-} {
+): QuizReturnedV2 {
   const quiz = findQuizById(quizId);
 
   const returnedQuestions = quiz.questions.map(question => ({
