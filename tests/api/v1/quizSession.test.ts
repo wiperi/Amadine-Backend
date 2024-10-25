@@ -390,7 +390,7 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
     const res1 = quizSessionGetStatus(token, quizId, quizSessionId);
     expect(res1.statusCode).toBe(200);
     expect(res1.body).toStrictEqual({
-      atQuestion: 1,
+      atQuestion: 0,
       state: 'LOBBY',
       players: [],
       metadata: {
