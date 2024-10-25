@@ -1,9 +1,12 @@
-import { userRegister, clear } from '../v1/helpers';
+import exp from 'constants';
+import { userRegister, clear, quizSessionCreate } from '../v1/helpers';
 
 import {
   quizGetDetails,
   quizCreate,
   questionCreate,
+  questionMove,
+  questionDuplicate,
   questionDelete,
   questionUpdate,
 } from './helpers';
@@ -284,7 +287,7 @@ describe('PUT /v2/admin/quiz/:quizid/question/:questionid', () => {
 });
 
 // test for question delete
-describe('DELETE /v1/admin/quiz/:quizId/question/:questionId', () => {
+describe('DELETE /v2/admin/quiz/:quizId/question/:questionId', () => {
   let quizId: number;
   let questionId: number;
   beforeEach(() => {
@@ -308,7 +311,216 @@ describe('DELETE /v1/admin/quiz/:quizId/question/:questionId', () => {
   });
 
   describe('invalid cases', () => {
-    // will be implemented after finished quizSessionUpdate
-    test.todo('session for this quiz is not in END state');
+    test('session for this quiz is not in END state', () => {
+      // Create a session to ensure the quiz is not in END state
+      const sessionRes = quizSessionCreate(token, quizId, 2); 
+      expect(sessionRes.statusCode).toBe(200);
+      
+      // Now attempt to delete the question
+      const deleteRes = questionDelete(token, quizId, questionId);
+      expect(deleteRes.statusCode).toBe(400); 
+      expect(deleteRes.body).toStrictEqual(ERROR); 
+    });
+  });
+  describe('valid cases', () => {
+    test('successfully delete a question when quiz is in END state', () => {
+      // Now attempt to delete the question
+      const deleteRes = questionDelete(token, quizId, questionId);
+      expect(deleteRes.statusCode).toBe(200);
+  
+      // Verify the question has been deleted by fetching quiz details
+      const getQuizRes = quizGetDetails(token, quizId);
+      expect(getQuizRes.statusCode).toBe(200);
+      const questions = getQuizRes.body.questions;
+      expect(questions.find((q: any) => q.questionId === questionId)).toBeUndefined();
+    });
+  });
+});
+
+// test for question move
+describe('PUT /v2/admin/quiz/:quizId/question/:questionId/move', () => {
+  let quizId: number;
+  let questionId1: number;
+  let questionId2: number;
+
+  beforeEach(() => {
+    // Create a quiz first
+    const createQuizRes = quizCreate(token, 'Test Quiz', 'A test quiz');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = createQuizRes.body.quizId;
+
+    const questionBody1 = {
+      question: 'What is the capital of France?',
+      duration: 60,
+      points: 5,
+      answers: [
+        { answer: 'Paris', correct: true },
+        { answer: 'Berlin', correct: false },
+        { answer: 'Rome', correct: false },
+      ],
+      thumbnailUrl: 'http://google.com/some/image/path.jpg',
+    };
+    const createQuestionRes1 = questionCreate(token, quizId, questionBody1);
+    expect(createQuestionRes1.statusCode).toBe(200);
+    questionId1 = createQuestionRes1.body.questionId;
+
+    // Add the second question
+    const questionBody2 = {
+      question: 'Who is the president of the United States?',
+      duration: 60,
+      points: 5,
+      answers: [
+        { answer: 'Biden', correct: true },
+        { answer: 'Obama', correct: false },
+        { answer: 'Trump', correct: false },
+      ],
+      thumbnailUrl: 'http://google.com/some/image/path2.jpg',
+    };
+    const createQuestionRes2 = questionCreate(token, quizId, questionBody2);
+    expect(createQuestionRes2.statusCode).toBe(200);
+    questionId2 = createQuestionRes2.body.questionId;
+  });
+  describe('invalid cases', () => {
+    test('attempt to move a question to an invalid position', () => {
+      // Try to move question 1 to an invalid position (e.g., index out of range)
+      const invalidPosition = 5;
+      const moveRes = questionMove(token, quizId, questionId1, invalidPosition);
+      expect(moveRes.statusCode).toBe(400); 
+      expect(moveRes.body).toStrictEqual(ERROR);
+    });
+  });
+  describe('valid cases', () => {
+    test('successfully move a question', () => {
+      // Move question 1 to the position of question 2
+      const moveRes = questionMove(token, quizId, questionId1, 1);
+      expect(moveRes.statusCode).toBe(200);
+  
+      // Fetch quiz details to verify the question has been moved
+      const getQuizRes = quizGetDetails(token, quizId);
+      expect(getQuizRes.statusCode).toBe(200);
+  
+      const questions = getQuizRes.body.questions;
+      expect(questions.length).toBe(2);
+  
+      // Verify that the questions have swapped positions
+      expect(questions[0].questionId).toBe(questionId2);
+      expect(questions[1].questionId).toBe(questionId1);
+    });
+  });
+});
+
+// test for question questionDuplicate
+describe('POST /v2/admin/quiz/:quizId/question/:questionId/duplicate', () => {
+  let quizId: number;
+  let questionId: number;
+  beforeEach(() => {
+    const createQuizRes = quizCreate(token, 'Test Quiz', 'A test quiz');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = createQuizRes.body.quizId;
+
+    const createQuestionRes = questionCreate(token, quizId, {
+      question: 'Are you my master?',
+      duration: 60,
+      points: 6,
+      answers: [
+        { answer: 'Yes', correct: true },
+        { answer: 'No', correct: false },
+        { answer: 'Maybe', correct: false },
+      ],
+      thumbnailUrl: 'http://google.com/some/image/path.jpg',
+    });
+    expect(createQuestionRes.statusCode).toBe(200);
+    questionId = createQuestionRes.body.questionId;
+  });
+
+  describe('invalid cases', () => {
+    test('attempt to duplicate a non-existent question', () => {
+      const invalidQuestionId = -1;
+      const duplicateRes = questionDuplicate(token, quizId, invalidQuestionId);
+      expect(duplicateRes.statusCode).toBe(400); 
+      expect(duplicateRes.body).toStrictEqual(ERROR);
+    });
+  });
+  describe('valid cases', () => {
+    test('successfully duplicate the question', () => {
+      const res = questionDuplicate(token, quizId, questionId);
+      expect(res.statusCode).toStrictEqual(200);
+      expect(res.body).toStrictEqual({ newQuestionId: expect.any(Number) });
+      const newQuestionId = res.body.newQuestionId;
+  
+      // Get quiz info
+      const detailRes = quizGetDetails(token, quizId);
+      expect(detailRes.statusCode).toStrictEqual(200);
+      expect(detailRes.body.numQuestions).toStrictEqual(2);
+      const questions = detailRes.body.questions;
+      expect(questions).toStrictEqual([
+        {
+          questionId: questionId,
+          question: 'Are you my master?',
+          duration: 60,
+          points: 6,
+          answers: [
+            {
+              answerId: expect.any(Number),
+              answer: 'Yes',
+              colour: expect.any(String),
+              correct: true,
+            },
+            {
+              answerId: expect.any(Number),
+              answer: 'No',
+              colour: expect.any(String),
+              correct: false,
+            },
+            {
+              answerId: expect.any(Number),
+              answer: 'Maybe',
+              colour: expect.any(String),
+              correct: false,
+            },
+          ],
+          thumbnailUrl: 'http://google.com/some/image/path.jpg',
+        },
+        {
+          questionId: newQuestionId,
+          question: 'Are you my master?',
+          duration: 60,
+          points: 6,
+          answers: [
+            {
+              answerId: expect.any(Number),
+              answer: 'Yes',
+              colour: expect.any(String),
+              correct: true,
+            },
+            {
+              answerId: expect.any(Number),
+              answer: 'No',
+              colour: expect.any(String),
+              correct: false,
+            },
+            {
+              answerId: expect.any(Number),
+              answer: 'Maybe',
+              colour: expect.any(String),
+              correct: false,
+            },
+          ],
+          thumbnailUrl: 'http://google.com/some/image/path.jpg',
+        },
+      ]);
+    });
+    test('successfully duplicate a question and verify its placement', async () => {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const res = questionDuplicate(token, quizId, questionId);
+      expect(res.statusCode).toStrictEqual(200);
+      expect(res.body).toStrictEqual({ newQuestionId: expect.any(Number) });
+
+      // get quiz info
+      const detailRes = quizGetDetails(token, quizId);
+      expect(detailRes.statusCode).toStrictEqual(200);
+      expect(detailRes.body.numQuestions).toStrictEqual(2);
+      expect(detailRes.body.timeLastEdited).not.toStrictEqual(detailRes.body.timeCreated);
+    });
   });
 });

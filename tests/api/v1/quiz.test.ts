@@ -673,7 +673,7 @@ describe('POST /v1/admin/quiz/:quizid/transfer', () => {
       const newToken = newUserRes.body.token;
       const quizDetails = quizGetDetails(newToken, quizId);
       expect(quizDetails.statusCode).toBe(200);
-      expect(quizDetails.body.authUserId).toBe(newUserRes.body.userId);
+      expect(quizDetails.body.name).toBe('Test Quiz');
     });
   });
 

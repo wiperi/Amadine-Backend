@@ -864,7 +864,7 @@ export function adminQuizQuestionDeleteV2(
   quizId: number,
   questionId: number
 ): EmptyObject {
-  if (!isQuizHasOngoingSessions(quizId)) {
+  if (isQuizHasOngoingSessions(quizId)) {
     throw new HttpError(400, ERROR_MESSAGES.QUIZ_NOT_IN_END_STATE);
   }
 
