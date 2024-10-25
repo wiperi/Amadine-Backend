@@ -17,7 +17,12 @@ import { hash, hashCompare } from '@/utils/helper';
 
 export function authorizeToken(req: Request, res: Response, next: NextFunction) {
   // Authorization white list
-  const whiteList = ['/v1/admin/auth/register', '/v1/admin/auth/login', '/v1/clear'];
+  const whiteList = [
+    '/v1/admin/auth/register',
+    '/v1/admin/auth/login',
+    '/v1/clear',
+    '/v1/player/join',
+  ];
   if (whiteList.includes(req.url)) {
     next();
     return;
