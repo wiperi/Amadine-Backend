@@ -36,8 +36,21 @@ describe('GET /v2/admin/quiz/:quizId', () => {
   describe('valid cases', () => {
     test('successful quiz retrieval', () => {
       const createQuizRes = quizCreate(token, 'Test Quiz', 'A test quiz');
-      expect(createQuizRes.statusCode).toBe(200);
       const { quizId } = createQuizRes.body;
+      const createQuestionRes = questionCreate(token, quizId, {
+        question: 'Are you my master?',
+        duration: 60,
+        points: 6,
+        answers: [
+          { answer: 'Yes', correct: true },
+          { answer: 'No', correct: false },
+          { answer: 'Maybe', correct: false },
+        ],
+        //refer to api, it shouldn't be empty and should be a valid url
+        thumbnailUrl: 'http://google.com/some/image/path.jpg',
+      });
+      expect(createQuestionRes.statusCode).toBe(200);
+      expect(createQuizRes.statusCode).toBe(200);
       const res = quizGetDetails(token, quizId);
       expect(res.statusCode).toBe(200);
       expect(res.body).toStrictEqual({
@@ -46,9 +59,37 @@ describe('GET /v2/admin/quiz/:quizId', () => {
         description: 'A test quiz',
         timeCreated: expect.any(Number),
         timeLastEdited: expect.any(Number),
-        numQuestions: 0,
-        questions: [],
-        duration: 0,
+        numQuestions: 1,
+        questions: [
+          {
+            questionId: createQuestionRes.body.questionId,
+            question: 'Are you my master?',
+            duration: 60,
+            points: 6,
+            answers: [
+              {
+                answer: 'Yes',
+                correct: true,
+                answerId: expect.any(Number),
+                colour: expect.any(String),
+              },
+              {
+                answer: 'No',
+                correct: false,
+                answerId: expect.any(Number),
+                colour: expect.any(String),
+              },
+              {
+                answer: 'Maybe',
+                correct: false,
+                answerId: expect.any(Number),
+                colour: expect.any(String),
+              },
+            ],
+            thumbnailUrl: 'http://google.com/some/image/path.jpg',
+          },
+        ],
+        duration: 60,
         thumbnailUrl: '#',
       });
     });
