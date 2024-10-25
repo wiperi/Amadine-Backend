@@ -253,6 +253,13 @@ export class QuizSession {
   constructor(sessionId: number, quiz: Quiz, autoStartNum: number) {
     this.sessionId = sessionId;
     this.quizId = quiz.quizId;
+
+
+    const questions = quiz.questions.map(question => ({
+      ...question,
+      answers: question.getAnswersSlice(),
+    }));
+
     this.metadata = { ...quiz, duration: quiz.duration() };
     this.autoStartNum = autoStartNum;
   }
