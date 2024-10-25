@@ -658,7 +658,7 @@ export function adminQuizInfoV2(
   timeLastEdited: number;
   description: string;
   numQuestions: number;
-  questions: (Pick<Question, 'questionId' | 'question' | 'duration' | 'points'> & {
+  questions: (Pick<Question, 'questionId' | 'question' | 'duration' | 'points' | 'thumbnailUrl'> & {
     answers: Answer[];
   })[];
   duration: number;
@@ -666,17 +666,18 @@ export function adminQuizInfoV2(
 } {
   const quiz = findQuizById(quizId);
 
-  return {
-    quizId: quiz.quizId,
-    name: quiz.name,
-    timeCreated: quiz.timeCreated,
-    timeLastEdited: quiz.timeLastEdited,
-    description: quiz.description,
-    numQuestions: quiz.questions.length,
-    questions: quiz.questions,
-    duration: quiz.duration(),
+  const returnedQuestions = quiz.questions.map(question => ({
+    ...question,
+    answers: question.getAnswersSlice(),
+  }));
+
+  const res = {
+    ...adminQuizInfo(authUserId, quizId),
+    questions: returnedQuestions,
     thumbnailUrl: quiz.thumbnailUrl,
   };
+
+  return res;
 }
 
 /**
