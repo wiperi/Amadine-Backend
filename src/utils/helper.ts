@@ -343,3 +343,12 @@ export function isQuizHasOngoingSessions(quizId: number): boolean {
       .length > 0
   );
 }
+
+export function removeProperties<T extends object, K extends keyof T>(
+  obj: T,
+  ...propertiesToRemove: K[]
+): Omit<T, K> {
+  const entries = Object.entries(obj) as [keyof T, T[keyof T]][];
+  const filteredEntries = entries.filter(([key]) => !propertiesToRemove.includes(key as K));
+  return Object.fromEntries(filteredEntries) as Omit<T, K>;
+}

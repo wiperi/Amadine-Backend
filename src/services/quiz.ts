@@ -20,6 +20,7 @@ import {
   getActiveQuizSession,
   isValidImgUrl,
   isQuizHasOngoingSessions,
+  removeProperties,
 } from '@/utils/helper';
 import { PlayerAction, QuizSessionState } from '@/models/Enums';
 
@@ -63,7 +64,9 @@ export function adminQuizInfo(
   timeLastEdited: number;
   description: string;
   numQuestions: number;
-  questions: Question[];
+  questions: (Pick<Question, 'questionId' | 'question' | 'duration' | 'points'> & {
+    answers: Answer[];
+  })[];
   duration: number;
 } {
   if (!isValidQuizId(quizId)) {
@@ -76,15 +79,18 @@ export function adminQuizInfo(
 
   const quiz = findQuizById(quizId);
 
+  const returnedQuestions = quiz.questions.map(question => ({
+    ...removeProperties(question, 'thumbnailUrl'),
+    answers: question.getAnswersSlice(),
+  }));
+
+  const res = removeProperties(quiz, 'thumbnailUrl', 'questions', 'active', 'authUserId');
+
   return {
-    quizId: quiz.quizId,
-    name: quiz.name,
-    timeCreated: quiz.timeCreated,
-    timeLastEdited: quiz.timeLastEdited,
-    description: quiz.description,
+    ...res,
+    questions: returnedQuestions,
+    duration: quiz.duration(),
     numQuestions: quiz.questions.length,
-    questions: quiz.questions, // Include the questions array
-    duration: quiz.questions.reduce((acc, question) => acc + question.duration, 0),
   };
 }
 
@@ -611,7 +617,7 @@ export function adminQuizSessionsActivity(
 export function adminQuizSessionGetStatus(
   authUserId: number,
   quizId: number,
-  sessionId: number
+  quizSessionId: number
 ): { state: QuizSessionState; atQuestion: number; players: string[]; metadata: object } {
   const data = getData();
   const quiz = findQuizById(quizId);
@@ -621,19 +627,24 @@ export function adminQuizSessionGetStatus(
   if (quiz.authUserId !== authUserId) {
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
-  const quizSession = data.quizSessions.find(s => s.sessionId === sessionId);
+  const quizSession = data.quizSessions.find(s => s.sessionId === quizSessionId);
   if (!quizSession) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_SESSION_ID);
   }
-  // find the players in this session
-  const players = data.players.filter(player => player.quizSessionId === sessionId);
-  // get the name of the players
+  const players = data.players.filter(player => player.quizSessionId === quizSessionId);
   const playerNames = players.map(player => player.name);
+  // metadata should be deep copied without active and authUserId
+  const metadata = removeProperties(quiz, 'active', 'authUserId');
+
   return {
     state: quizSession.state(),
     atQuestion: quizSession.atQuestion,
     players: playerNames,
-    metadata: quizSession.metadata,
+    metadata: {
+      ...metadata,
+      numQuestions: quiz.questions.length,
+      duration: quiz.duration(),
+    },
   };
 }
 
@@ -647,16 +658,26 @@ export function adminQuizInfoV2(
   timeLastEdited: number;
   description: string;
   numQuestions: number;
-  questions: Question[];
+  questions: (Pick<Question, 'questionId' | 'question' | 'duration' | 'points' | 'thumbnailUrl'> & {
+    answers: Answer[];
+  })[];
   duration: number;
   thumbnailUrl: string;
 } {
   const quiz = findQuizById(quizId);
 
-  return {
+  const returnedQuestions = quiz.questions.map(question => ({
+    ...question,
+    answers: question.getAnswersSlice(),
+  }));
+
+  const res = {
     ...adminQuizInfo(authUserId, quizId),
+    questions: returnedQuestions,
     thumbnailUrl: quiz.thumbnailUrl,
   };
+
+  return res;
 }
 
 /**
