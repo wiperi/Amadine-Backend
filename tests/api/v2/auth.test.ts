@@ -1,10 +1,5 @@
-import {
-  userLogout,
-  userGetDetails,
-  userUpdateDetails,
-  userUpdatePassword,
-} from './helpers';
-import { clear ,userRegister, userLogin } from '../v1/helpers';
+import { userLogout, userGetDetails, userUpdateDetails, userUpdatePassword } from './helpers';
+import { clear, userRegister, userLogin } from '../v1/helpers';
 
 const ERROR = { error: expect.any(String) };
 
