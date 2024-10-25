@@ -658,30 +658,26 @@ export function adminQuizInfoV2(
   timeLastEdited: number;
   description: string;
   numQuestions: number;
-  questions: Question[];
+  questions: (Pick<Question, 'questionId' | 'question' | 'duration' | 'points' | 'thumbnailUrl'> & {
+    answers: Answer[];
+  })[];
   duration: number;
   thumbnailUrl: string;
 } {
-  if (!isValidQuizId(quizId)) {
-    throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
-  }
-  adminQuizInfo(authUserId, quizId);
-  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
-    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
-  }
   const quiz = findQuizById(quizId);
 
-  return {
-    quizId: quiz.quizId,
-    name: quiz.name,
-    timeCreated: quiz.timeCreated,
-    timeLastEdited: quiz.timeLastEdited,
-    description: quiz.description,
-    numQuestions: quiz.questions.length,
-    questions: quiz.questions,
-    duration: quiz.duration(),
+  const returnedQuestions = quiz.questions.map(question => ({
+    ...question,
+    answers: question.getAnswersSlice(),
+  }));
+
+  const res = {
+    ...adminQuizInfo(authUserId, quizId),
+    questions: returnedQuestions,
     thumbnailUrl: quiz.thumbnailUrl,
   };
+
+  return res;
 }
 
 /**
