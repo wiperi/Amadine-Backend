@@ -313,13 +313,13 @@ describe('DELETE /v2/admin/quiz/:quizId/question/:questionId', () => {
   describe('invalid cases', () => {
     test('session for this quiz is not in END state', () => {
       // Create a session to ensure the quiz is not in END state
-      const sessionRes = quizSessionCreate(token, quizId, 2); 
+      const sessionRes = quizSessionCreate(token, quizId, 2);
       expect(sessionRes.statusCode).toBe(200);
-      
+
       // Now attempt to delete the question
       const deleteRes = questionDelete(token, quizId, questionId);
-      expect(deleteRes.statusCode).toBe(400); 
-      expect(deleteRes.body).toStrictEqual(ERROR); 
+      expect(deleteRes.statusCode).toBe(400);
+      expect(deleteRes.body).toStrictEqual(ERROR);
     });
   });
   describe('valid cases', () => {
@@ -327,7 +327,7 @@ describe('DELETE /v2/admin/quiz/:quizId/question/:questionId', () => {
       // Now attempt to delete the question
       const deleteRes = questionDelete(token, quizId, questionId);
       expect(deleteRes.statusCode).toBe(200);
-  
+
       // Verify the question has been deleted by fetching quiz details
       const getQuizRes = quizGetDetails(token, quizId);
       expect(getQuizRes.statusCode).toBe(200);
@@ -385,7 +385,7 @@ describe('PUT /v2/admin/quiz/:quizId/question/:questionId/move', () => {
       // Try to move question 1 to an invalid position (e.g., index out of range)
       const invalidPosition = 5;
       const moveRes = questionMove(token, quizId, questionId1, invalidPosition);
-      expect(moveRes.statusCode).toBe(400); 
+      expect(moveRes.statusCode).toBe(400);
       expect(moveRes.body).toStrictEqual(ERROR);
     });
   });
@@ -394,14 +394,14 @@ describe('PUT /v2/admin/quiz/:quizId/question/:questionId/move', () => {
       // Move question 1 to the position of question 2
       const moveRes = questionMove(token, quizId, questionId1, 1);
       expect(moveRes.statusCode).toBe(200);
-  
+
       // Fetch quiz details to verify the question has been moved
       const getQuizRes = quizGetDetails(token, quizId);
       expect(getQuizRes.statusCode).toBe(200);
-  
+
       const questions = getQuizRes.body.questions;
       expect(questions.length).toBe(2);
-  
+
       // Verify that the questions have swapped positions
       expect(questions[0].questionId).toBe(questionId2);
       expect(questions[1].questionId).toBe(questionId1);
@@ -437,7 +437,7 @@ describe('POST /v2/admin/quiz/:quizId/question/:questionId/duplicate', () => {
     test('attempt to duplicate a non-existent question', () => {
       const invalidQuestionId = -1;
       const duplicateRes = questionDuplicate(token, quizId, invalidQuestionId);
-      expect(duplicateRes.statusCode).toBe(400); 
+      expect(duplicateRes.statusCode).toBe(400);
       expect(duplicateRes.body).toStrictEqual(ERROR);
     });
   });
@@ -447,7 +447,7 @@ describe('POST /v2/admin/quiz/:quizId/question/:questionId/duplicate', () => {
       expect(res.statusCode).toStrictEqual(200);
       expect(res.body).toStrictEqual({ newQuestionId: expect.any(Number) });
       const newQuestionId = res.body.newQuestionId;
-  
+
       // Get quiz info
       const detailRes = quizGetDetails(token, quizId);
       expect(detailRes.statusCode).toStrictEqual(200);
