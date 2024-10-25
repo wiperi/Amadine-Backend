@@ -685,7 +685,7 @@ export function adminQuizInfoV2(
  * Return an empty object if succeed
  */
 export function adminQuizRemoveV2(authUserId: number, quizId: number): EmptyObject {
-  if (!isQuizHasOngoingSessions(quizId)) {
+  if (isQuizHasOngoingSessions(quizId)) {
     throw new HttpError(400, ERROR_MESSAGES.QUIZ_NOT_IN_END_STATE);
   }
 
@@ -697,7 +697,7 @@ export function adminQuizTransferV2(
   quizId: number,
   userEmail: string
 ): EmptyObject {
-  if (!isQuizHasOngoingSessions(quizId)) {
+  if (isQuizHasOngoingSessions(quizId)) {
     throw new HttpError(400, ERROR_MESSAGES.QUIZ_NOT_IN_END_STATE);
   }
 
