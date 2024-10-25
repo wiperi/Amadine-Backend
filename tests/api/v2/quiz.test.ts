@@ -9,7 +9,8 @@ import {
   quizGetTrash,
   quizRestore,
   questionCreate,
-  trashEmpty } from './helpers';
+  trashEmpty,
+} from './helpers';
 
 import { userRegister, clear, quizSessionCreate, userLogin } from '../v1/helpers';
 
