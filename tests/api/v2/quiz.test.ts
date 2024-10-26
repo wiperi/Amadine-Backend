@@ -4,7 +4,7 @@ import {
   quizCreate,
   quizDelete,
   quizTransfer,
-  quizRequestNameUpdate,
+  quizUpdateName,
   quizUpdateDescription,
   quizGetTrash,
   quizRestore,
@@ -239,13 +239,14 @@ describe('PUT /v2/admin/quiz/{quizid}/name', () => {
     quizId = createQuizRes.body.quizId;
   });
   describe('valid cases', () => {
-    test('has correct return type', () => {
-      const res = quizRequestNameUpdate(quizId, token, 'myName');
-      expect(res).toStrictEqual({});
+    test.only('has correct return type', () => {
+      const res = quizUpdateName(quizId, token, 'myName');
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({});
     });
 
     test('successful update the quiz name', () => {
-      quizRequestNameUpdate(quizId, token, 'newName');
+      quizUpdateName(quizId, token, 'newName');
       const res = quizGetDetails(token, quizId);
       expect(res.statusCode).toBe(200);
       expect(res.body).toStrictEqual({
@@ -263,7 +264,7 @@ describe('PUT /v2/admin/quiz/{quizid}/name', () => {
 
     test('successful update last edit time', async () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      quizRequestNameUpdate(quizId, token, 'newName');
+      quizUpdateName(quizId, token, 'newName');
       const res = quizGetDetails(token, quizId);
       expect(res.statusCode).toBe(200);
       expect(res.body.timeLastEdited).not.toStrictEqual(res.body.timeCreated);

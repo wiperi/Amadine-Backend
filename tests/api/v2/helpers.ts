@@ -126,6 +126,22 @@ export function quizUpdateDescription(
   return parse(res);
 }
 
+export function quizUpdateName(
+  quizId: number,
+  token: string,
+  name: string
+): ParsedResponse {
+  const res = request('PUT', `${QUIZ_URL}/${quizId}/name`, {
+    headers: {
+      token,
+    },
+    json: {
+      name,
+    },
+  });
+  return parse(res);
+}
+
 export function quizGetTrash(token: string): ParsedResponse {
   const res = request('GET', `${QUIZ_URL}/trash`, {
     headers: {
