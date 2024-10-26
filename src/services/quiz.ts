@@ -14,7 +14,6 @@ import {
   getNewID,
   isQuizIdOwnedByUser,
   isValidQuizId,
-  findQuizById,
   isValidQuizName,
   isValidQuizDescription,
   recursiveFind,
@@ -23,6 +22,7 @@ import {
   isValidImgUrl,
   isQuizHasOngoingSessions,
   removeProperties,
+  find,
 } from '@/utils/helper';
 import { PlayerAction, QuizSessionState } from '@/models/Enums';
 
@@ -45,7 +45,7 @@ export function adminQuizDescriptionUpdate(
     throw new HttpError(400, ERROR_MESSAGES.INVALID_DESCRIPTION);
   }
 
-  const quiz = findQuizById(quizId);
+  const quiz = find.quiz(quizId);
   quiz.description = description;
   quiz.timeLastEdited = Math.floor(Date.now() / 1000);
   setData();
@@ -56,10 +56,7 @@ export function adminQuizDescriptionUpdate(
 /**
  * Get all of the relevant information about the current quiz.
  */
-export function adminQuizInfo(
-  authUserId: number,
-  quizId: number
-): QuizReturned {
+export function adminQuizInfo(authUserId: number, quizId: number): QuizReturned {
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -68,7 +65,7 @@ export function adminQuizInfo(
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
 
-  const quiz = findQuizById(quizId);
+  const quiz = find.quiz(quizId);
 
   const returnedQuestions = quiz.questions.map(question => ({
     ...removeProperties(question, 'thumbnailUrl'),
@@ -101,7 +98,7 @@ export function adminQuizNameUpdate(authUserId: number, quizId: number, name: st
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
 
-  const quiz = findQuizById(quizId);
+  const quiz = find.quiz(quizId);
   quiz.name = name;
   quiz.timeLastEdited = Math.floor(Date.now() / 1000);
   setData();
@@ -160,7 +157,7 @@ export function adminQuizRemove(authUserId: number, quizId: number): EmptyObject
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
 
-  const quiz = findQuizById(quizId);
+  const quiz = find.quiz(quizId);
   quiz.active = false;
   quiz.timeLastEdited = Math.floor(Date.now() / 1000);
   setData();
@@ -180,7 +177,7 @@ export function adminQuizTrashView(authUserId: number): { quizzes: ReturnedQuizV
 }
 
 export function adminQuizRestore(authUserId: number, quizId: number): EmptyObject {
-  const quiz = findQuizById(quizId);
+  const quiz = find.quiz(quizId);
   if (!quiz) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -204,7 +201,7 @@ export function adminQuizTrashEmpty(authUserId: number, quizIds: number[]): Empt
   const data = getData();
 
   for (const quizId of quizIds) {
-    const quiz = findQuizById(quizId);
+    const quiz = find.quiz(quizId);
     if (!quiz) {
       throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
     }
@@ -229,7 +226,7 @@ export function adminQuizTransfer(
 ): EmptyObject {
   // TODO: Implement this function
   // const newAuthUserId = data.users.find(user => user.email === userEmail).userId;
-  // findQuizById(quizId).authUserId = newAuthUserId;
+  // find.quiz(quizId).authUserId = newAuthUserId;
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -244,7 +241,7 @@ export function adminQuizTransfer(
   if (targetuser.userId === authUserId) {
     throw new HttpError(400, ERROR_MESSAGES.USED_EMAIL);
   }
-  const quiz = findQuizById(quizId);
+  const quiz = find.quiz(quizId);
   const hasSameName = data.quizzes.some(
     q => q.authUserId === targetuser.userId && q.name === quiz.name
   );
@@ -278,7 +275,7 @@ export function adminQuizQuestionCreate(
   if (questionBody.duration <= 0) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
-  const quiz = findQuizById(quizId);
+  const quiz = find.quiz(quizId);
   if (
     quiz.questions.reduce((acc, question) => acc + question.duration, 0) + questionBody.duration >
     180
@@ -342,7 +339,7 @@ export function adminQuizQuestionUpdate(
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
 
-  const quiz = findQuizById(quizId);
+  const quiz = find.quiz(quizId);
 
   const question = quiz.questions.find(q => q.questionId === questionId);
   if (!question) {
@@ -405,7 +402,7 @@ export function adminQuizQuestionDelete(
   quizId: number,
   questionId: number
 ): EmptyObject {
-  const quiz = findQuizById(quizId);
+  const quiz = find.quiz(quizId);
   if (!quiz || !quiz.active) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -431,7 +428,7 @@ export function adminQuizQuestionMove(
   questionId: number,
   newPosition: number
 ): EmptyObject {
-  const quiz = findQuizById(quizId);
+  const quiz = find.quiz(quizId);
   if (!quiz) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -466,7 +463,7 @@ export function adminQuizQuestionDuplicate(
   quizId: number,
   questionId: number
 ): { newQuestionId: number } {
-  const quiz = findQuizById(quizId);
+  const quiz = find.quiz(quizId);
   if (!quiz || !quiz.active) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -482,7 +479,7 @@ export function adminQuizQuestionDuplicate(
 
   quiz.timeLastEdited = Math.floor(Date.now() / 1000);
   const newQuestionId = getNewID('question');
-  const questions = findQuizById(quizId).questions;
+  const questions = find.quiz(quizId).questions;
 
   const newQuestion = Object.assign(
     {},
@@ -504,7 +501,7 @@ export function adminQuizSessionUpdate(
   const data = getData();
 
   // Valid token is provided, but user is not an owner of this quiz or quiz doesn't exist
-  const quiz = findQuizById(quizId);
+  const quiz = find.quiz(quizId);
   if (!quiz) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -548,7 +545,7 @@ export function adminQuizSessionStart(
   autoStartNum: number
 ): { newSessionId: number } {
   const data = getData();
-  const quiz = findQuizById(quizId);
+  const quiz = find.quiz(quizId);
   if (!quiz) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -612,7 +609,7 @@ export function adminQuizSessionGetStatus(
   quizSessionId: number
 ): { state: QuizSessionState; atQuestion: number; players: string[]; metadata: QuizReturnedV2 } {
   const data = getData();
-  const quiz = findQuizById(quizId);
+  const quiz = find.quiz(quizId);
   if (!quiz) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }
@@ -644,11 +641,8 @@ export function adminQuizSessionGetStatus(
   };
 }
 
-export function adminQuizInfoV2(
-  authUserId: number,
-  quizId: number
-): QuizReturnedV2 {
-  const quiz = findQuizById(quizId);
+export function adminQuizInfoV2(authUserId: number, quizId: number): QuizReturnedV2 {
+  const quiz = find.quiz(quizId);
 
   const returnedQuestions = quiz.questions.map(question => ({
     ...question,
@@ -710,7 +704,7 @@ export function adminQuizQuestionCreateV2(
   if (questionBody.duration <= 0) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_QUESTION);
   }
-  const quiz = findQuizById(quizId);
+  const quiz = find.quiz(quizId);
   if (
     quiz.questions.reduce((acc, question) => acc + question.duration, 0) + questionBody.duration >
     180
@@ -779,7 +773,7 @@ export function adminQuizQuestionUpdateV2(
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
 
-  const quiz = findQuizById(quizId);
+  const quiz = find.quiz(quizId);
 
   const question = quiz.questions.find(q => q.questionId === questionId);
   if (!question) {
@@ -864,7 +858,7 @@ export function adminQuizThumbnail(
     throw new HttpError(400, ERROR_MESSAGES.INVALID_URL);
   }
 
-  const quiz = findQuizById(quizId);
+  const quiz = find.quiz(quizId);
   if (!quiz) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
   }

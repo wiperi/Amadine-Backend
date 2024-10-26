@@ -4,6 +4,7 @@ import { User, UserSession } from '@/models/Classes';
 import { EmptyObject } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import {
+  find,
   getNewID,
   isUnusedEmail,
   isValidEmail,
@@ -17,11 +18,7 @@ import { hash, hashCompare } from '@/utils/helper';
 
 export function authorizeToken(req: Request, res: Response, next: NextFunction) {
   // Authorization white list
-  const whiteList = [
-    '/v1/admin/auth/register',
-    '/v1/admin/auth/login',
-    '/v1/clear',
-  ];
+  const whiteList = ['/v1/admin/auth/register', '/v1/admin/auth/login', '/v1/clear'];
   if (whiteList.includes(req.url) || req.url.startsWith('/v1/player/')) {
     next();
     return;
@@ -152,7 +149,7 @@ export function adminUserDetailsUpdate(
   }
 
   const data = getData();
-  const user = data.users.find(user => user.userId === authUserId);
+  const user = find.user(authUserId);
 
   const emailUsedByOthers = data.users.find(
     user => user.email === email && user.userId !== authUserId
@@ -187,8 +184,7 @@ export function adminUserDetails(authUserId: number): {
     numFailedPasswordsSinceLastLogin: number;
   };
 } {
-  const data = getData();
-  const user = data.users.find(user => user.userId === authUserId);
+  const user = find.user(authUserId);
 
   return {
     user: {
@@ -213,7 +209,7 @@ export async function adminUserPasswordUpdate(
     throw new HttpError(400, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
   }
 
-  const user = getData().users.find(user => user.userId === authUserId);
+  const user = find.user(authUserId);
 
   if (!user) {
     throw new HttpError(400, ERROR_MESSAGES.UID_NOT_EXIST);

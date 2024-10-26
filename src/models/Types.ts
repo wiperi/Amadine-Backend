@@ -14,7 +14,10 @@ export type ParamQuestionBody = {
 
 export type ParamQuestionBodyV2 = ParamQuestionBody & { thumbnailUrl: string };
 
-export type RemoveFunctions<T> = Omit<T, keyof {[K in keyof T as T[K] extends (...args: any[]) => unknown ? K : never]: never}>;
+export type RemoveFunctions<T> = Omit<
+  T,
+  keyof { [K in keyof T as T[K] extends (...args: any[]) => unknown ? K : never]: never }
+>;
 
 export type AnswerReturned = {
   answerId: number;
@@ -44,4 +47,7 @@ export type QuizReturned = {
 
 export type QuestionReturnedV2 = QuestionReturned & { thumbnailUrl: string };
 
-export type QuizReturnedV2 = QuizReturned & { questions: QuestionReturnedV2[]; thumbnailUrl: string };
+export type QuizReturnedV2 = QuizReturned & {
+  questions: QuestionReturnedV2[];
+  thumbnailUrl: string;
+};

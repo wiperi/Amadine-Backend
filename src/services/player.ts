@@ -2,7 +2,7 @@ import { getData } from '@/dataStore';
 import { QuizSession, Player } from '@/models/Classes';
 import { QuizSessionState } from '@/models/Enums';
 import { ERROR_MESSAGES } from '@/utils/errors';
-import { findQuizSessionById, getNewID, getRandomName, isPlayerNameUnique } from '@/utils/helper';
+import { getNewID, getRandomName, isPlayerNameUnique } from '@/utils/helper';
 import { HttpError } from '@/utils/HttpError';
 import { EmptyObject } from '@/models/Types';
 import { find } from '@/utils/helper';
@@ -12,7 +12,7 @@ export function PlayerJoinSession(sessionId: number, name: string): { playerId: 
     throw new HttpError(400, ERROR_MESSAGES.PLAYER_NAME_ALREADY_USED);
   }
 
-  const quizSession: QuizSession = findQuizSessionById(sessionId);
+  const quizSession: QuizSession = find.quizSession(sessionId);
 
   if (!quizSession) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_SESSION_ID);
@@ -88,7 +88,9 @@ export function adminPlayerSubmitAnswers(
   const timeSpent = Math.floor(Date.now() / 1000) - quizSession.timeCurrentQuestionStarted;
 
   // Check if user is wrong, if user submit any answer that is not correct
-  const userIsWrong = question.getAnswersSlice().some(a => answerIdsSet.has(a.answerId) && (!a.correct));
+  const userIsWrong = question
+    .getAnswersSlice()
+    .some(a => answerIdsSet.has(a.answerId) && !a.correct);
 
   const submit = player.submits.find(s => s.questionId === question.questionId);
 
