@@ -21,9 +21,8 @@ export function authorizeToken(req: Request, res: Response, next: NextFunction) 
     '/v1/admin/auth/register',
     '/v1/admin/auth/login',
     '/v1/clear',
-    '/v1/player/join',
   ];
-  if (whiteList.includes(req.url)) {
+  if (whiteList.includes(req.url) || req.url.startsWith('/v1/player/')) {
     next();
     return;
   }

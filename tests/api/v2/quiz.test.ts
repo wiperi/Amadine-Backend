@@ -239,7 +239,7 @@ describe('PUT /v2/admin/quiz/{quizid}/name', () => {
     quizId = createQuizRes.body.quizId;
   });
   describe('valid cases', () => {
-    test.only('has correct return type', () => {
+    test('has correct return type', () => {
       const res = quizUpdateName(quizId, token, 'myName');
       expect(res.statusCode).toBe(200);
       expect(res.body).toStrictEqual({});

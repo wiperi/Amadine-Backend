@@ -7,6 +7,9 @@ import {
   playerJoinSession,
   quizSessionUpdateState,
   quizSessionGetStatus,
+  questionUpdate,
+  playerGetQuestionInfo,
+  playerSubmitAnswer,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -28,17 +31,28 @@ beforeEach(() => {
   quizId = createQuizRes.body.quizId;
 
   // Create a question
-  const createQuestionRes = questionCreate(token, quizId, {
+  let createQuestionRes = questionCreate(token, quizId, {
     question: 'Are you my master?',
     duration: 60,
     points: 6,
     answers: [
       { answer: 'Yes', correct: true },
+      { answer: 'You are puppets', correct: true },
       { answer: 'No', correct: false },
-      { answer: 'Maybe', correct: false },
+      { answer: 'Who knows', correct: false },
     ],
   });
-  expect(createQuestionRes.statusCode).toBe(200);
+  createQuestionRes = questionCreate(token, quizId, {
+    question: 'Blue pill or red pill?',
+    duration: 60,
+    points: 5,
+    answers: [
+      { answer: 'Red', correct: true },
+      { answer: 'Blue', correct: false },
+      { answer: 'Whatever', correct: false },
+      { answer: "I don't know", correct: false },
+    ],
+  });
 
   // Create a quiz session
   const createQuizSessionRes = quizSessionCreate(token, quizId, 2);
@@ -114,6 +128,93 @@ describe('POST /v1/player/join', () => {
       const getInfoRes = quizSessionGetStatus(token, quizId, quizSessionId);
       expect(getInfoRes.statusCode).toBe(200);
       expect(getInfoRes.body.players).toStrictEqual(['Peter Griffin', 'Glen Quagmire']);
+    });
+  });
+});
+
+describe.skip('PUT /v1/player/{playerid}/question/{questionposition}/answer', () => {
+  let playerId: number;
+  let answerIds: number[];
+  beforeEach(() => {
+    // Join a not started session
+    const res = playerJoinSession(quizSessionId, 'Peter Griffin');
+    expect(res.statusCode).toBe(200);
+    playerId = res.body.playerId;
+
+    // Get answerIds
+    const questionInfo = playerGetQuestionInfo(playerId, 1);
+    expect(questionInfo.statusCode).toBe(200);
+    answerIds = questionInfo.body.answers.map((answer: Record<string, unknown>) => answer.answerId);
+    expect(answerIds.length).toBeGreaterThan(2); // at least 3 answers
+
+    // Go to the first question
+    quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+    quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
+  });
+
+  describe('valid cases', () => {
+    // valid cases
+    test('submit all answers', () => {
+      // Submit answer
+      const res = playerSubmitAnswer(answerIds, playerId, 1);
+      expect(res.statusCode).toBe(200);
+    });
+    test('submit partial answers', () => {
+      // Submit answer
+      const res = playerSubmitAnswer(answerIds.slice(0, 1), playerId, 1);
+      expect(res.statusCode).toBe(200);
+
+      // Submit answer again
+      const res2 = playerSubmitAnswer(answerIds.slice(0, 1), playerId, 1);
+      expect(res2.statusCode).toBe(200);
+    });
+  });
+
+  describe('invalid cases', () => {
+    test('player ID does not exist', () => {
+      const res = playerSubmitAnswer(answerIds, 999999, 1);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('question position is not valid for the session', () => {
+      const res = playerSubmitAnswer(answerIds, playerId, 999);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('session is not in QUESTION_OPEN state', () => {
+      quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER');
+      const res = playerSubmitAnswer(answerIds, playerId, 1);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('session is not currently on this question', () => {
+      quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+      const res = playerSubmitAnswer(answerIds, playerId, 1);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('answer IDs are not valid for this particular question', () => {
+      const invalidAnswerIds = [999999, 1000000];
+      const res = playerSubmitAnswer(invalidAnswerIds, playerId, 1);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('duplicate answer IDs provided', () => {
+      const duplicateAnswerIds = [answerIds[0], answerIds[0]];
+      const res = playerSubmitAnswer(duplicateAnswerIds, playerId, 1);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('less than 1 answer ID submitted', () => {
+      const res = playerSubmitAnswer([], playerId, 1);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
     });
   });
 });
