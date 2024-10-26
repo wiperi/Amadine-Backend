@@ -10,6 +10,8 @@ import {
   questionUpdate,
   playerSubmitAnswer,
   playerGetQuestionInfo,
+  playerPostMessage,
+  playerGetMessage,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -288,6 +290,96 @@ describe('GET /v1/player/:playerId/question/:questionposition', () => {
           { answerId: expect.any(Number), answer: 'You are puppets', colour: expect.any(String) },
           { answerId: expect.any(Number), answer: 'No', colour: expect.any(String) },
           { answerId: expect.any(Number), answer: 'Who knows', colour: expect.any(String) },
+        ],
+      });
+    });
+  });
+});
+
+/**
+ * test for playerPostMessage
+ */
+describe('POST /v1/player/:playerId/chat', () => {
+  let playerId: number;
+  beforeEach(() => {
+    const res = playerJoinSession(quizSessionId, 'Peter Griffin');
+    expect(res.statusCode).toBe(200);
+    playerId = res.body.playerId;
+  });
+
+  describe('invalid cases', () => {
+    test('player Id does not exist', () => {
+      const res = playerPostMessage(0, { message: { messageBody: 'hello' } });
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('invalid message body', () => {
+      const res1 = playerPostMessage(playerId, { message: { messageBody: '' } });
+      expect(res1.statusCode).toBe(400);
+      expect(res1.body).toStrictEqual(ERROR);
+
+      const res2 = playerPostMessage(playerId, {
+        message: {
+          messageBody:
+            'SeskASvSvZkvSdHfoArZXJTVbsxUHoqXRFFpjamzBMNmPvfKWWwQQWZbBguKqzhcPGZkxJYwNFBDjNFQEHYUSWdxHomoDXsssARwwwwwM',
+        },
+      });
+      expect(res2.statusCode).toBe(400);
+      expect(res2.body).toStrictEqual(ERROR);
+    });
+  });
+
+  describe('valid cases', () => {
+    test('have correct return type', () => {
+      const res = playerPostMessage(playerId, {
+        message: { messageBody: 'Hello everyone! Nice to chat.' },
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({});
+    });
+
+    // the following 2 tests will be test after finish playerGetMessage
+    test.skip('successful add one new message', () => {
+      const res = playerPostMessage(playerId, {
+        message: { messageBody: 'Hello everyone! Nice to chat.' },
+      });
+      expect(res.statusCode).toBe(200);
+      const getMessageRes = playerGetMessage(playerId);
+      expect(getMessageRes.statusCode).toBe(200);
+      expect(getMessageRes.body).toStrictEqual({
+        messages: [
+          {
+            messageBody: 'Hello everyone! Nice to chat.',
+            playerId: playerId,
+            playerName: 'Peter Griffin',
+            timeSent: expect.any(Number),
+          },
+        ],
+      });
+    });
+
+    test.skip('successful add multiple new messages', () => {
+      const res = playerPostMessage(playerId, { message: 'Hello everyone! Nice to chat.' });
+      expect(res.statusCode).toBe(200);
+      const res1 = playerPostMessage(playerId, { message: 'Hi nice to meet you!' });
+      expect(res1.statusCode).toBe(200);
+      const getMessageRes = playerGetMessage(playerId);
+      expect(getMessageRes.statusCode).toBe(200);
+      expect(getMessageRes.body).toStrictEqual({
+        messages: [
+          {
+            messageBody: 'Hello everyone! Nice to chat.',
+            playerId: playerId,
+            playerName: 'Peter Griffin',
+            timeSent: expect.any(Number),
+          },
+          {
+            messageBody: 'Hi nice to meet you!',
+            playerId: playerId,
+            playerName: 'Peter Griffin',
+            timeSent: expect.any(Number),
+          },
         ],
       });
     });

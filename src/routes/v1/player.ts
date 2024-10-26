@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import {
   PlayerJoinSession,
-  playerGetQuestionInfo,
+  playerGetQuestionInfo, playerPostMessage,
   adminPlayerSubmitAnswers,
 } from '@/services/player';
 import { tryCatch } from '@/utils/helper';
@@ -32,4 +32,9 @@ router.put(
   }
 );
 
+router.post('/:playerid(-?\\d+)/chat', (req: Request, res: Response, next: NextFunction) => {
+  const playerId = parseInt(req.params.playerid);
+  const { message } = req.body.message;
+  tryCatch(() => playerPostMessage(playerId, message.messageBody), req, res, next);
+});
 export default router;
