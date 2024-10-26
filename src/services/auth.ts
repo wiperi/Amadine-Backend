@@ -22,8 +22,14 @@ export function authorizeToken(req: Request, res: Response, next: NextFunction) 
     '/v1/admin/auth/login',
     '/v1/clear',
     '/v1/player/join',
+    '/v1/player/:playerId/question/:questionposition',
   ];
-  if (whiteList.includes(req.url)) {
+  const isWhitelisted = whiteList.some(path => {
+    const regexPath = path.replace(/:[^\s/]+/g, '([\\w-]+)');
+    return new RegExp(`^${regexPath}$`).test(req.path);
+  });
+
+  if (isWhitelisted) {
     next();
     return;
   }
