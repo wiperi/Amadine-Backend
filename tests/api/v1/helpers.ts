@@ -221,7 +221,7 @@ export function questionCreate(
   return parse(res);
 }
 
-export function quizRequestNameUpdate(quizId: Number, token: String, name: String) {
+export function quizUpdateName(quizId: Number, token: String, name: String) {
   const res = request('PUT', `${config.url}:${config.port}/v1/admin/quiz/${quizId}/name`, {
     json: {
       token,

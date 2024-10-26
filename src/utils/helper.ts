@@ -1,6 +1,6 @@
 import { getData } from '@/dataStore';
 import isEmail from 'validator/lib/isEmail';
-import { User, Quiz, QuizSession, UserSession, Player } from '@/models/Classes';
+import { User, Quiz, QuizSession, Player, UserSession } from '@/models/Classes';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
@@ -296,10 +296,6 @@ export function isQuizIdOwnedByUser(quizId: number, authUserId: number): boolean
   );
 }
 
-export function findQuizById(quizId: number): Quiz | undefined {
-  return getData().quizzes.find(quiz => quiz.quizId === quizId);
-}
-
 export function getActiveQuizSession(quizId: number): number[] {
   const data = getData();
 
@@ -348,10 +344,6 @@ export function removeProperties<T extends object, K extends keyof T>(
   const entries = Object.entries(obj) as [keyof T, T[keyof T]][];
   const filteredEntries = entries.filter(([key]) => !propertiesToRemove.includes(key as K));
   return Object.fromEntries(filteredEntries) as Omit<T, K>;
-}
-
-export function findQuizSessionById(sessionId: number): QuizSession {
-  return getData().quizSessions.find(q => q.sessionId === sessionId);
 }
 
 export function isPlayerNameUnique(name: string, sessionId: number): boolean {

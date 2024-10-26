@@ -9,7 +9,7 @@ import {
   quizGetTrash,
   quizRestore,
   clear,
-  quizRequestNameUpdate,
+  quizUpdateName,
   trashEmpty,
   quizTransfer,
   quizUpdateThumbnail,
@@ -199,17 +199,17 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
 
   describe('invalid cases', () => {
     test('name contains invalid characters', () => {
-      const res = quizRequestNameUpdate(quizId, token, 'Алексей');
+      const res = quizUpdateName(quizId, token, 'Алексей');
       expect(res).toStrictEqual(400);
     });
 
     test('name less than 3 characters', () => {
-      const res = quizRequestNameUpdate(quizId, token, 'ha');
+      const res = quizUpdateName(quizId, token, 'ha');
       expect(res).toStrictEqual(400);
     });
 
     test('name is more than 30 characters', () => {
-      const res = quizRequestNameUpdate(quizId, token, 'morethanthirtycharsmorethanthirty');
+      const res = quizUpdateName(quizId, token, 'morethanthirtycharsmorethanthirty');
       expect(res).toStrictEqual(400);
     });
 
@@ -220,17 +220,17 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
         'Do not have the same name as mine!'
       );
       expect(createQuizRes1.statusCode).toStrictEqual(200);
-      const res = quizRequestNameUpdate(quizId, token, 'My Test Name');
+      const res = quizUpdateName(quizId, token, 'My Test Name');
       expect(res).toStrictEqual(400);
     });
 
     test('userId is empty', () => {
-      const res = quizRequestNameUpdate(quizId, '', 'newName');
+      const res = quizUpdateName(quizId, '', 'newName');
       expect(res).toStrictEqual(401);
     });
 
     test('userId does not refer to a valid logged in user session', () => {
-      const res = quizRequestNameUpdate(quizId, 'invalidToken', 'newName');
+      const res = quizUpdateName(quizId, 'invalidToken', 'newName');
       expect(res).toStrictEqual(401);
     });
 
@@ -239,24 +239,24 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
       expect(userRes.statusCode).toBe(200);
       const token1 = userRes.body.token;
 
-      const res = quizRequestNameUpdate(quizId, token1, 'newName');
+      const res = quizUpdateName(quizId, token1, 'newName');
       expect(res).toStrictEqual(403);
     });
 
     test('quizId does not exist', () => {
-      const res = quizRequestNameUpdate(0, token, 'newName');
+      const res = quizUpdateName(0, token, 'newName');
       expect(res).toStrictEqual(403);
     });
   });
 
   describe('valid cases', () => {
     test('has correct return type', () => {
-      const res = quizRequestNameUpdate(quizId, token, 'myName');
+      const res = quizUpdateName(quizId, token, 'myName');
       expect(res).toStrictEqual({});
     });
 
     test('successful update the quiz name', () => {
-      quizRequestNameUpdate(quizId, token, 'newName');
+      quizUpdateName(quizId, token, 'newName');
       const res = quizGetDetails(token, quizId);
       expect(res.statusCode).toBe(200);
       expect(res.body).toStrictEqual({
@@ -273,7 +273,7 @@ describe('PUT /v1/admin/quiz/{quizid}/name', () => {
 
     test('successful update last edit time', async () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      quizRequestNameUpdate(quizId, token, 'newName');
+      quizUpdateName(quizId, token, 'newName');
       const res = quizGetDetails(token, quizId);
       expect(res.statusCode).toBe(200);
       expect(res.body.timeLastEdited).not.toStrictEqual(res.body.timeCreated);

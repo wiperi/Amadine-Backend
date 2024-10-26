@@ -1,6 +1,6 @@
-import { findQuizById } from '@/utils/helper';
 import { QuizSessionState, Color, PlayerAction } from './Enums';
 import { StateMachine } from './StateMachine';
+
 const {
   LOBBY,
   QUESTION_COUNTDOWN,
@@ -63,10 +63,6 @@ export class Quiz {
     this.description = description;
   }
 
-  // numQuestions(): number {
-  //   return this.questions.length;
-  // }
-
   duration(): number {
     return this.questions.reduce((acc, question) => acc + question.duration, 0);
   }
@@ -92,7 +88,7 @@ export class Question {
   questionId: number;
 
   question: string;
-  duration: number;
+  duration: number; // in seconds
   thumbnailUrl: string = '#';
   points: number;
 
@@ -181,10 +177,11 @@ export class QuizSession {
   sessionId: number;
   quizId: number;
   autoStartNum: number;
-  metadata: object; // deep copy of quiz
+  metadata: Quiz;
+  timeCurrentQuestionStarted: number; // in unix timestamp seconds
 
   messages: Message[] = [];
-  atQuestion: number = 1; // Question index starting from 1
+  atQuestion: number = 0; // Question index starting from 1, 0 means not started
   timeCreated: number = Math.floor(Date.now() / 1000);
 
   private static transitions = StateMachine.parseTransitions<QuizSessionState, PlayerAction>([
@@ -224,29 +221,45 @@ export class QuizSession {
    */
   dispatch(action: PlayerAction): void {
     this.stateMachine.dispatch(action);
+
     if (this.state() === QUESTION_COUNTDOWN) {
+      this.atQuestion++;
+      const currentQuestion = this.atQuestion;
       setTimeout(() => {
-        if (this.state() === QUESTION_COUNTDOWN) {
+        if (this.atQuestion === currentQuestion && this.state() === QUESTION_COUNTDOWN) {
           this.stateMachine.jumpTo(QUESTION_OPEN);
         }
       }, 3000);
     }
+
     if (this.state() === QUESTION_OPEN) {
-      setTimeout(
-        () => {
-          if (this.state() === QUESTION_OPEN) {
-            this.stateMachine.jumpTo(QUESTION_CLOSE);
-          }
-        },
-        findQuizById(this.quizId).duration() * 1000
-      );
+      // Get question duration
+      const duration = this.metadata.questions[this.atQuestion - 1].duration;
+      // Set time when question started
+      this.timeCurrentQuestionStarted = Math.floor(Date.now() / 1000);
+      // Store current question position
+      const currentQuestion = this.atQuestion;
+      setTimeout(() => {
+        // If session is still on the same question and hasn't changed state
+        if (this.atQuestion === currentQuestion && this.state() === QUESTION_OPEN) {
+          this.stateMachine.jumpTo(QUESTION_CLOSE);
+          this.timeCurrentQuestionStarted = undefined;
+        }
+      }, duration * 1000);
+    }
+
+    if (this.state() === END) {
+      this.atQuestion = 0;
+      this.timeCurrentQuestionStarted = undefined;
     }
   }
 
   constructor(sessionId: number, quiz: Quiz, autoStartNum: number) {
     this.sessionId = sessionId;
     this.quizId = quiz.quizId;
-    this.metadata = { ...quiz };
+
+    this.metadata = quiz;
+
     this.autoStartNum = autoStartNum;
   }
 }
@@ -256,6 +269,14 @@ export class Player {
   quizSessionId: number;
 
   name: string;
+
+  totalScore: number = 0;
+  submits: {
+    questionId: number;
+    answerIds: number[];
+    timeSpent: number;
+    isRight: boolean;
+  }[] = [];
 
   constructor(playerId: number, quizSessionId: number, name: string) {
     this.playerId = playerId;

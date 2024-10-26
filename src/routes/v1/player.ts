@@ -1,5 +1,9 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { PlayerJoinSession, PlayerGetQuestionInfo, playerPostMessage } from '@/services/player';
+import {
+  PlayerJoinSession,
+  playerGetQuestionInfo, playerPostMessage,
+  adminPlayerSubmitAnswers,
+} from '@/services/player';
 import { tryCatch } from '@/utils/helper';
 
 const router = Router();
@@ -14,9 +18,20 @@ router.get(
   (req: Request, res: Response, next: NextFunction) => {
     const playerId = parseInt(req.params.playerid);
     const questionposition = parseInt(req.params.questionposition);
-    tryCatch(() => PlayerGetQuestionInfo(playerId, questionposition), req, res, next);
+    tryCatch(() => playerGetQuestionInfo(playerId, questionposition), req, res, next);
   }
 );
+
+router.put(
+  '/:playerid(-?\\d+)/question/:questionposition(-?\\d+)/answer',
+  (req: Request, res: Response, next: NextFunction) => {
+    const playerId = parseInt(req.params.playerid);
+    const questionposition = parseInt(req.params.questionposition);
+    const { answerIds } = req.body;
+    tryCatch(() => adminPlayerSubmitAnswers(playerId, questionposition, answerIds), req, res, next);
+  }
+);
+
 
 router.post('/:playerid(-?\\d+)/chat', (req: Request, res: Response, next: NextFunction) => {
   const playerId = parseInt(req.params.playerid);
