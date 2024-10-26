@@ -224,8 +224,9 @@ export class QuizSession {
 
     if (this.state() === QUESTION_COUNTDOWN) {
       this.atQuestion++;
+      const currentQuestion = this.atQuestion;
       setTimeout(() => {
-        if (this.state() === QUESTION_COUNTDOWN) {
+        if (this.atQuestion === currentQuestion && this.state() === QUESTION_COUNTDOWN) {
           this.stateMachine.jumpTo(QUESTION_OPEN);
         }
       }, 3000);
@@ -234,9 +235,13 @@ export class QuizSession {
     if (this.state() === QUESTION_OPEN) {
       // Get question duration
       const duration = this.metadata.questions[this.atQuestion - 1].duration;
+      // Set time when question started
       this.timeCurrentQuestionStarted = Math.floor(Date.now() / 1000);
+      // Store current question position
+      const currentQuestion = this.atQuestion;
       setTimeout(() => {
-        if (this.state() === QUESTION_OPEN) {
+        // If session is still on the same question and hasn't changed state
+        if (this.atQuestion === currentQuestion && this.state() === QUESTION_OPEN) {
           this.stateMachine.jumpTo(QUESTION_CLOSE);
           this.timeCurrentQuestionStarted = undefined;
         }
@@ -245,6 +250,7 @@ export class QuizSession {
 
     if (this.state() === END) {
       this.atQuestion = 0;
+      this.timeCurrentQuestionStarted = undefined;
     }
   }
 
@@ -252,9 +258,7 @@ export class QuizSession {
     this.sessionId = sessionId;
     this.quizId = quiz.quizId;
 
-    // deep copy quiz
-    this.metadata = JSON.parse(JSON.stringify(quiz));
-    Object.setPrototypeOf(this.metadata, Quiz.prototype);
+    this.metadata = quiz;
 
     this.autoStartNum = autoStartNum;
   }

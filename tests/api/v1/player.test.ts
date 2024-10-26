@@ -132,7 +132,7 @@ describe('POST /v1/player/join', () => {
   });
 });
 
-describe.skip('PUT /v1/player/{playerid}/question/{questionposition}/answer', () => {
+describe('PUT /v1/player/{playerid}/question/{questionposition}/answer', () => {
   let playerId: number;
   let answerIds: number[];
   beforeEach(() => {
@@ -141,15 +141,15 @@ describe.skip('PUT /v1/player/{playerid}/question/{questionposition}/answer', ()
     expect(res.statusCode).toBe(200);
     playerId = res.body.playerId;
 
+    // Start the first question
+    quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+    quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
+
     // Get answerIds
     const questionInfo = playerGetQuestionInfo(playerId, 1);
     expect(questionInfo.statusCode).toBe(200);
     answerIds = questionInfo.body.answers.map((answer: Record<string, unknown>) => answer.answerId);
     expect(answerIds.length).toBeGreaterThan(2); // at least 3 answers
-
-    // Go to the first question
-    quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
-    quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
   });
 
   describe('valid cases', () => {
@@ -191,10 +191,24 @@ describe.skip('PUT /v1/player/{playerid}/question/{questionposition}/answer', ()
     });
 
     test('session is not currently on this question', () => {
+      quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER');
       quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+      quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
       const res = playerSubmitAnswer(answerIds, playerId, 1);
       expect(res.statusCode).toBe(400);
       expect(res.body).toStrictEqual(ERROR);
+
+      // Get second question info
+      const questionInfo = playerGetQuestionInfo(playerId, 2);
+      expect(questionInfo.statusCode).toBe(200);
+      const answerIds2 = questionInfo.body.answers.map(
+        (answer: Record<string, unknown>) => answer.answerId
+      );
+      expect(answerIds2.length).toBeGreaterThan(2); // at least 3 answers
+
+      // Submit answer to second question
+      const res2 = playerSubmitAnswer(answerIds2, playerId, 2);
+      expect(res2.statusCode).toBe(200);
     });
 
     test('answer IDs are not valid for this particular question', () => {
