@@ -23,6 +23,7 @@ export function authorizeToken(req: Request, res: Response, next: NextFunction) 
     '/v1/clear',
     '/v1/player/join',
     '/v1/player/:playerId/question/:questionposition',
+    '/v1/player/:playerId/chat'
   ];
   const isWhitelisted = whiteList.some(path => {
     const regexPath = path.replace(/:[^\s/]+/g, '([\\w-]+)');

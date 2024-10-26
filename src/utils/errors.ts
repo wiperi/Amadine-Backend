@@ -56,6 +56,7 @@ const ERROR_MESSAGES = {
   PLAYER_NAME_ALREADY_USED: 'Name already used by another user',
   INVALID_PLAYER_ID: 'Invalid player id',
   SESSION_STATE_INVALID: 'SESSION_STATE_INVALID',
+  INVALID_MESSAGE_BODY: 'Message cannot be less than 1 character or more than 100'
 };
 
 export { ERROR_MESSAGES };

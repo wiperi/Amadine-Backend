@@ -1,6 +1,7 @@
 import { getData } from '@/dataStore';
-import { QuizSession, Player } from '@/models/Classes';
+import { QuizSession, Player, Message } from '@/models/Classes';
 import { QuizSessionState } from '@/models/Enums';
+import { EmptyObject } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import {
   findQuizById,
@@ -8,6 +9,9 @@ import {
   getNewID,
   getRandomName,
   isPlayerNameUnique,
+  find,
+  isValidEmail,
+  isValidMessageBody
 } from '@/utils/helper';
 import { HttpError } from '@/utils/HttpError';
 
@@ -99,4 +103,23 @@ export function PlayerGetQuestionInfo(
     points: returnedQuestions.points,
     answers: returnedAnswers,
   };
+}
+
+export function playerPostMessage(playerId: number, message: string): EmptyObject {
+  const player = find.player(playerId);
+  if (!player) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_PLAYER_ID);
+  }
+
+  if (!isValidMessageBody(message)) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_MESSAGE_BODY);
+  }
+
+  const quizSession = find.quizSession(player.quizSessionId);
+
+  const msg: Message = new Message(playerId, player.name, message);
+
+  quizSession.messages.push(msg);
+
+  return {};
 }

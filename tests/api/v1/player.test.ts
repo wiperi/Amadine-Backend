@@ -194,17 +194,17 @@ describe('POST /v1/player/:playerId/chat', () => {
 
   describe('invalid cases', () => {
     test('player Id does not exist', () => {
-      const res = playerPostMessage(0, { message: 'hello' });
+      const res = playerPostMessage(0, { message: { messageBody: 'hello' } });
       expect(res.statusCode).toBe(400);
       expect(res.body).toStrictEqual(ERROR);
     });
 
     test('invalid message body', () => {
-      const res1 = playerPostMessage(playerId, { message: '' });
+      const res1 = playerPostMessage(playerId, { message: { messageBody: '' } });
       expect(res1.statusCode).toBe(400);
       expect(res1.body).toStrictEqual(ERROR);
 
-      const res2 = playerPostMessage(playerId, { message: 'hi this is glen quagmire from family guy, my favarite thing to do is giddity, I am a pilot and I was a actor in some k-drama.'});
+      const res2 = playerPostMessage(playerId, { message: { messageBody: 'SeskASvSvZkvSdHfoArZXJTVbsxUHoqXRFFpjamzBMNmPvfKWWwQQWZbBguKqzhcPGZkxJYwNFBDjNFQEHYUSWdxHomoDXsssARwwwwwM' } });
       expect(res2.statusCode).toBe(400);
       expect(res2.body).toStrictEqual(ERROR);
     });
@@ -212,14 +212,14 @@ describe('POST /v1/player/:playerId/chat', () => {
 
   describe('valid cases', () => {
     test('have correct return type', () => {
-      const res = playerPostMessage(playerId, { message: 'Hello everyone! Nice to chat.' });
+      const res = playerPostMessage(playerId, { message: { messageBody: 'Hello everyone! Nice to chat.' } });
       expect(res.statusCode).toBe(200);
       expect(res.body).toStrictEqual({});
     });
 
     // the following 2 tests will be test after finish playerGetMessage
     test.skip('successful add one new message', () => {
-      const res = playerPostMessage(playerId, { message: 'Hello everyone! Nice to chat.' });
+      const res = playerPostMessage(playerId, { message: { messageBody: 'Hello everyone! Nice to chat.' } });
       expect(res.statusCode).toBe(200);
       const getMessageRes = playerGetMessage(playerId);
       expect(getMessageRes.statusCode).toBe(200);
