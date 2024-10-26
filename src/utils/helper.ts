@@ -352,3 +352,34 @@ export function removeProperties<T extends object, K extends keyof T>(
   const filteredEntries = entries.filter(([key]) => !propertiesToRemove.includes(key as K));
   return Object.fromEntries(filteredEntries) as Omit<T, K>;
 }
+
+export function findQuizSessionById(sessionId: number): QuizSession {
+  return getData().quizSessions.find(q => q.sessionId === sessionId);
+}
+
+export function isPlayerNameUnique(name: string, sessionId: number): boolean {
+  return !getData().players.find(p => p.name === name && p.quizSessionId === sessionId);
+}
+
+export function getRandomNumberNoRepeat(length: number): string {
+  const numberPick = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  return numberPick
+    .sort(() => Math.random() - 0.5)
+    .slice(0, length)
+    .join('');
+}
+
+export function getRandomLetterNoRepeat(length: number): string {
+  const letterPick = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  return letterPick
+    .sort(() => Math.random() - 0.5)
+    .slice(0, length)
+    .join('');
+}
+
+// In player join, when name entered is empty, generated randomly satisfied:
+//    1. 5 letters + 3 numbers
+//    2. no repetitions of numbers and characters within the same name
+export function getRandomName(): string {
+  return getRandomLetterNoRepeat(5) + getRandomNumberNoRepeat(3);
+}

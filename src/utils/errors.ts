@@ -52,6 +52,8 @@ const ERROR_MESSAGES = {
   INVALID_ACTION: 'Action provided is not a valid Action enum',
   INVALID_URL: 'Invalid image URL',
   QUIZ_NOT_IN_END_STATE: 'There are some session for quiz are not in END state',
+  SESSION_NOT_IN_LOBBY_STATE: 'Session is not in LOBBY state',
+  PLAYER_NAME_ALREADY_USED: 'Name already used by another user',
 };
 
 export { ERROR_MESSAGES };
