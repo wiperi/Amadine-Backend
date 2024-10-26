@@ -32,7 +32,6 @@ router.put(
   }
 );
 
-
 router.post('/:playerid(-?\\d+)/chat', (req: Request, res: Response, next: NextFunction) => {
   const playerId = parseInt(req.params.playerid);
   const { message } = req.body.message;
