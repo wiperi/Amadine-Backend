@@ -10,8 +10,7 @@ import {
   getRandomName,
   isPlayerNameUnique,
   find,
-  isValidEmail,
-  isValidMessageBody
+  isValidMessageBody,
 } from '@/utils/helper';
 import { HttpError } from '@/utils/HttpError';
 

@@ -204,7 +204,12 @@ describe('POST /v1/player/:playerId/chat', () => {
       expect(res1.statusCode).toBe(400);
       expect(res1.body).toStrictEqual(ERROR);
 
-      const res2 = playerPostMessage(playerId, { message: { messageBody: 'SeskASvSvZkvSdHfoArZXJTVbsxUHoqXRFFpjamzBMNmPvfKWWwQQWZbBguKqzhcPGZkxJYwNFBDjNFQEHYUSWdxHomoDXsssARwwwwwM' } });
+      const res2 = playerPostMessage(playerId, {
+        message: {
+          messageBody:
+            'SeskASvSvZkvSdHfoArZXJTVbsxUHoqXRFFpjamzBMNmPvfKWWwQQWZbBguKqzhcPGZkxJYwNFBDjNFQEHYUSWdxHomoDXsssARwwwwwM',
+        },
+      });
       expect(res2.statusCode).toBe(400);
       expect(res2.body).toStrictEqual(ERROR);
     });
@@ -212,14 +217,18 @@ describe('POST /v1/player/:playerId/chat', () => {
 
   describe('valid cases', () => {
     test('have correct return type', () => {
-      const res = playerPostMessage(playerId, { message: { messageBody: 'Hello everyone! Nice to chat.' } });
+      const res = playerPostMessage(playerId, {
+        message: { messageBody: 'Hello everyone! Nice to chat.' },
+      });
       expect(res.statusCode).toBe(200);
       expect(res.body).toStrictEqual({});
     });
 
     // the following 2 tests will be test after finish playerGetMessage
     test.skip('successful add one new message', () => {
-      const res = playerPostMessage(playerId, { message: { messageBody: 'Hello everyone! Nice to chat.' } });
+      const res = playerPostMessage(playerId, {
+        message: { messageBody: 'Hello everyone! Nice to chat.' },
+      });
       expect(res.statusCode).toBe(200);
       const getMessageRes = playerGetMessage(playerId);
       expect(getMessageRes.statusCode).toBe(200);
@@ -227,11 +236,11 @@ describe('POST /v1/player/:playerId/chat', () => {
         messages: [
           {
             messageBody: 'Hello everyone! Nice to chat.',
-            playerId: playerId, 
+            playerId: playerId,
             playerName: 'Peter Griffin',
-            timeSent: expect.any(Number)
-          }
-        ]
+            timeSent: expect.any(Number),
+          },
+        ],
       });
     });
 
@@ -246,18 +255,18 @@ describe('POST /v1/player/:playerId/chat', () => {
         messages: [
           {
             messageBody: 'Hello everyone! Nice to chat.',
-            playerId: playerId, 
+            playerId: playerId,
             playerName: 'Peter Griffin',
-            timeSent: expect.any(Number)
+            timeSent: expect.any(Number),
           },
           {
             messageBody: 'Hi nice to meet you!',
             playerId: playerId,
             playerName: 'Peter Griffin',
-            timeSent: expect.any(Number)
-          }
-        ]
+            timeSent: expect.any(Number),
+          },
+        ],
       });
     });
   });
-})
+});
