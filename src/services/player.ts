@@ -18,6 +18,7 @@ export function adminPlayerSubmitAnswers(
   if (!quizSession) {
     throw new Error('Quiz session not found');
   }
+
   if (quizSession.state() !== QuizSessionState.QUESTION_OPEN) {
     throw new Error('Quiz session is not in QUESTION_OPEN state');
   }
@@ -34,11 +35,44 @@ export function adminPlayerSubmitAnswers(
 
   // Answer IDs are not valid for this particular question
   const question = quizSession.metadata.questions[questionPosition - 1];
-  if (!question.getAnswersSlice().some(answer => answerIds.includes(answer.answerId))) {
-    throw new Error('Answer IDs are not valid for this particular question');
+  if (!question.getAnswersSlice().some(a => answerIds.includes(a.answerId))) {
+    throw new Error('Answer IDs not exist in this particular question');
   }
+
   // There are duplicate answer IDs provided
+  const answerIdsSet = new Set(answerIds);
+  if (answerIds.length !== answerIdsSet.size) {
+    throw new Error('Duplicate answer IDs provided');
+  }
+
   // Less than 1 answer ID was submitted
+  if (answerIds.length < 1) {
+    throw new Error('No answer IDs provided');
+  }
+
+  // Calculate time spent
+  const timeSpent = Math.floor(Date.now() / 1000) - quizSession.timeCurrentQuestionStarted;
+
+  // Check if user is wrong, if user submit any answer that is not correct
+  const userIsWrong = question.getAnswersSlice().some(a => answerIdsSet.has(a.answerId) && (!a.correct));
+
+  const submit = player.submits.find(s => s.questionId === question.questionId);
+
+  if (!submit) {
+    player.submits.push({
+      questionId: question.questionId,
+      answerIds,
+      timeSpent,
+      isRight: !userIsWrong,
+    });
+  } else {
+    submit.answerIds = answerIds;
+    submit.timeSpent = timeSpent;
+    submit.isRight = !userIsWrong;
+  }
+
+  // Update player's total score
+  player.totalScore += !userIsWrong ? question.points : 0;
 
   return {};
 }

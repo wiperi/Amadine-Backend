@@ -264,14 +264,14 @@ export function findUserById(userId: number): User | undefined {
 }
 
 export const find = {
-  user: (id: number): User | undefined => getData().users.find(user => user.userId === id),
-  quiz: (id: number): Quiz | undefined => getData().quizzes.find(quiz => quiz.quizId === id),
-  quizSession: (id: number): QuizSession | undefined =>
-    getData().quizSessions.find(session => session.sessionId === id),
-  userSession: (id: number): UserSession | undefined =>
-    getData().userSessions.find(session => session.sessionId === id),
-  player: (id: number): Player | undefined =>
-    getData().players.find(player => player.playerId === id),
+  user: (userId: number): User | undefined => getData().users.find(user => user.userId === userId),
+  quiz: (quizId: number): Quiz | undefined => getData().quizzes.find(quiz => quiz.quizId === quizId),
+  quizSession: (sessionId: number): QuizSession | undefined =>
+    getData().quizSessions.find(session => session.sessionId === sessionId),
+  userSession: (sessionId: number): UserSession | undefined =>
+    getData().userSessions.find(session => session.sessionId === sessionId),
+  player: (playerId: number): Player | undefined =>
+    getData().players.find(player => player.playerId === playerId),
 };
 
 /**
