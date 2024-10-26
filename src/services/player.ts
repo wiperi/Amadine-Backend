@@ -6,6 +6,7 @@ import { getNewID, getRandomName, isPlayerNameUnique } from '@/utils/helper';
 import { HttpError } from '@/utils/HttpError';
 import { EmptyObject } from '@/models/Types';
 import { find } from '@/utils/helper';
+import errMessages from '@/utils/errorsV2';
 
 export function PlayerJoinSession(sessionId: number, name: string): { playerId: number } {
   if (!isPlayerNameUnique(name, sessionId)) {
@@ -44,44 +45,54 @@ export function adminPlayerSubmitAnswers(
   // If player ID does not exist
   const player = find.player(playerId);
   if (!player) {
-    throw new HttpError(400, 'Player not found');
+    throw new HttpError(400, errMessages.player.notFound(playerId));
   }
 
   // Session is not in QUESTION_OPEN state
   const quizSession = find.quizSession(player.quizSessionId);
   if (!quizSession) {
-    throw new HttpError(400, 'Quiz session not found');
+    throw new HttpError(400, errMessages.quizSession.notFound(player.quizSessionId));
   }
 
   if (quizSession.state() !== QuizSessionState.QUESTION_OPEN) {
-    throw new HttpError(400, 'Quiz session is not in QUESTION_OPEN state');
+    throw new HttpError(400, errMessages.quizSession.questionNotOpen);
   }
 
   // If question position is not valid for the session this player is in
   if (questionPosition <= 0 || questionPosition > quizSession.metadata.questions.length) {
-    throw new HttpError(400, 'Question position is out of range');
+    throw new HttpError(
+      400,
+      errMessages.quizSession.invalidPosition(
+        questionPosition,
+        1,
+        quizSession.metadata.questions.length
+      )
+    );
   }
 
   // If session is not currently on this question
   if (quizSession.atQuestion !== questionPosition) {
-    throw new HttpError(400, 'Session is not currently on this question');
+    throw new HttpError(
+      400,
+      errMessages.quizSession.questionNotCurrent(questionPosition, quizSession.atQuestion)
+    );
   }
 
   // Answer IDs are not valid for this particular question
   const question = quizSession.metadata.questions[questionPosition - 1];
   if (!question.getAnswersSlice().some(a => answerIds.includes(a.answerId))) {
-    throw new HttpError(400, 'Answer IDs not exist in this particular question');
+    throw new HttpError(400, errMessages.question.answerIdsInvalid);
   }
 
   // There are duplicate answer IDs provided
   const answerIdsSet = new Set(answerIds);
   if (answerIds.length !== answerIdsSet.size) {
-    throw new HttpError(400, 'Duplicate answer IDs provided');
+    throw new HttpError(400, errMessages.question.duplicateAnswerIds);
   }
 
   // Less than 1 answer ID was submitted
   if (answerIds.length < 1) {
-    throw new HttpError(400, 'No answer IDs provided');
+    throw new HttpError(400, errMessages.question.emptyAnswerIds);
   }
 
   // Calculate time spent
