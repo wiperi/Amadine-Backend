@@ -1,7 +1,7 @@
 import { getData } from '@/dataStore';
 import { QuizSession, Player, Message } from '@/models/Classes';
 import { QuizSessionState } from '@/models/Enums';
-import { EmptyObject } from '@/models/Types';
+import { EmptyObject, MessagesReturned } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import { getNewID, getRandomName, isPlayerNameUnique } from '@/utils/helper';
 import { HttpError } from '@/utils/HttpError';
@@ -200,4 +200,23 @@ export function playerPostMessage(playerId: number, message: string): EmptyObjec
   quizSession.messages.push(msg);
 
   return {};
+}
+
+export function playerGetMessage(playerId: number): { messages: MessagesReturned[] } {
+  const player = find.player(playerId);
+  if (!player) {
+    throw new HttpError(400, ERROR_MESSAGES.PLAYER_NOT_FOUND);
+  }
+
+  const quizSession = find.quizSession(player.quizSessionId);
+  const messages = quizSession.messages;
+  messages.sort((a, b) => a.timeSent - b.timeSent);
+  return {
+    messages: messages.map(m => ({
+      messageBody: m.messageBody,
+      playerId: m.playerId,
+      playerName: m.playerName,
+      timeSent: m.timeSent,
+    })),
+  };
 }

@@ -385,3 +385,139 @@ describe('POST /v1/player/:playerId/chat', () => {
     });
   });
 });
+
+/**
+ * test for playergetMessage
+ */
+describe('GET /v1/player/{playerid}/chat', () => {
+  let playerId: number;
+  beforeEach(() => {
+    // Join a not started session
+    const res = playerJoinSession(quizSessionId, 'John Wick');
+    expect(res.statusCode).toBe(200);
+    playerId = res.body.playerId;
+  });
+  describe('invalid cases', () => {
+    test('player ID does not exist', () => {
+      const res = playerGetMessage(999999);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+  });
+  describe('valid cases', () => {
+    test('should return empty array when no message', () => {
+      const res = playerGetMessage(playerId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({ messages: [] });
+    });
+
+    test('should return correct message', () => {
+      const res = playerPostMessage(playerId, {
+        message: { messageBody: 'STEINS GATE' },
+      });
+      expect(res.statusCode).toBe(200);
+      const getMessageRes = playerGetMessage(playerId);
+      expect(getMessageRes.statusCode).toBe(200);
+      expect(getMessageRes.body).toStrictEqual({
+        messages: [
+          {
+            messageBody: 'STEINS GATE',
+            playerId: playerId,
+            playerName: 'John Wick',
+            timeSent: expect.any(Number),
+          },
+        ],
+      });
+    });
+    test('should return correct message in order when multiple messages', () => {
+      const res1 = playerPostMessage(playerId, {
+        message: { messageBody: 'STEINS GATE' },
+      });
+      expect(res1.statusCode).toBe(200);
+      const res2 = playerPostMessage(playerId, {
+        message: { messageBody: 'FATE STAY NIGHT' },
+      });
+      expect(res2.statusCode).toBe(200);
+      const res3 = playerPostMessage(playerId, {
+        message: { messageBody: 'CYBERPUNK 2077' },
+      });
+      expect(res3.statusCode).toBe(200);
+      const res = playerGetMessage(playerId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({
+        messages: [
+          {
+            messageBody: 'STEINS GATE',
+            playerId: playerId,
+            playerName: 'John Wick',
+            timeSent: expect.any(Number),
+          },
+          {
+            messageBody: 'FATE STAY NIGHT',
+            playerId: playerId,
+            playerName: 'John Wick',
+            timeSent: expect.any(Number),
+          },
+          {
+            messageBody: 'CYBERPUNK 2077',
+            playerId: playerId,
+            playerName: 'John Wick',
+            timeSent: expect.any(Number),
+          },
+        ],
+      });
+    });
+
+    test('should return correct timesent', async () => {
+      const now1 = Math.floor(Date.now() / 1000);
+      const res1 = playerPostMessage(playerId, {
+        message: { messageBody: 'STEINS GATE' },
+      });
+      expect(res1.statusCode).toBe(200);
+      // wait for 1 second
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const now2 = Math.floor(Date.now() / 1000);
+      const res2 = playerPostMessage(playerId, {
+        message: { messageBody: 'FATE STAY NIGHT' },
+      });
+      expect(res2.statusCode).toBe(200);
+      // wait for 1 second
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const now3 = Math.floor(Date.now() / 1000);
+      const res3 = playerPostMessage(playerId, {
+        message: { messageBody: 'CYBERPUNK 2077' },
+      });
+      expect(res3.statusCode).toBe(200);
+      const res = playerGetMessage(playerId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({
+        messages: [
+          {
+            messageBody: 'STEINS GATE',
+            playerId: playerId,
+            playerName: 'John Wick',
+            timeSent: expect.any(Number),
+          },
+          {
+            messageBody: 'FATE STAY NIGHT',
+            playerId: playerId,
+            playerName: 'John Wick',
+            timeSent: expect.any(Number),
+          },
+          {
+            messageBody: 'CYBERPUNK 2077',
+            playerId: playerId,
+            playerName: 'John Wick',
+            timeSent: expect.any(Number),
+          },
+        ],
+      });
+      expect(res.body.messages[0].timeSent).toBeGreaterThanOrEqual(now1 - 1);
+      expect(res.body.messages[0].timeSent).toBeLessThanOrEqual(now1 + 1);
+      expect(res.body.messages[1].timeSent).toBeGreaterThanOrEqual(now2 - 1);
+      expect(res.body.messages[1].timeSent).toBeLessThanOrEqual(now2 + 1);
+      expect(res.body.messages[2].timeSent).toBeGreaterThanOrEqual(now3 - 1);
+      expect(res.body.messages[2].timeSent).toBeLessThanOrEqual(now3 + 1);
+    });
+  });
+});
