@@ -1,3 +1,4 @@
+import { adminQuizThumbnail } from '@/services/quiz';
 import {
   userRegister,
   quizCreate,
@@ -7,6 +8,7 @@ import {
   playerJoinSession,
   quizSessionUpdateState,
   quizSessionGetStatus,
+  playerGetQuestionInfo,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -114,6 +116,63 @@ describe('POST /v1/player/join', () => {
       const getInfoRes = quizSessionGetStatus(token, quizId, quizSessionId);
       expect(getInfoRes.statusCode).toBe(200);
       expect(getInfoRes.body.players).toStrictEqual(['Peter Griffin', 'Glen Quagmire']);
+    });
+  });
+});
+
+describe('GET /v1/player/:playerId/question/:questionposition', () => {
+  let playerId: number;
+  beforeEach(() => {
+    const res = playerJoinSession(quizSessionId, 'Peter Griffin');
+    expect(res.statusCode).toBe(200);
+    playerId = res.body.playerId;
+  });
+
+  describe('invalid cases', () => {
+    test('playerId does not refer to a valid player', () => {
+      const errorRes = playerGetQuestionInfo(playerId+1, 0);
+      expect(errorRes.statusCode).toBe(400);
+      expect(errorRes.body).toStrictEqual(ERROR);      
+    });
+
+    //If question position is not valid for the session this player is in
+    test('questionPosition does not refer to a valid question', () => {
+      const errorRes = playerGetQuestionInfo(playerId, 100);
+      expect(errorRes.statusCode).toBe(400);
+      expect(errorRes.body).toStrictEqual(ERROR);
+    });
+    // If session is not currently on this question
+    test('session is not currently on this question', () => {
+      const errorRes = playerGetQuestionInfo(playerId, 0);
+      expect(errorRes.statusCode).toBe(400);
+      expect(errorRes.body).toStrictEqual(ERROR);
+    });
+    // Session is in LOBBY, QUESTION_COUNTDOWN, FINAL_RESULTS or END state
+    test('player is not in PLAYING state', () => {
+      const res = quizSessionUpdateState(token, quizId, quizSessionId, 'END');
+      expect(res.statusCode).toBe(200);
+      const errorRes = playerGetQuestionInfo(playerId, 0);
+      expect(errorRes.statusCode).toBe(400);
+      expect(errorRes.body).toStrictEqual(ERROR);
+    });
+  }); 
+
+  describe('valid cases', () => {
+    test('player get correct question info', () => {
+      const res = playerGetQuestionInfo(playerId, 0);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({
+        questionId: expect.any(Number),
+        question: 'Are you my master?',
+        duration: 60,
+        thumbnailUrl: expect.any(String),
+        points: 6,
+        answers: [
+          { answerId: expect.any(Number), answer: 'Yes', colour: expect.any(String) },
+          { answerId: expect.any(Number), answer: 'No', colour: expect.any(String) },
+          { answerId: expect.any(Number), answer: 'Maybe', colour: expect.any(String) },
+        ],
+      });
     });
   });
 });
