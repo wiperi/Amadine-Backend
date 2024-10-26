@@ -178,6 +178,7 @@ export class QuizSession {
   quizId: number;
   autoStartNum: number;
   metadata: Quiz;
+  timeCurrentQuestionStarted: number; // in unix timestamp seconds
 
   messages: Message[] = [];
   atQuestion: number = 0; // Question index starting from 1, 0 means not started
@@ -233,9 +234,11 @@ export class QuizSession {
     if (this.state() === QUESTION_OPEN) {
       // Get question duration
       const duration = this.metadata.questions[this.atQuestion - 1].duration;
+      this.timeCurrentQuestionStarted = Math.floor(Date.now() / 1000);
       setTimeout(() => {
         if (this.state() === QUESTION_OPEN) {
           this.stateMachine.jumpTo(QUESTION_CLOSE);
+          this.timeCurrentQuestionStarted = undefined;
         }
       }, duration * 1000);
     }
@@ -262,6 +265,14 @@ export class Player {
   quizSessionId: number;
 
   name: string;
+
+  totalScore: number = 0;
+  submits: {
+    questionId: number;
+    answerIds: number[];
+    timeSpent: number;
+    isRight: boolean;
+  }[] = [];
 
   constructor(playerId: number, quizSessionId: number, name: string) {
     this.playerId = playerId;
