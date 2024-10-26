@@ -2,7 +2,13 @@ import { getData } from '@/dataStore';
 import { QuizSession, Player } from '@/models/Classes';
 import { QuizSessionState } from '@/models/Enums';
 import { ERROR_MESSAGES } from '@/utils/errors';
-import { findQuizSessionById, getNewID, getRandomName, isPlayerNameUnique } from '@/utils/helper';
+import {
+  findQuizById,
+  findQuizSessionById,
+  getNewID,
+  getRandomName,
+  isPlayerNameUnique,
+} from '@/utils/helper';
 import { HttpError } from '@/utils/HttpError';
 
 export function PlayerJoinSession(sessionId: number, name: string): { playerId: number } {
@@ -32,4 +38,65 @@ export function PlayerJoinSession(sessionId: number, name: string): { playerId: 
   getData().players.push(player);
 
   return { playerId: playerId };
+}
+
+export function PlayerGetQuestionInfo(
+  playerId: number,
+  questionPosition: number
+): {
+  questionId: number;
+  question: string;
+  duration: number;
+  thumbnailUrl: string;
+  points: number;
+  answers: Pick<
+    { answerId: number; answer: string; colour: string },
+    'answerId' | 'answer' | 'colour'
+  >[];
+} {
+  // if player id not found
+  const player = getData().players.find(player => player.playerId === playerId);
+  if (!player) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_PLAYER_ID);
+  }
+  // If question position is not valid for the session this player is in
+  const quizSession = getData().quizSessions.find(
+    quizSession => quizSession.sessionId === player.quizSessionId
+  );
+  const quizId = quizSession.quizId;
+  const quiz = findQuizById(quizId);
+  if (questionPosition < 0 || questionPosition > quiz.questions.length) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_POSITION);
+  }
+
+  if (quizSession.atQuestion !== questionPosition) {
+    throw new HttpError(400, ERROR_MESSAGES.SAME_POSITION);
+  }
+
+  // Session is in LOBBY, QUESTION_COUNTDOWN, FINAL_RESULTS or END state
+  const quizSessionState = quizSession.state();
+  if (
+    quizSessionState === QuizSessionState.LOBBY ||
+    quizSessionState === QuizSessionState.QUESTION_COUNTDOWN ||
+    quizSessionState === QuizSessionState.FINAL_RESULTS ||
+    quizSessionState === QuizSessionState.END
+  ) {
+    throw new HttpError(400, ERROR_MESSAGES.SESSION_STATE_INVALID);
+  }
+
+  const returnedQuestions = quiz.questions[questionPosition - 1];
+  const returnedAnswers = returnedQuestions.getAnswersSlice();
+  // we don't want to return the correct key
+  returnedAnswers.forEach(answer => {
+    delete answer.correct;
+  });
+
+  return {
+    questionId: returnedQuestions.questionId,
+    question: returnedQuestions.question,
+    duration: returnedQuestions.duration,
+    thumbnailUrl: returnedQuestions.thumbnailUrl,
+    points: returnedQuestions.points,
+    answers: returnedAnswers,
+  };
 }
