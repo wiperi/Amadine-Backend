@@ -57,6 +57,8 @@ const ERROR_MESSAGES = {
   INVALID_PLAYER_ID: 'Invalid player id',
   SESSION_STATE_INVALID: 'SESSION_STATE_INVALID',
   INVALID_MESSAGE_BODY: 'Message cannot be less than 1 character or more than 100',
+  // Player not found
+  PLAYER_NOT_FOUND: 'Player not found',
 };
 
 export { ERROR_MESSAGES };
