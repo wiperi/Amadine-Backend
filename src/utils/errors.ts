@@ -54,6 +54,11 @@ const ERROR_MESSAGES = {
   QUIZ_NOT_IN_END_STATE: 'There are some session for quiz are not in END state',
   SESSION_NOT_IN_LOBBY_STATE: 'Session is not in LOBBY state',
   PLAYER_NAME_ALREADY_USED: 'Name already used by another user',
+  INVALID_PLAYER_ID: 'Invalid player id',
+  SESSION_STATE_INVALID: 'SESSION_STATE_INVALID',
+  INVALID_MESSAGE_BODY: 'Message cannot be less than 1 character or more than 100',
+  // Player not found
+  PLAYER_NOT_FOUND: 'Player not found',
 };
 
 export { ERROR_MESSAGES };

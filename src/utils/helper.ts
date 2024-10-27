@@ -1,6 +1,6 @@
 import { getData } from '@/dataStore';
 import isEmail from 'validator/lib/isEmail';
-import { User, Quiz, QuizSession } from '@/models/Classes';
+import { User, Quiz, QuizSession, Player, UserSession } from '@/models/Classes';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
@@ -259,9 +259,17 @@ export function isValidUserId(id: number): boolean {
   return userList.some(user => user.userId === id);
 }
 
-export function findUserById(userId: number): User | undefined {
-  return getData().users.find(user => user.userId === userId);
-}
+export const find = {
+  user: (userId: number): User | undefined => getData().users.find(user => user.userId === userId),
+  quiz: (quizId: number): Quiz | undefined =>
+    getData().quizzes.find(quiz => quiz.quizId === quizId),
+  quizSession: (sessionId: number): QuizSession | undefined =>
+    getData().quizSessions.find(session => session.sessionId === sessionId),
+  userSession: (sessionId: number): UserSession | undefined =>
+    getData().userSessions.find(session => session.sessionId === sessionId),
+  player: (playerId: number): Player | undefined =>
+    getData().players.find(player => player.playerId === playerId),
+};
 
 /**
  * Checks if the provided quizId is valid.
@@ -286,10 +294,6 @@ export function isQuizIdOwnedByUser(quizId: number, authUserId: number): boolean
   return quizList.some(
     quiz => quiz.quizId === quizId && quiz.authUserId === authUserId && quiz.active
   );
-}
-
-export function findQuizById(quizId: number): Quiz | undefined {
-  return getData().quizzes.find(quiz => quiz.quizId === quizId);
 }
 
 export function getActiveQuizSession(quizId: number): number[] {
@@ -342,10 +346,6 @@ export function removeProperties<T extends object, K extends keyof T>(
   return Object.fromEntries(filteredEntries) as Omit<T, K>;
 }
 
-export function findQuizSessionById(sessionId: number): QuizSession {
-  return getData().quizSessions.find(q => q.sessionId === sessionId);
-}
-
 export function isPlayerNameUnique(name: string, sessionId: number): boolean {
   return !getData().players.find(p => p.name === name && p.quizSessionId === sessionId);
 }
@@ -371,4 +371,8 @@ export function getRandomLetterNoRepeat(length: number): string {
 //    2. no repetitions of numbers and characters within the same name
 export function getRandomName(): string {
   return getRandomLetterNoRepeat(5) + getRandomNumberNoRepeat(3);
+}
+
+export function isValidMessageBody(msg: string): boolean {
+  return !(msg.length < 1 || msg.length > 100);
 }

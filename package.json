@@ -10,7 +10,7 @@
     "cleanup-sync-request": "pkill -f node_modules/sync-rpc/lib/worker.js > /dev/null 2>&1",
     "posttest": "npm run cleanup-sync-request || true",
     "contribution-report": "for author in \"Tianyang Chen\" \"Cheong\" \"Guangwei Hu\" \"Yuting\" \"Yibin\"; do echo \"Author: $author\"; git log --author=\"$author\" --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf \"Lines added: %s, Lines removed: %s, Total lines: %s\\n\", add, subs, loc }'; echo; done",
-    "nyc": "nyc --reporter=html ts-node -r tsconfig-paths/register -T src/server.ts",
+    "nyc": "nyc --reporter=text --reporter=lcov ts-node -r tsconfig-paths/register -T src/server.ts",
     "prettier": "prettier --write \"src/**/*.{ts,js,json}\" \"tests/**/*.{ts,js,json}\"",
     "format": "npm run prettier; npm run lint-fix"
   },
