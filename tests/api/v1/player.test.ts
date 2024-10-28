@@ -567,7 +567,7 @@ describe('GET /v1/player/:playerId', () => {
 
       // Clear the session to simulate invalid session state
       clear();
-      
+
       // Attempt to get the status
       const res = playerGetStatusInSession(playerId);
       expect(res.statusCode).toBe(400);
