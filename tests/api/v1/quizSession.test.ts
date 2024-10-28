@@ -1,3 +1,4 @@
+import { PlayerAction, QuizSessionState } from '../../../src/models/Enums';
 import {
   userRegister,
   quizCreate,
@@ -31,7 +32,7 @@ beforeEach(() => {
   // Create a question
   const createQuestionRes = questionCreate(token, quizId, {
     question: 'Are you my master?',
-    duration: 60,
+    duration: 0.01,
     points: 6,
     answers: [
       { answer: 'Yes', correct: true },
@@ -195,7 +196,63 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
   });
 
   describe('QUESTION_CLOSE state', () => {
-    // Tests for QUESTION_CLOSE state will be added here by yuting
+
+    beforeEach(async () => {
+      // goto question_close state
+      // LOBBY -> (NEXT_QUESTION)-> QUESTION_COUNTDOWN -> (SKIP_COUNTDOWN) -> QUESTION_OPEN -> QUESTION_CLOSE
+      quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.NEXT_QUESTION);
+      quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.SKIP_COUNTDOWN);
+
+      // wait for 0.01 seconds (duration)
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      // use get quizSession status to ensure quizSession is in state QUESTION_CLOSE
+      const getStatusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+      expect(getStatusInfo.statusCode).toBe(200);
+      expect(getStatusInfo.body.state).toBe(QuizSessionState.QUESTION_CLOSE);
+    })
+
+    describe('valid cases', () => {
+      test('QUESTION_CLOSE -> (END) -> END', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.END);
+        expect(res.statusCode).toBe(200);
+        const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+        expect(statusInfo.statusCode).toBe(200);
+        expect(statusInfo.body.state).toBe(QuizSessionState.END);
+      });
+
+      test('QUESTION_CLOSE -> (GO_TO_FINAL_RESULTS) -> FINAL_RESULTS', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.GO_TO_FINAL_RESULTS);
+        expect(res.statusCode).toBe(200);
+        const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+        expect(statusInfo.statusCode).toBe(200);
+        expect(statusInfo.body.state).toBe(QuizSessionState.FINAL_RESULTS);
+      });
+
+      test('QUESTION_CLOSE -> (GO_TO_ANSWER) -> ANSWER_SHOW', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.GO_TO_ANSWER);
+        expect(res.statusCode).toBe(200);
+        const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+        expect(statusInfo.statusCode).toBe(200);
+        expect(statusInfo.body.state).toBe(QuizSessionState.ANSWER_SHOW);
+      });
+
+      test('QUESTION_CLOSE -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.NEXT_QUESTION);
+        expect(res.statusCode).toBe(200);
+        const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+        expect(statusInfo.statusCode).toBe(200);
+        expect(statusInfo.body.state).toBe(QuizSessionState.QUESTION_COUNTDOWN);
+      });
+    });
+
+    describe('invalid cases', () => {
+      test('QUESTION_CLOSE -> (WRONG ACTION) -> END', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.SKIP_COUNTDOWN);
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+    });
   });
 
   describe('FINAL_RESULT state', () => {
@@ -400,13 +457,13 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
         timeCreated: expect.any(Number),
         timeLastEdited: expect.any(Number),
         numQuestions: 1,
-        duration: 60,
+        duration: 0.01,
         thumbnailUrl: expect.any(String),
         questions: [
           {
             questionId: expect.any(Number),
             question: 'Are you my master?',
-            duration: 60,
+            duration: 0.01,
             points: 6,
             // warning!!:
             thumbnailUrl: expect.any(String),
