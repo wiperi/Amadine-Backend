@@ -372,3 +372,7 @@ export function getRandomLetterNoRepeat(length: number): string {
 export function getRandomName(): string {
   return getRandomLetterNoRepeat(5) + getRandomNumberNoRepeat(3);
 }
+
+export function isValidMessageBody(msg: string): boolean {
+  return !(msg.length < 1 || msg.length > 100);
+}

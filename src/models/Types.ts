@@ -51,3 +51,10 @@ export type QuizReturnedV2 = QuizReturned & {
   questions: QuestionReturnedV2[];
   thumbnailUrl: string;
 };
+
+export type MessagesReturned = {
+  messageBody: string;
+  playerId: number;
+  playerName: string;
+  timeSent: number;
+};

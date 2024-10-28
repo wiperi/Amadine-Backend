@@ -1,9 +1,12 @@
-import { userRegister, clear } from '../v1/helpers';
+
+import { userRegister, clear, quizSessionCreate, quizSessionUpdateState } from '../v1/helpers';
 
 import {
   quizGetDetails,
   quizCreate,
   questionCreate,
+  questionMove,
+  questionDuplicate,
   questionDelete,
   questionUpdate,
 } from './helpers';
@@ -284,7 +287,7 @@ describe('PUT /v2/admin/quiz/:quizid/question/:questionid', () => {
 });
 
 // test for question delete
-describe('DELETE /v1/admin/quiz/:quizId/question/:questionId', () => {
+describe('DELETE /v2/admin/quiz/:quizId/question/:questionId', () => {
   let quizId: number;
   let questionId: number;
   beforeEach(() => {
@@ -308,7 +311,121 @@ describe('DELETE /v1/admin/quiz/:quizId/question/:questionId', () => {
   });
 
   describe('invalid cases', () => {
-    // will be implemented after finished quizSessionUpdate
-    test.todo('session for this quiz is not in END state');
+    test('session for this quiz is not in END state', () => {
+      // Create a session to ensure the quiz is not in END state
+      const sessionRes = quizSessionCreate(token, quizId, 2);
+      expect(sessionRes.statusCode).toBe(200);
+
+      // Now attempt to delete the question
+      const deleteRes = questionDelete(token, quizId, questionId);
+      expect(deleteRes.statusCode).toBe(400);
+    });
+  });
+  describe('valid cases', () => {
+    test('successfully delete a question when all quiz sessions are in END state', () => {
+      // Start a session for the quiz
+      const sessionRes = quizSessionCreate(token, quizId, 2); // Create a session
+      expect(sessionRes.statusCode).toBe(200);
+      const sessionId = sessionRes.body.newSessionId;
+      const endSessionRes = quizSessionUpdateState(token, quizId, sessionId, 'END');
+      expect(endSessionRes.statusCode).toBe(200);
+
+      // Now attempt to delete the question
+      const deleteRes = questionDelete(token, quizId, questionId);
+      expect(deleteRes.statusCode).toBe(200);
+    });
+  });
+});
+
+// test for question move
+describe('PUT /v2/admin/quiz/:quizId/question/:questionId/move', () => {
+  let quizId: number;
+  let questionId1: number;
+  let questionId2: number;
+
+  beforeEach(() => {
+    // Create a quiz first
+    const createQuizRes = quizCreate(token, 'Test Quiz', 'A test quiz');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = createQuizRes.body.quizId;
+
+    const questionBody1 = {
+      question: 'What is the capital of France?',
+      duration: 60,
+      points: 5,
+      answers: [
+        { answer: 'Paris', correct: true },
+        { answer: 'Berlin', correct: false },
+        { answer: 'Rome', correct: false },
+      ],
+      thumbnailUrl: 'http://google.com/some/image/path.jpg',
+    };
+    const createQuestionRes1 = questionCreate(token, quizId, questionBody1);
+    expect(createQuestionRes1.statusCode).toBe(200);
+    questionId1 = createQuestionRes1.body.questionId;
+
+    // Add the second question
+    const questionBody2 = {
+      question: 'Who is the president of the United States?',
+      duration: 60,
+      points: 5,
+      answers: [
+        { answer: 'Biden', correct: true },
+        { answer: 'Obama', correct: false },
+        { answer: 'Trump', correct: false },
+      ],
+      thumbnailUrl: 'http://google.com/some/image/path2.jpg',
+    };
+    const createQuestionRes2 = questionCreate(token, quizId, questionBody2);
+    expect(createQuestionRes2.statusCode).toBe(200);
+    questionId2 = createQuestionRes2.body.questionId;
+  });
+  describe('invalid cases', () => {
+    test('attempt to move a question to an invalid position', () => {
+      // Try to move question 1 to an invalid position
+      const invalidPosition = 5;
+      const moveRes = questionMove(token, quizId, questionId1, invalidPosition);
+      expect(moveRes.statusCode).toBe(400);
+      expect(moveRes.body).toStrictEqual(ERROR);
+    });
+  });
+  describe('valid cases', () => {
+    test('successfully move a question', () => {
+      // Move question 1 to the position of question 2
+      const moveRes = questionMove(token, quizId, questionId1, 1);
+      expect(moveRes.statusCode).toBe(200);
+    });
+  });
+});
+
+// test for question questionDuplicate
+describe('POST /v2/admin/quiz/:quizId/question/:questionId/duplicate', () => {
+  let quizId: number;
+  let questionId: number;
+  beforeEach(() => {
+    const createQuizRes = quizCreate(token, 'Test Quiz', 'A test quiz');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = createQuizRes.body.quizId;
+
+    const createQuestionRes = questionCreate(token, quizId, {
+      question: 'Are you my master?',
+      duration: 60,
+      points: 6,
+      answers: [
+        { answer: 'Yes', correct: true },
+        { answer: 'No', correct: false },
+        { answer: 'Maybe', correct: false },
+      ],
+      thumbnailUrl: 'http://google.com/some/image/path.jpg',
+    });
+    expect(createQuestionRes.statusCode).toBe(200);
+    questionId = createQuestionRes.body.questionId;
+  });
+
+  describe('valid cases', () => {
+    test('successfully duplicate the question', () => {
+      const res = questionDuplicate(token, quizId, questionId);
+      expect(res.statusCode).toBe(200);
+    });
   });
 });

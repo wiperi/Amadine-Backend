@@ -10,6 +10,8 @@ import {
   questionUpdate,
   playerSubmitAnswer,
   playerGetQuestionInfo,
+  playerPostMessage,
+  playerGetMessage,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -290,6 +292,235 @@ describe('GET /v1/player/:playerId/question/:questionposition', () => {
           { answerId: expect.any(Number), answer: 'Who knows', colour: expect.any(String) },
         ],
       });
+    });
+  });
+});
+
+/**
+ * test for playerPostMessage
+ */
+describe('POST /v1/player/:playerId/chat', () => {
+  let playerId: number;
+  beforeEach(() => {
+    const res = playerJoinSession(quizSessionId, 'Peter Griffin');
+    expect(res.statusCode).toBe(200);
+    playerId = res.body.playerId;
+  });
+
+  describe('invalid cases', () => {
+    test('player Id does not exist', () => {
+      const res = playerPostMessage(0, { message: { messageBody: 'hello' } });
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('invalid message body', () => {
+      const res1 = playerPostMessage(playerId, { message: { messageBody: '' } });
+      expect(res1.statusCode).toBe(400);
+      expect(res1.body).toStrictEqual(ERROR);
+
+      const res2 = playerPostMessage(playerId, {
+        message: {
+          messageBody:
+            'SeskASvSvZkvSdHfoArZXJTVbsxUHoqXRFFpjamzBMNmPvfKWWwQQWZbBguKqzhcPGZkxJYwNFBDjNFQEHYUSWdxHomoDXsssARwwwwwM',
+        },
+      });
+      expect(res2.statusCode).toBe(400);
+      expect(res2.body).toStrictEqual(ERROR);
+    });
+  });
+
+  describe('valid cases', () => {
+    test('have correct return type', () => {
+      const res = playerPostMessage(playerId, {
+        message: { messageBody: 'Hello everyone! Nice to chat.' },
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({});
+    });
+
+    test('successful add one new message', () => {
+      const res = playerPostMessage(playerId, {
+        message: { messageBody: 'Hello everyone! Nice to chat.' },
+      });
+      expect(res.statusCode).toBe(200);
+      const getMessageRes = playerGetMessage(playerId);
+      expect(getMessageRes.statusCode).toBe(200);
+      expect(getMessageRes.body).toStrictEqual({
+        messages: [
+          {
+            messageBody: 'Hello everyone! Nice to chat.',
+            playerId: playerId,
+            playerName: 'Peter Griffin',
+            timeSent: expect.any(Number),
+          },
+        ],
+      });
+    });
+
+    test('successful add multiple new messages', () => {
+      const res = playerPostMessage(playerId, {
+        message: { messageBody: 'Hello everyone! Nice to chat.' },
+      });
+      expect(res.statusCode).toBe(200);
+      const res1 = playerPostMessage(playerId, {
+        message: { messageBody: 'Hi nice to meet you!' },
+      });
+      expect(res1.statusCode).toBe(200);
+      const getMessageRes = playerGetMessage(playerId);
+      expect(getMessageRes.statusCode).toBe(200);
+      expect(getMessageRes.body).toStrictEqual({
+        messages: [
+          {
+            messageBody: 'Hello everyone! Nice to chat.',
+            playerId: playerId,
+            playerName: 'Peter Griffin',
+            timeSent: expect.any(Number),
+          },
+          {
+            messageBody: 'Hi nice to meet you!',
+            playerId: playerId,
+            playerName: 'Peter Griffin',
+            timeSent: expect.any(Number),
+          },
+        ],
+      });
+    });
+  });
+});
+
+/**
+ * test for playergetMessage
+ */
+describe('GET /v1/player/{playerid}/chat', () => {
+  let playerId: number;
+  beforeEach(() => {
+    // Join a not started session
+    const res = playerJoinSession(quizSessionId, 'John Wick');
+    expect(res.statusCode).toBe(200);
+    playerId = res.body.playerId;
+  });
+  describe('invalid cases', () => {
+    test('player ID does not exist', () => {
+      const res = playerGetMessage(999999);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+  });
+  describe('valid cases', () => {
+    test('should return empty array when no message', () => {
+      const res = playerGetMessage(playerId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({ messages: [] });
+    });
+
+    test('should return correct message', () => {
+      const res = playerPostMessage(playerId, {
+        message: { messageBody: 'STEINS GATE' },
+      });
+      expect(res.statusCode).toBe(200);
+      const getMessageRes = playerGetMessage(playerId);
+      expect(getMessageRes.statusCode).toBe(200);
+      expect(getMessageRes.body).toStrictEqual({
+        messages: [
+          {
+            messageBody: 'STEINS GATE',
+            playerId: playerId,
+            playerName: 'John Wick',
+            timeSent: expect.any(Number),
+          },
+        ],
+      });
+    });
+    test('should return correct message in order when multiple messages', () => {
+      const res1 = playerPostMessage(playerId, {
+        message: { messageBody: 'STEINS GATE' },
+      });
+      expect(res1.statusCode).toBe(200);
+      const res2 = playerPostMessage(playerId, {
+        message: { messageBody: 'FATE STAY NIGHT' },
+      });
+      expect(res2.statusCode).toBe(200);
+      const res3 = playerPostMessage(playerId, {
+        message: { messageBody: 'CYBERPUNK 2077' },
+      });
+      expect(res3.statusCode).toBe(200);
+      const res = playerGetMessage(playerId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({
+        messages: [
+          {
+            messageBody: 'STEINS GATE',
+            playerId: playerId,
+            playerName: 'John Wick',
+            timeSent: expect.any(Number),
+          },
+          {
+            messageBody: 'FATE STAY NIGHT',
+            playerId: playerId,
+            playerName: 'John Wick',
+            timeSent: expect.any(Number),
+          },
+          {
+            messageBody: 'CYBERPUNK 2077',
+            playerId: playerId,
+            playerName: 'John Wick',
+            timeSent: expect.any(Number),
+          },
+        ],
+      });
+    });
+
+    test('should return correct timesent', async () => {
+      const now1 = Math.floor(Date.now() / 1000);
+      const res1 = playerPostMessage(playerId, {
+        message: { messageBody: 'STEINS GATE' },
+      });
+      expect(res1.statusCode).toBe(200);
+      // wait for 1 second
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const now2 = Math.floor(Date.now() / 1000);
+      const res2 = playerPostMessage(playerId, {
+        message: { messageBody: 'FATE STAY NIGHT' },
+      });
+      expect(res2.statusCode).toBe(200);
+      // wait for 1 second
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const now3 = Math.floor(Date.now() / 1000);
+      const res3 = playerPostMessage(playerId, {
+        message: { messageBody: 'CYBERPUNK 2077' },
+      });
+      expect(res3.statusCode).toBe(200);
+      const res = playerGetMessage(playerId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({
+        messages: [
+          {
+            messageBody: 'STEINS GATE',
+            playerId: playerId,
+            playerName: 'John Wick',
+            timeSent: expect.any(Number),
+          },
+          {
+            messageBody: 'FATE STAY NIGHT',
+            playerId: playerId,
+            playerName: 'John Wick',
+            timeSent: expect.any(Number),
+          },
+          {
+            messageBody: 'CYBERPUNK 2077',
+            playerId: playerId,
+            playerName: 'John Wick',
+            timeSent: expect.any(Number),
+          },
+        ],
+      });
+      expect(res.body.messages[0].timeSent).toBeGreaterThanOrEqual(now1 - 1);
+      expect(res.body.messages[0].timeSent).toBeLessThanOrEqual(now1 + 1);
+      expect(res.body.messages[1].timeSent).toBeGreaterThanOrEqual(now2 - 1);
+      expect(res.body.messages[1].timeSent).toBeLessThanOrEqual(now2 + 1);
+      expect(res.body.messages[2].timeSent).toBeGreaterThanOrEqual(now3 - 1);
+      expect(res.body.messages[2].timeSent).toBeLessThanOrEqual(now3 + 1);
     });
   });
 });

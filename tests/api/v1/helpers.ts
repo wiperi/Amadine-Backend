@@ -329,22 +329,6 @@ export function quizSessionGetActivity(token: string, quizId: number): ParsedRes
   return parse(res);
 }
 
-export function quizStartNewSession(
-  token: string,
-  quizId: number,
-  autoStartNum: number
-): ParsedResponse {
-  const res = request('POST', `${QUIZ_URL}/${quizId}/session/start`, {
-    headers: {
-      token,
-    },
-    json: {
-      autoStartNum,
-    },
-  });
-  return parse(res);
-}
-
 export function quizSessionUpdateState(
   token: string,
   quizId: number,
