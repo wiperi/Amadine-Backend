@@ -339,8 +339,7 @@ describe('POST /v1/player/:playerId/chat', () => {
       expect(res.body).toStrictEqual({});
     });
 
-    // the following 2 tests will be test after finish playerGetMessage
-    test.skip('successful add one new message', () => {
+    test('successful add one new message', () => {
       const res = playerPostMessage(playerId, {
         message: { messageBody: 'Hello everyone! Nice to chat.' },
       });
@@ -359,10 +358,14 @@ describe('POST /v1/player/:playerId/chat', () => {
       });
     });
 
-    test.skip('successful add multiple new messages', () => {
-      const res = playerPostMessage(playerId, { message: 'Hello everyone! Nice to chat.' });
+    test('successful add multiple new messages', () => {
+      const res = playerPostMessage(playerId, {
+        message: { messageBody: 'Hello everyone! Nice to chat.' },
+      });
       expect(res.statusCode).toBe(200);
-      const res1 = playerPostMessage(playerId, { message: 'Hi nice to meet you!' });
+      const res1 = playerPostMessage(playerId, {
+        message: { messageBody: 'Hi nice to meet you!' },
+      });
       expect(res1.statusCode).toBe(200);
       const getMessageRes = playerGetMessage(playerId);
       expect(getMessageRes.statusCode).toBe(200);
