@@ -12,6 +12,7 @@ import {
   playerGetQuestionInfo,
   playerPostMessage,
   playerGetMessage,
+  playerGetStatusInSession,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -521,6 +522,56 @@ describe('GET /v1/player/{playerid}/chat', () => {
       expect(res.body.messages[1].timeSent).toBeLessThanOrEqual(now2 + 1);
       expect(res.body.messages[2].timeSent).toBeGreaterThanOrEqual(now3 - 1);
       expect(res.body.messages[2].timeSent).toBeLessThanOrEqual(now3 + 1);
+    });
+  });
+});
+
+describe('GET /v1/player/:playerId', () => {
+  let playerId: number;
+  beforeEach(() => {
+    // Join a not started session
+    const res = playerJoinSession(quizSessionId, 'John Wick');
+    expect(res.statusCode).toBe(200);
+    playerId = res.body.playerId;
+  });
+  describe('valid cases', () => {
+    test('should return player status successfully', () => {
+      // Join the session as a player for this test
+      const joinSessionRes = playerJoinSession(quizSessionId, 'Peter Griffin');
+      expect(joinSessionRes.statusCode).toBe(200);
+      const playerId = joinSessionRes.body.playerId;
+
+      // Get the player’s status
+      const res = playerGetStatusInSession(playerId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toStrictEqual({
+        state: expect.any(String),
+        numQuestions: expect.any(Number),
+        atQuestion: expect.any(Number),
+      });
+    });
+  });
+
+  describe('invalid cases', () => {
+    test('should return error when player ID is invalid', () => {
+      const res = playerGetStatusInSession(99999); // Non-existent player ID
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('should return error when session ID is invalid', () => {
+      // Join the session as a player
+      const joinSessionRes = playerJoinSession(quizSessionId, 'Peter Griffin');
+      expect(joinSessionRes.statusCode).toBe(200);
+      const playerId = joinSessionRes.body.playerId;
+
+      // Clear the session to simulate invalid session state
+      clear();
+      
+      // Attempt to get the status
+      const res = playerGetStatusInSession(playerId);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
     });
   });
 });
