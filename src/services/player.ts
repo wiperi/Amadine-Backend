@@ -220,3 +220,23 @@ export function playerGetMessage(playerId: number): { messages: MessagesReturned
     })),
   };
 }
+
+export function playerGetSessionStatus(playerId: number): {
+  state: QuizSessionState;
+  numQuestions: number;
+  atQuestion: number;
+} {
+  const player = find.player(playerId);
+  if (!player) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_PLAYER_ID);
+  }
+  const quizSession = find.quizSession(player.quizSessionId);
+  const sessionState = quizSession.state();
+  const numQuestions = quizSession.metadata.questions.length;
+  const atQuestion = quizSession.atQuestion;
+  return {
+    state: sessionState,
+    numQuestions: numQuestions,
+    atQuestion: atQuestion,
+  };
+}
