@@ -205,7 +205,7 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
   });
 
   describe('ANSWER_SHOW state', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       const res = playerJoinSession(quizSessionId, 'John Wick');
       expect(res.statusCode).toBe(200);
       // goto ANSWER_SHOW state
