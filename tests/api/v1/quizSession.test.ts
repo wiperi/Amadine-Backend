@@ -1,3 +1,4 @@
+import { PlayerAction, QuizSessionState } from '../../../src/models/Enums';
 import {
   userRegister,
   quizCreate,
@@ -31,7 +32,7 @@ beforeEach(() => {
   // Create a question
   const createQuestionRes = questionCreate(token, quizId, {
     question: 'Are you my master?',
-    duration: 60,
+    duration: 1,
     points: 6,
     answers: [
       { answer: 'Yes', correct: true },
@@ -203,7 +204,61 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
   });
 
   describe('ANSWER_SHOW state', () => {
-    // Tests for ANSWER_SHOW state will be added here by yibin
+    beforeEach(async () => {
+      // goto ANSWER_SHOW state
+      // LOBBY -> (NEXT_QUESTION)-> QUESTION_COUNTDOWN -> (SKIP_COUNTDOWN) -> QUESTION_OPEN -> (GO_TO_ANSWER) -> ANSWER_SHOW
+      quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.NEXT_QUESTION);
+      quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.SKIP_COUNTDOWN);
+      quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.GO_TO_ANSWER);
+
+      // use get quizSession status to ensure quizSession is in state ANSWER_SHOW
+      const getStatusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+      expect(getStatusInfo.statusCode).toBe(200);
+      expect(getStatusInfo.body.state).toBe(QuizSessionState.ANSWER_SHOW);
+    });
+    describe('valid cases', () => {
+      test('ANSWER_SHOW -> (END) -> END', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.END);
+        expect(res.statusCode).toBe(200);
+        const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+        expect(statusInfo.statusCode).toBe(200);
+        expect(statusInfo.body.state).toBe(QuizSessionState.END);
+      });
+
+      test('ANSWER_SHOW -> (GO_TO_FINAL_RESULTS) -> FINAL_RESULTS', () => {
+        const res = quizSessionUpdateState(
+          token,
+          quizId,
+          quizSessionId,
+          PlayerAction.GO_TO_FINAL_RESULTS
+        );
+        expect(res.statusCode).toBe(200);
+        const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+        expect(statusInfo.statusCode).toBe(200);
+        expect(statusInfo.body.state).toBe(QuizSessionState.FINAL_RESULTS);
+      });
+
+      test('ANSWER_SHOW -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN', () => {
+        const res = quizSessionUpdateState(
+          token,
+          quizId,
+          quizSessionId,
+          PlayerAction.NEXT_QUESTION
+        );
+        expect(res.statusCode).toBe(200);
+        const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+        expect(statusInfo.statusCode).toBe(200);
+        expect(statusInfo.body.state).toBe(QuizSessionState.QUESTION_COUNTDOWN);
+      });
+    });
+
+    describe('invalid cases', () => {
+      test('ANSWER_SHOW -> (WRONG ACTION) -> END', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.GO_TO_ANSWER);
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+    });
   });
 });
 
@@ -400,13 +455,13 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
         timeCreated: expect.any(Number),
         timeLastEdited: expect.any(Number),
         numQuestions: 1,
-        duration: 60,
+        duration: 1,
         thumbnailUrl: expect.any(String),
         questions: [
           {
             questionId: expect.any(Number),
             question: 'Are you my master?',
-            duration: 60,
+            duration: 1,
             points: 6,
             // warning!!:
             thumbnailUrl: expect.any(String),
