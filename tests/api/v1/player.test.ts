@@ -17,6 +17,7 @@ import {
   playerGetStatusInSession,
   succ,
   err,
+  playerGetSessionResult,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -719,6 +720,98 @@ describe('GET /v1/player/:playerId', () => {
       const res = playerGetStatusInSession(playerId);
       expect(res.statusCode).toBe(400);
       expect(res.body).toStrictEqual(ERROR);
+    });
+  });
+});
+
+/**
+ * Test for playerGetSessionResult
+ */
+describe.skip('GET /v1/player/:playerid/results', () => {
+  let player1Id: number;
+  let player2Id: number;
+  let question1Id: number;
+  let question2Id: number;
+  let correctAnsIds: number[];
+  let wrongAnsIds: number[];
+  beforeEach(async () => {
+    player1Id = succ(playerJoinSession(quizSessionId, 'Peter Griffin')).playerId;
+    player2Id = succ(playerJoinSession(quizSessionId, 'Homer Simpson')).playerId;
+
+    const question1Info = succ(quizGetDetails(token, quizId)).questions[0];
+    question1Id = question1Info.questionId;
+    correctAnsIds = question1Info.answers
+      .filter((a: { correct: boolean }) => a.correct)
+      .map((a: { answerId: number }) => a.answerId);
+    wrongAnsIds = question1Info.answers
+      .filter((a: { correct: boolean }) => !a.correct)
+      .map((a: { answerId: number }) => a.answerId);
+
+    const question2Info = succ(quizGetDetails(token, quizId)).questions[1];
+    question2Id = question2Info.questionId;
+    correctAnsIds = question2Info.answers
+      .filter((a: { correct: boolean }) => a.correct)
+      .map((a: { answerId: number }) => a.answerId);
+    wrongAnsIds = question2Info.answers
+      .filter((a: { correct: boolean }) => !a.correct)
+      .map((a: { answerId: number }) => a.answerId);
+
+    // Update session state to FINAL_RESULTS state
+    // LOBBY -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN
+    succ(quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION'));
+    // QUESTION_COUNTDOWN -> (SKIP_COUNTDOWN) -> QUESTION_OPEN
+    succ(quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN'));
+    // Now is QUESTION_OPEN state, let players both answer the question correctly
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    succ(playerSubmitAnswer(correctAnsIds, player1Id, 1));
+    succ(playerSubmitAnswer(correctAnsIds, player2Id, 1));
+    // QUESTION_OPEN -> (GO_TO_ANSWER) -> ANSWER_SHOW
+    succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER'));
+    // ANSWER_SHOW -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN
+    succ(quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION'));
+    // QUESTION_COUNTDOWN -> (SKIP_COUNTDOWN) -> QUESTION_OPEN
+    succ(quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN'));
+    // Now is QUESTION_OPEN state, let player1 be correct and player2 be incorrect
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    succ(playerSubmitAnswer(correctAnsIds, player1Id, 2));
+    succ(playerSubmitAnswer(wrongAnsIds, player2Id, 2));
+    // QUESTION_OPEN -> (GO_TO_ANSWER) -> ANSWER_SHOW
+    succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER'));
+    // ANSWER_SHOW -> (GO_TO_FINAL_RESULTS) -> FINAL_RESULTS
+    succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_FINAL_RESULTS'));
+  });
+
+  describe('invalid cases', () => {
+    test('playerId does not exist', () => {
+      err(playerGetSessionResult(0), 400);
+    });
+
+    test('session is not in FINAL_RESULTS STATE', () => {
+      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'END'));
+      // Now session state is in END state
+      err(playerGetSessionResult(player1Id), 400);
+    });
+  });
+
+  describe('valid cases', () => {
+    test('return correct answer', () => {
+      // player1: 6 + 5 points
+      // player2: 6 + 0 points
+      const sessionResult = succ(playerGetSessionResult(player1Id));
+      expect(sessionResult.usersRankedByScore).toStrictEqual({
+        usersRankedByScore: [
+          {
+            name: 'Peter Griffin',
+            score: 11
+          },
+          {
+            name: 'Homer Simpson',
+            score: 6
+          }
+        ]
+      });
+      expect(sessionResult.questionResults[0]).toStrictEqual(succ(playerGetQuestionResult(player1Id, 1)));
+      expect(sessionResult.questionResults[1]).toStrictEqual(succ(playerGetQuestionResult(player1Id, 2)));
     });
   });
 });
