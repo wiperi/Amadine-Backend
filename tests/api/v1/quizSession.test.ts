@@ -32,7 +32,7 @@ beforeEach(() => {
   // Create a question
   const createQuestionRes = questionCreate(token, quizId, {
     question: 'Are you my master?',
-    duration: 0.01,
+    duration: 1,
     points: 6,
     answers: [
       { answer: 'Yes', correct: true },
@@ -203,8 +203,7 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
       quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.NEXT_QUESTION);
       quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.SKIP_COUNTDOWN);
 
-      // wait for 0.01 seconds (duration)
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // use get quizSession status to ensure quizSession is in state QUESTION_CLOSE
       const getStatusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
@@ -457,13 +456,13 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
         timeCreated: expect.any(Number),
         timeLastEdited: expect.any(Number),
         numQuestions: 1,
-        duration: 0.01,
+        duration: 1,
         thumbnailUrl: expect.any(String),
         questions: [
           {
             questionId: expect.any(Number),
             question: 'Are you my master?',
-            duration: 0.01,
+            duration: 1,
             points: 6,
             // warning!!:
             thumbnailUrl: expect.any(String),
