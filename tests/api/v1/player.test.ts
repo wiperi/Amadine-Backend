@@ -12,7 +12,11 @@ import {
   playerGetQuestionInfo,
   playerPostMessage,
   playerGetMessage,
+  quizGetDetails,
+  playerGetQuestionResult,
   playerGetStatusInSession,
+  succ,
+  err,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -522,6 +526,98 @@ describe('GET /v1/player/{playerid}/chat', () => {
       expect(res.body.messages[1].timeSent).toBeLessThanOrEqual(now2 + 1);
       expect(res.body.messages[2].timeSent).toBeGreaterThanOrEqual(now3 - 1);
       expect(res.body.messages[2].timeSent).toBeLessThanOrEqual(now3 + 1);
+    });
+  });
+});
+
+describe('GET /v1/player/{playerid}/question/{questionposition}/results', () => {
+  let playerIds: number[];
+  let questionId: number;
+  let correctAnsIds: number[];
+  let wrongAnsIds: number[];
+  beforeEach(() => {
+    playerIds = [
+      succ(playerJoinSession(quizSessionId, 'player1')).playerId,
+      succ(playerJoinSession(quizSessionId, 'player2')).playerId,
+      succ(playerJoinSession(quizSessionId, 'player3')).playerId,
+    ];
+
+    const questionInfo = succ(quizGetDetails(token, quizId)).questions[0];
+    questionId = questionInfo.questionId;
+    correctAnsIds = questionInfo.answers
+      .filter((a: { correct: boolean }) => a.correct)
+      .map((a: { answerId: number }) => a.answerId);
+    wrongAnsIds = questionInfo.answers
+      .filter((a: { correct: boolean }) => !a.correct)
+      .map((a: { answerId: number }) => a.answerId);
+  });
+
+  describe('valid cases', () => {
+    test('player get correct question result', async () => {
+      // Start the session
+      expect(quizSessionGetStatus(token, quizId, quizSessionId).body.state).toBe('LOBBY');
+      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION'));
+      expect(quizSessionGetStatus(token, quizId, quizSessionId).body.state).toBe(
+        'QUESTION_COUNTDOWN'
+      );
+      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN'));
+      expect(quizSessionGetStatus(token, quizId, quizSessionId).body.state).toBe('QUESTION_OPEN');
+      // Answer question
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      succ(playerSubmitAnswer(correctAnsIds, playerIds[0], 1));
+      succ(playerSubmitAnswer(correctAnsIds, playerIds[1], 1));
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      succ(playerSubmitAnswer(wrongAnsIds, playerIds[2], 1));
+      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER'));
+      expect(quizSessionGetStatus(token, quizId, quizSessionId).body.state).toBe('ANSWER_SHOW');
+      // Check the result
+      const res = succ(playerGetQuestionResult(playerIds[0], 1));
+      console.log(res);
+      expect(res.questionId).toBe(questionId);
+      expect(res.playersCorrectList).toContain('player1');
+      expect(res.playersCorrectList).toContain('player2');
+      expect(res.playersCorrectList).not.toContain('player3');
+      expect(res.averageAnswerTime).toBeGreaterThan(1.33 - 1);
+      expect(res.averageAnswerTime).toBeLessThan(1.33 + 1);
+      expect(res.percentCorrect).toBe(2 / 3);
+    });
+  });
+
+  describe('invalid cases', () => {
+    test('error when player ID does not exist', () => {
+      err(playerGetQuestionResult(0, 1), 400);
+    });
+
+    test('error when question position is invalid', () => {
+      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION'));
+      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN'));
+      succ(playerSubmitAnswer(correctAnsIds, playerIds[0], 1));
+      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER'));
+
+      err(playerGetQuestionResult(playerIds[0], 0), 400);
+      err(playerGetQuestionResult(playerIds[0], 999), 400);
+    });
+
+    test('error when session not in ANSWER_SHOW state', () => {
+      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION'));
+      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN'));
+
+      err(playerGetQuestionResult(playerIds[0], 1), 400);
+    });
+
+    test('error when session not at this question', () => {
+      // Move to question 1 answer show
+      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION'));
+      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN'));
+      succ(playerSubmitAnswer(correctAnsIds, playerIds[0], 1));
+      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER'));
+
+      // Move to question 2
+      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION'));
+      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN'));
+      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER'));
+
+      err(playerGetQuestionResult(playerIds[0], 1), 400);
     });
   });
 });

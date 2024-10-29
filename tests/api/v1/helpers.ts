@@ -15,6 +15,16 @@ export function parse(res: Response): ParsedResponse {
   };
 }
 
+export function succ(res: any) {
+  expect(res.statusCode).toBe(200);
+  return res.body;
+}
+
+export function err(res: any, statusCode: number) {
+  expect(res.statusCode).toBe(statusCode);
+  expect(res.body).toStrictEqual({ error: expect.any(String) });
+}
+
 export function clear(): ParsedResponse {
   const res = request('DELETE', `${config.url}:${config.port}/v1/clear`);
   return parse(res);
@@ -418,16 +428,16 @@ export function playerSubmitAnswer(
   return parse(res);
 }
 
-export function playerGetOneQuestionResult(
+export function playerGetQuestionResult(
   playerId: number,
   questionposition: number
 ): ParsedResponse {
-  const res = request('GET', `${PLAYER_URL}/${playerId}/question/${questionposition}/result`, {});
+  const res = request('GET', `${PLAYER_URL}/${playerId}/question/${questionposition}/results`, {});
   return parse(res);
 }
 
-export function playerGetWholeQuestionFinalResult(playerId: number): ParsedResponse {
-  const res = request('GET', `${PLAYER_URL}/${playerId}/result`, {});
+export function playerGetSessionResult(playerId: number): ParsedResponse {
+  const res = request('GET', `${PLAYER_URL}/${playerId}/results`, {});
   return parse(res);
 }
 
