@@ -5,6 +5,7 @@ import {
   playerPostMessage,
   adminPlayerSubmitAnswers,
   playerGetMessage,
+  playerGetQuestionResult,
 } from '@/services/player';
 import { tryCatch } from '@/utils/helper';
 
@@ -44,5 +45,14 @@ router.get('/:playerid(-?\\d+)/chat', (req: Request, res: Response, next: NextFu
   const playerId = parseInt(req.params.playerid);
   tryCatch(() => playerGetMessage(playerId), req, res, next);
 });
+
+router.get(
+  '/:playerid(-?\\d+)/question/:questionposition(-?\\d+)/results',
+  (req: Request, res: Response, next: NextFunction) => {
+    const playerId = parseInt(req.params.playerid);
+    const questionposition = parseInt(req.params.questionposition);
+    tryCatch(() => playerGetQuestionResult(playerId, questionposition), req, res, next);
+  }
+);
 
 export default router;
