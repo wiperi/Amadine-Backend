@@ -253,8 +253,13 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
     });
 
     describe('invalid cases', () => {
-      test('ANSWER_SHOW -> (WRONG ACTION) -> END', () => {
+      test('ANSWER_SHOW -> (GO_TO_ANSWER))', () => {
         const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.GO_TO_ANSWER);
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+      test('ANSWER_SHOW -> (SKIP_COUNTDOWN)', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.SKIP_COUNTDOWN);
         expect(res.statusCode).toBe(400);
         expect(res.body).toStrictEqual(ERROR);
       });
