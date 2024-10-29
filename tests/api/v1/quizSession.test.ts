@@ -1,3 +1,4 @@
+import exp from 'constants';
 import { PlayerAction, QuizSessionState } from '../../../src/models/Enums';
 import {
   userRegister,
@@ -167,25 +168,82 @@ describe('POST /v1/admin/quiz/:quizId/session/start', () => {
 
 describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
   describe('LOBBY state', () => {
-    // Tests for LOBBY state will be added here by guangwei
-
-    // beforeEach(() => {
-    //   // Go to TARGET_STATE from LOBBY state
-    // });
-
     describe('valid cases', () => {
       // Tests for valid cases will be added here by guangwei
       // use test each to test each valid outbound action
+      test('LOBBY -> (GO_TO_END) -> END', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.END);
+        expect(res.statusCode).toBe(200);
+        const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+        expect(statusInfo.statusCode).toBe(200);
+        expect(statusInfo.body.state).toBe(QuizSessionState.END)
+      })
+
+      test('LOBBY -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.NEXT_QUESTION);
+        expect(res.statusCode).toBe(200);
+    
+        const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+        expect(statusInfo.statusCode).toBe(200);
+        expect(statusInfo.body.state).toBe(QuizSessionState.QUESTION_COUNTDOWN);
+      });
     });
 
     describe('invalid cases', () => {
-      // Tests for invalid cases will be added here by guangwei
-      // use test each to test each invalid outbound action
+      test('INVALID ACTION: SKIP_COUNTDOWN', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.SKIP_COUNTDOWN);
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+
+      test('INVALID ACTION: GO_TO_ANSWER', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.GO_TO_ANSWER);
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+
+      test('INVALID ACTION: GO_TO_FINAL_RESULTS', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.GO_TO_FINAL_RESULTS);
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
     });
   });
 
   describe('END state', () => {
-    // Tests for END state will be added here by guangwei
+    beforeEach(() => {
+      const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.END);
+      expect(res.statusCode).toBe(200);
+
+      const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+      expect(statusInfo.statusCode).toBe(200);
+      expect(statusInfo.body.state).toBe(QuizSessionState.END);
+    })
+    describe('invalid case', () => {
+      test('INVALID ACTION: SKIP_COUNTDOWN', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.SKIP_COUNTDOWN);
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+
+      test('INVALID ACTION: NEXT_QUESTION', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.NEXT_QUESTION);
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+
+      test('INVALID ACTION: GO_TO_ANSWER', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.GO_TO_ANSWER);
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+
+      test('INVALID ACTION: GO_TO_FINAL_RESULTS', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.GO_TO_FINAL_RESULTS);
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+    })
   });
 
   describe('QUESTION_COUNTDOWN state', () => {
