@@ -11,6 +11,7 @@ import {
 } from './models/Classes';
 import fs from 'fs';
 import path from 'path';
+import { StateMachine } from './models/StateMachine';
 
 type DataStore = {
   users: User[];
@@ -84,7 +85,8 @@ function loadData(): void {
   rawData.quizSessions.forEach(
     (qs: any) =>
       Object.setPrototypeOf(qs, QuizSession.prototype) &&
-      qs.messages.forEach((m: any) => Object.setPrototypeOf(m, Message.prototype))
+      qs.messages.forEach((m: any) => Object.setPrototypeOf(m, Message.prototype)) &&
+      Object.setPrototypeOf(qs.stateMachine, StateMachine.prototype)
   );
   rawData.players.forEach((p: any) => Object.setPrototypeOf(p, Player.prototype));
 
