@@ -264,6 +264,10 @@ export class QuizSession {
         config.resultsPath,
         `quiz${this.quizId}_session${this.sessionId}.json`
       );
+      // If results not exist , create file
+      if (!fs.existsSync(config.resultsPath)) {
+        fs.mkdirSync(config.resultsPath, { recursive: true });
+      }
       // TODO: Parse to CSV format
       fs.writeFileSync(filePath, JSON.stringify(sessionResult, null, 2));
     }
