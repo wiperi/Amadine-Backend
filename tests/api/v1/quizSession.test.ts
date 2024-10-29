@@ -8,6 +8,7 @@ import {
   quizSessionGetActivity,
   quizSessionUpdateState,
   quizSessionGetStatus,
+  playerJoinSession,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -31,7 +32,7 @@ beforeEach(() => {
   // Create a question
   const createQuestionRes = questionCreate(token, quizId, {
     question: 'Are you my master?',
-    duration: 60,
+    duration: 1,
     points: 6,
     answers: [
       { answer: 'Yes', correct: true },
@@ -192,6 +193,65 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
 
   describe('QUESTION_OPEN state', () => {
     // Tests for QUESTION_OPEN state will be added here by cheong
+    let playerId: number;
+    beforeEach(() => {
+      // Join a not started session
+      const res = playerJoinSession(quizSessionId, 'Peter Griffin');
+      expect(res.statusCode).toBe(200);
+      playerId = res.body.playerId;
+
+      // Start the first question
+      const updateRes = quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+      expect(updateRes.statusCode).toBe(200);
+      quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
+    });
+    describe('valid cases', () => {
+      test('go to the end', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'END');
+        expect(res.statusCode).toBe(200);
+        const stateRes = quizSessionGetStatus(token, quizId, quizSessionId);
+        expect(stateRes.body.state).toBe('END');
+      });
+      test('duration is up ', () => {
+        // wait for the duration to be up
+        async () => {
+          // goto question_close state
+          // LOBBY -> (NEXT_QUESTION)-> QUESTION_COUNTDOWN -> (SKIP_COUNTDOWN) -> QUESTION_OPEN -> QUESTION_CLOSE
+          quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+          quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
+
+          // wait for 1 seconds (duration)
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
+          // use get quizSession status to ensure quizSession is in state QUESTION_CLOSE
+          const getStatusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+          expect(getStatusInfo.statusCode).toBe(200);
+          expect(getStatusInfo.body.state).toBe('QUESTION_CLOSE');
+        };
+      });
+    });
+    describe('invalid cases', () => {
+      test('INVALID ACTION: NOT IN ENUM', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'INVALID_ACTION');
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+      test('INVALID ACTION: GO TO NEXT QUESTION', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+      test('INVALID ACTION: GO TO FINAL RESULT', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_FINAL_RESULT');
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+      test('INVALID ACTION: SKIP COUNTDOWN', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+    });
   });
 
   describe('QUESTION_CLOSE state', () => {
@@ -351,9 +411,6 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
     const sessionId = res.body.newSessionId;
     const res1 = quizSessionGetStatus(token, quizId, sessionId);
     expect(res1.statusCode).toBe(200);
-    //WARNING: the following test is not correct, because the players array is empty
-    // console.log(res1.body);
-    // will be discussed with in Oct 24
   });
 });
 
@@ -400,13 +457,13 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
         timeCreated: expect.any(Number),
         timeLastEdited: expect.any(Number),
         numQuestions: 1,
-        duration: 60,
+        duration: 1,
         thumbnailUrl: expect.any(String),
         questions: [
           {
             questionId: expect.any(Number),
             question: 'Are you my master?',
-            duration: 60,
+            duration: 1,
             points: 6,
             // warning!!:
             thumbnailUrl: expect.any(String),
