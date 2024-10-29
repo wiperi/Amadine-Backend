@@ -535,26 +535,77 @@ describe('GET /v1/player/:playerId', () => {
     playerId = res.body.playerId;
   });
   describe('valid cases', () => {
-    test('should return player status successfully', () => {
-      // Join the session as a player for this test
-      const joinSessionRes = playerJoinSession(quizSessionId, 'Peter Griffin');
-      expect(joinSessionRes.statusCode).toBe(200);
-      const playerId = joinSessionRes.body.playerId;
-
-      // Get the player’s status
-      const res = playerGetStatusInSession(playerId);
+    test('should move through different quiz states and verify player status', () => {
+      // Step 1: LOBBY state - before starting the quiz
+      let res = playerGetStatusInSession(playerId);
       expect(res.statusCode).toBe(200);
       expect(res.body).toStrictEqual({
-        state: expect.any(String),
-        numQuestions: expect.any(Number),
-        atQuestion: expect.any(Number),
+        state: 'LOBBY',
+        numQuestions: 2,
+        atQuestion: 0,
       });
+  
+      // Step 2: Move to QUESTION_COUNTDOWN for the first question
+      quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+      res = playerGetStatusInSession(playerId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.state).toBe('QUESTION_COUNTDOWN');
+      expect(res.body.atQuestion).toBe(1);
+  
+      // Step 3: Open first question - QUESTION_OPEN state
+      quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
+      res = playerGetStatusInSession(playerId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.state).toBe('QUESTION_OPEN');
+      expect(res.body.atQuestion).toBe(1);
+  
+      // Step 4: Close the first question and show the answer - ANSWER_SHOW state
+      quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER');
+      res = playerGetStatusInSession(playerId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.state).toBe('ANSWER_SHOW');
+      expect(res.body.atQuestion).toBe(1);
+  
+      // Step 5: Move to QUESTION_COUNTDOWN for the second question
+      quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+      res = playerGetStatusInSession(playerId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.state).toBe('QUESTION_COUNTDOWN');
+      expect(res.body.atQuestion).toBe(2);
+  
+      // Step 6: Open the second question - QUESTION_OPEN state
+      quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
+      res = playerGetStatusInSession(playerId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.state).toBe('QUESTION_OPEN');
+      expect(res.body.atQuestion).toBe(2);
+
+      // Step 7: Close the second question and show the answer - ANSWER_SHOW state
+      quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER');
+      res = playerGetStatusInSession(playerId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.state).toBe('ANSWER_SHOW');
+      expect(res.body.atQuestion).toBe(2);
+  
+      // Step 7: Close the second question and move to FINAL_RESULTS
+      quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_FINAL_RESULTS');
+      res = playerGetStatusInSession(playerId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.state).toBe('FINAL_RESULTS');
+      expect(res.body.atQuestion).toBe(2);
+  
+      // Step 8: End the session
+      quizSessionUpdateState(token, quizId, quizSessionId, 'END');
+      res = playerGetStatusInSession(playerId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.state).toBe('END');
+      expect(res.body.atQuestion).toBe(0);
     });
   });
 
   describe('invalid cases', () => {
     test('should return error when player ID is invalid', () => {
-      const res = playerGetStatusInSession(99999); // Non-existent player ID
+      const res = playerGetStatusInSession(-1); // Non-existent player ID
       expect(res.statusCode).toBe(400);
       expect(res.body).toStrictEqual(ERROR);
     });
