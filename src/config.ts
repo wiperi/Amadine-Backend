@@ -6,6 +6,8 @@ const config = {
   expandDocs: false,
   jwtSecretKey: 'a1b2c3d4e5f6g7h8',
   logPath: path.join(process.cwd(), 'logs'),
+  publicPath: path.join(process.cwd(), 'public'),
+  resultsPath: path.join(process.cwd(), 'public', 'results'),
 };
 
 export default config;
