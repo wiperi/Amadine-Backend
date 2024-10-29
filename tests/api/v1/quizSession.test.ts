@@ -1,4 +1,4 @@
-import { PlayerAction, QuizSessionState } from '../../../src/models/Enums';
+
 import {
   userRegister,
   quizCreate,
@@ -316,24 +316,24 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
     beforeEach(async () => {
       // goto question_close state
       // LOBBY -> (NEXT_QUESTION)-> QUESTION_COUNTDOWN -> (SKIP_COUNTDOWN) -> QUESTION_OPEN -> QUESTION_CLOSE
-      quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.NEXT_QUESTION);
-      quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.SKIP_COUNTDOWN);
+      quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+      quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
 
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // use get quizSession status to ensure quizSession is in state QUESTION_CLOSE
       const getStatusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
       expect(getStatusInfo.statusCode).toBe(200);
-      expect(getStatusInfo.body.state).toBe(QuizSessionState.QUESTION_CLOSE);
+      expect(getStatusInfo.body.state).toBe('QUESTION_CLOSE');
     });
 
     describe('valid cases', () => {
       test('QUESTION_CLOSE -> (END) -> END', () => {
-        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.END);
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'END');
         expect(res.statusCode).toBe(200);
         const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
         expect(statusInfo.statusCode).toBe(200);
-        expect(statusInfo.body.state).toBe(QuizSessionState.END);
+        expect(statusInfo.body.state).toBe('END');
       });
 
       test('QUESTION_CLOSE -> (GO_TO_FINAL_RESULTS) -> FINAL_RESULTS', () => {
@@ -341,20 +341,20 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
           token,
           quizId,
           quizSessionId,
-          PlayerAction.GO_TO_FINAL_RESULTS
+          'GO_TO_FINAL_RESULTS'
         );
         expect(res.statusCode).toBe(200);
         const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
         expect(statusInfo.statusCode).toBe(200);
-        expect(statusInfo.body.state).toBe(QuizSessionState.FINAL_RESULTS);
+        expect(statusInfo.body.state).toBe('FINAL_RESULTS');
       });
 
       test('QUESTION_CLOSE -> (GO_TO_ANSWER) -> ANSWER_SHOW', () => {
-        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.GO_TO_ANSWER);
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER');
         expect(res.statusCode).toBe(200);
         const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
         expect(statusInfo.statusCode).toBe(200);
-        expect(statusInfo.body.state).toBe(QuizSessionState.ANSWER_SHOW);
+        expect(statusInfo.body.state).toBe('ANSWER_SHOW');
       });
 
       test('QUESTION_CLOSE -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN', () => {
@@ -362,12 +362,12 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
           token,
           quizId,
           quizSessionId,
-          PlayerAction.NEXT_QUESTION
+          'NEXT_QUESTION'
         );
         expect(res.statusCode).toBe(200);
         const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
         expect(statusInfo.statusCode).toBe(200);
-        expect(statusInfo.body.state).toBe(QuizSessionState.QUESTION_COUNTDOWN);
+        expect(statusInfo.body.state).toBe('QUESTION_COUNTDOWN');
       });
     });
 
@@ -377,7 +377,7 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
           token,
           quizId,
           quizSessionId,
-          PlayerAction.SKIP_COUNTDOWN
+          'SKIP_COUNTDOWN'
         );
         expect(res.statusCode).toBe(400);
         expect(res.body).toStrictEqual(ERROR);
@@ -440,22 +440,22 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
       expect(res.statusCode).toBe(200);
       // goto ANSWER_SHOW state
       // LOBBY -> (NEXT_QUESTION)-> QUESTION_COUNTDOWN -> (SKIP_COUNTDOWN) -> QUESTION_OPEN -> (GO_TO_ANSWER) -> ANSWER_SHOW
-      quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.NEXT_QUESTION);
-      quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.SKIP_COUNTDOWN);
-      quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.GO_TO_ANSWER);
+      quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+      quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
+      quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER');
 
       // use get quizSession status to ensure quizSession is in state ANSWER_SHOW
       const getStatusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
       expect(getStatusInfo.statusCode).toBe(200);
-      expect(getStatusInfo.body.state).toBe(QuizSessionState.ANSWER_SHOW);
+      expect(getStatusInfo.body.state).toBe('ANSWER_SHOW');
     });
     describe('valid cases', () => {
       test('ANSWER_SHOW -> (END) -> END', () => {
-        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.END);
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'END');
         expect(res.statusCode).toBe(200);
         const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
         expect(statusInfo.statusCode).toBe(200);
-        expect(statusInfo.body.state).toBe(QuizSessionState.END);
+        expect(statusInfo.body.state).toBe('END');
       });
 
       test('ANSWER_SHOW -> (GO_TO_FINAL_RESULTS) -> FINAL_RESULTS', () => {
@@ -463,12 +463,12 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
           token,
           quizId,
           quizSessionId,
-          PlayerAction.GO_TO_FINAL_RESULTS
+          'GO_TO_FINAL_RESULTS'
         );
         expect(res.statusCode).toBe(200);
         const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
         expect(statusInfo.statusCode).toBe(200);
-        expect(statusInfo.body.state).toBe(QuizSessionState.FINAL_RESULTS);
+        expect(statusInfo.body.state).toBe('FINAL_RESULTS');
       });
 
       test('ANSWER_SHOW -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN', () => {
@@ -476,18 +476,18 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
           token,
           quizId,
           quizSessionId,
-          PlayerAction.NEXT_QUESTION
+          'NEXT_QUESTION'
         );
         expect(res.statusCode).toBe(200);
         const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
         expect(statusInfo.statusCode).toBe(200);
-        expect(statusInfo.body.state).toBe(QuizSessionState.QUESTION_COUNTDOWN);
+        expect(statusInfo.body.state).toBe('QUESTION_COUNTDOWN');
       });
     });
 
     describe('invalid cases', () => {
       test('ANSWER_SHOW -> (GO_TO_ANSWER))', () => {
-        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.GO_TO_ANSWER);
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER');
         expect(res.statusCode).toBe(400);
         expect(res.body).toStrictEqual(ERROR);
       });
@@ -496,7 +496,7 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
           token,
           quizId,
           quizSessionId,
-          PlayerAction.SKIP_COUNTDOWN
+          'SKIP_COUNTDOWN'
         );
         expect(res.statusCode).toBe(400);
         expect(res.body).toStrictEqual(ERROR);
