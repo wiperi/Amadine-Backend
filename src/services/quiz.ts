@@ -8,6 +8,7 @@ import {
   ParamQuestionBodyV2,
   QuizReturnedV2,
   QuizReturned,
+  QuizSessionResultReturned,
 } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import {
@@ -870,4 +871,24 @@ export function adminQuizThumbnail(
   quiz.thumbnailUrl = imgUrl;
   setData();
   return {};
+}
+
+export function quizSessionFinalResults(
+  quizId: number,
+  sessionId: number
+): QuizSessionResultReturned {
+  return {
+    usersRankedByScore: [{
+      name: 'Hayden',
+      score: 45
+    }],
+    questionResults: [
+      {
+        questionId: 5546,
+        playersCorrectList: ['Hayden'],
+        averageAnswerTime: 45,
+        percentCorrect: 54
+      }
+    ]
+  };
 }

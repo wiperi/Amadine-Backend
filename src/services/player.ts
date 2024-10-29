@@ -1,7 +1,7 @@
 import { getData } from '@/dataStore';
 import { QuizSession, Player, Message } from '@/models/Classes';
 import { QuizSessionState } from '@/models/Enums';
-import { EmptyObject, GetSessionResultReturned, MessagesReturned, QuestionResult, RankedPlayer } from '@/models/Types';
+import { EmptyObject, GetSessionResultReturned, MessagesReturned, QuestionResult, RankedPlayer, QuestionResultReturned } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import { getNewID, getQuestionResult, getRandomName, isPlayerNameUnique, rankPlayerInSession } from '@/utils/helper';
 import { HttpError } from '@/utils/HttpError';
@@ -245,12 +245,7 @@ export function playerGetSessionStatus(playerId: number): {
 export function playerGetQuestionResult(
   playerId: number,
   questionPosition: number
-): {
-  questionId: number;
-  playersCorrectList: string[];
-  averageAnswerTime: number;
-  percentCorrect: number;
-} {
+): QuestionResultReturned {
   // If player ID does not exist
   const player = find.player(playerId);
   if (!player) {

@@ -1,5 +1,9 @@
+import { quizSessionFinalResults } from '@/services/quiz';
 import { QuizSessionState, Color, PlayerAction } from './Enums';
 import { StateMachine } from './StateMachine';
+import fs from 'fs';
+import path from 'path';
+import config from '@/config';
 
 const {
   LOBBY,
@@ -251,6 +255,21 @@ export class QuizSession {
     if (this.state() === END) {
       this.atQuestion = 0;
       this.timeCurrentQuestionStarted = undefined;
+    }
+
+    if (this.state() === FINAL_RESULTS) {
+      // Save results to file
+      const sessionResult = quizSessionFinalResults(this.quizId, this.sessionId);
+      const filePath = path.join(
+        config.resultsPath,
+        `quiz${this.quizId}_session${this.sessionId}.json`
+      );
+      // If results not exist , create file
+      if (!fs.existsSync(config.resultsPath)) {
+        fs.mkdirSync(config.resultsPath, { recursive: true });
+      }
+      // TODO: Parse to CSV format
+      fs.writeFileSync(filePath, JSON.stringify(sessionResult, null, 2));
     }
   }
 
