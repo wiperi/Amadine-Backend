@@ -259,7 +259,52 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
   });
 
   describe('FINAL_RESULT state', () => {
-    // Tests for FINAL_RESULT state will be added here by cheong
+    beforeEach(async () => {
+      // goto question_close state
+      // LOBBY -> (NEXT_QUESTION)-> QUESTION_COUNTDOWN -> (SKIP_COUNTDOWN) -> QUESTION_OPEN -> QUESTION_CLOSE
+      quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+      quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      let getStatusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+      expect(getStatusInfo.statusCode).toBe(200);
+      expect(getStatusInfo.body.state).toBe('QUESTION_CLOSE');
+      quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_FINAL_RESULTS');
+      getStatusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+      expect(getStatusInfo.statusCode).toBe(200);
+      expect(getStatusInfo.body.state).toBe('FINAL_RESULTS');
+    });
+    describe('valid cases', () => {
+      test('go to the end', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'END');
+        expect(res.statusCode).toBe(200);
+        const stateRes = quizSessionGetStatus(token, quizId, quizSessionId);
+        expect(stateRes.body.state).toBe('END');
+      });
+    });
+    describe('invalid cases', () => {
+      test('INVALID ACTION: NOT IN ENUM', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'INVALID_ACTION');
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+      test('INVALID ACTION: GO TO NEXT QUESTION', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+      test('INVALID ACTION: GO TO QUESTION OPEN', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER');
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+      test('INVALID ACTION: SKIP COUNTDOWN', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+    });
   });
 
   describe('ANSWER_SHOW state', () => {
