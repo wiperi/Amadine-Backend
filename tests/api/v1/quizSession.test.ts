@@ -9,6 +9,7 @@ import {
   quizSessionGetActivity,
   quizSessionUpdateState,
   quizSessionGetStatus,
+  playerJoinSession,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -205,6 +206,8 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
 
   describe('ANSWER_SHOW state', () => {
     beforeEach(async () => {
+      const res = playerJoinSession(quizSessionId, 'John Wick');
+      expect(res.statusCode).toBe(200);
       // goto ANSWER_SHOW state
       // LOBBY -> (NEXT_QUESTION)-> QUESTION_COUNTDOWN -> (SKIP_COUNTDOWN) -> QUESTION_OPEN -> (GO_TO_ANSWER) -> ANSWER_SHOW
       quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.NEXT_QUESTION);
@@ -259,7 +262,12 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
         expect(res.body).toStrictEqual(ERROR);
       });
       test('ANSWER_SHOW -> (SKIP_COUNTDOWN)', () => {
-        const res = quizSessionUpdateState(token, quizId, quizSessionId, PlayerAction.SKIP_COUNTDOWN);
+        const res = quizSessionUpdateState(
+          token,
+          quizId,
+          quizSessionId,
+          PlayerAction.SKIP_COUNTDOWN
+        );
         expect(res.statusCode).toBe(400);
         expect(res.body).toStrictEqual(ERROR);
       });
