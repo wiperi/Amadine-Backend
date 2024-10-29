@@ -5,6 +5,7 @@ import { ERROR_MESSAGES } from '@/utils/errors';
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { QuizSessionState } from '@/models/Enums';
+import { QuestionResult, RankedPlayer } from '@/models/Types';
 
 /**
  * Hashes a string using bcrypt.
@@ -375,4 +376,47 @@ export function getRandomName(): string {
 
 export function isValidMessageBody(msg: string): boolean {
   return !(msg.length < 1 || msg.length > 100);
+}
+
+export function rankPlayerInSession (sessionId: number): RankedPlayer[] | [] {
+  const data = getData();
+  const rankedPlayers: RankedPlayer[] = [];
+  for (const player of data.players) {
+    if (player.quizSessionId === sessionId) {
+      const rankedPlayer: RankedPlayer = {
+        name: player.name,
+        score: player.totalScore
+      }
+      rankedPlayers.push(rankedPlayer);
+    }
+  }
+
+  return rankedPlayers.sort((a, b) => b.score - a.score);
+}
+
+export function getQuestionResult (quizSession: QuizSession, questionPosition: number, player: Player): QuestionResult {
+  const data = getData();
+  const questionIndex = questionPosition - 1;
+  const question = quizSession.metadata.questions[questionIndex];
+  const questionId = question.questionId;
+
+  const players = data.players.filter(p => p.quizSessionId === player.quizSessionId);
+
+  const playersCorrectList = players
+    .filter(p => p.submits.some(s => s.questionId === questionId && s.isRight))
+    .map(p => p.name);
+
+  const averageAnswerTime =
+    players.reduce(
+      (acc, p) => acc + p.submits.find(s => s.questionId === questionId)?.timeSpent,
+      0
+    ) / players.length;
+  const percentCorrect = playersCorrectList.length / players.length;
+
+  return {
+    questionId,
+    playersCorrectList,
+    averageAnswerTime,
+    percentCorrect,
+  };
 }

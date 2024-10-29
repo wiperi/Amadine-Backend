@@ -58,3 +58,19 @@ export type MessagesReturned = {
   playerName: string;
   timeSent: number;
 };
+
+export type RankedPlayer = {
+  name: string;
+  score: number;
+}
+
+export type QuestionResult = {
+  questionId: number;
+  playersCorrectList: string[];
+  averageAnswerTime: number;
+  percentCorrect: number;
+}
+export type GetSessionResultReturned = {
+  usersRankedByScore: RankedPlayer[];
+  questionResults: QuestionResult[];
+}
