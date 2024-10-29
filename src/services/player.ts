@@ -1,9 +1,21 @@
 import { getData } from '@/dataStore';
 import { QuizSession, Player, Message } from '@/models/Classes';
 import { QuizSessionState } from '@/models/Enums';
-import { EmptyObject, GetSessionResultReturned, MessagesReturned, QuestionResult, RankedPlayer, QuestionResultReturned } from '@/models/Types';
+import {
+  EmptyObject,
+  GetSessionResultReturned,
+  MessagesReturned,
+  QuestionResultReturned,
+  RankedPlayer,
+} from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
-import { getNewID, getQuestionResult, getRandomName, isPlayerNameUnique, rankPlayerInSession } from '@/utils/helper';
+import {
+  getNewID,
+  getQuestionResult,
+  getRandomName,
+  isPlayerNameUnique,
+  rankPlayerInSession,
+} from '@/utils/helper';
 import { HttpError } from '@/utils/HttpError';
 import { find, isValidMessageBody } from '@/utils/helper';
 import errMessages from '@/utils/errorsV2';
@@ -306,16 +318,20 @@ export function playerGetSessionResult(playerId: number): GetSessionResultReturn
 
   const usersRankedByScore: RankedPlayer[] = rankPlayerInSession(player.quizSessionId);
 
-  const questionResults: QuestionResult[] = [];
+  const QuestionResults: QuestionResultReturned[] = [];
   // get results for each question in quiz
   for (const question of quizSession.metadata.questions) {
     const pos = quizSession.metadata.questions.indexOf(question) + 1;
-    const questionResult: QuestionResult = getQuestionResult(quizSession, pos, player);
-    questionResults.push(questionResult);
+    const QuestionResultReturned: QuestionResultReturned = getQuestionResult(
+      quizSession,
+      pos,
+      player
+    );
+    QuestionResults.push(QuestionResultReturned);
   }
 
   return {
     usersRankedByScore: usersRankedByScore,
-    questionResults: questionResults
-  }
+    questionResults: QuestionResults,
+  };
 }

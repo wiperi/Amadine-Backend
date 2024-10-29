@@ -804,20 +804,18 @@ describe('GET /v1/player/:playerid/results', () => {
       expect(stateInfo.state).toStrictEqual('FINAL_RESULTS');
       // player1: 6 + 5 points
       // player2: 6 + 0 points
-      
+
       const sessionResult = succ(playerGetSessionResult(player1Id));
-      expect(sessionResult.usersRankedByScore).toStrictEqual(
-        [
-          {
-            name: 'Peter Griffin',
-            score: 11
-          },
-          {
-            name: 'Homer Simpson',
-            score: 6
-          }
-        ]
-      );
+      expect(sessionResult.usersRankedByScore).toStrictEqual([
+        {
+          name: 'Peter Griffin',
+          score: 11,
+        },
+        {
+          name: 'Homer Simpson',
+          score: 6,
+        },
+      ]);
 
       expect(sessionResult.questionResults[0]).toStrictEqual(question1Result);
       expect(sessionResult.questionResults[1]).toStrictEqual(question2Result);

@@ -378,15 +378,15 @@ export function isValidMessageBody(msg: string): boolean {
   return !(msg.length < 1 || msg.length > 100);
 }
 
-export function rankPlayerInSession (sessionId: number): RankedPlayer[] | [] {
+export function rankPlayerInSession(sessionId: number): RankedPlayer[] | [] {
   const data = getData();
   const rankedPlayers: RankedPlayer[] = [];
   for (const player of data.players) {
     if (player.quizSessionId === sessionId) {
       const rankedPlayer: RankedPlayer = {
         name: player.name,
-        score: player.totalScore
-      }
+        score: player.totalScore,
+      };
       rankedPlayers.push(rankedPlayer);
     }
   }
@@ -394,7 +394,11 @@ export function rankPlayerInSession (sessionId: number): RankedPlayer[] | [] {
   return rankedPlayers.sort((a, b) => b.score - a.score);
 }
 
-export function getQuestionResult (quizSession: QuizSession, questionPosition: number, player: Player): QuestionResult {
+export function getQuestionResult(
+  quizSession: QuizSession,
+  questionPosition: number,
+  player: Player
+): QuestionResult {
   const data = getData();
   const questionIndex = questionPosition - 1;
   const question = quizSession.metadata.questions[questionIndex];

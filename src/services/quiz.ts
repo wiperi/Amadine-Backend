@@ -878,17 +878,19 @@ export function quizSessionFinalResults(
   sessionId: number
 ): QuizSessionResultReturned {
   return {
-    usersRankedByScore: [{
-      name: 'Hayden',
-      score: 45
-    }],
+    usersRankedByScore: [
+      {
+        name: 'Hayden',
+        score: 45,
+      },
+    ],
     questionResults: [
       {
         questionId: 5546,
         playersCorrectList: ['Hayden'],
         averageAnswerTime: 45,
-        percentCorrect: 54
-      }
-    ]
+        percentCorrect: 54,
+      },
+    ],
   };
 }
