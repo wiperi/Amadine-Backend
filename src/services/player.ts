@@ -79,7 +79,8 @@ export function adminPlayerSubmitAnswers(
   }
 
   // Answer IDs are not valid for this particular question
-  const question = quizSession.metadata.questions[questionPosition - 1];
+  const questionIndex = questionPosition - 1;
+  const question = quizSession.metadata.questions[questionIndex];
   if (!question.getAnswersSlice().some(a => answerIds.includes(a.answerId))) {
     throw new HttpError(400, errMessages.question.answerIdsInvalid);
   }
@@ -195,7 +196,7 @@ export function playerPostMessage(playerId: number, message: string): EmptyObjec
 
   const quizSession = find.quizSession(player.quizSessionId);
 
-  const msg: Message = new Message(playerId, player.name, message);
+  const msg = new Message(playerId, player.name, message);
 
   quizSession.messages.push(msg);
 
@@ -218,5 +219,79 @@ export function playerGetMessage(playerId: number): { messages: MessagesReturned
       playerName: m.playerName,
       timeSent: m.timeSent,
     })),
+  };
+}
+
+export function playerGetSessionStatus(playerId: number): {
+  state: QuizSessionState;
+  numQuestions: number;
+  atQuestion: number;
+} {
+  const player = find.player(playerId);
+  if (!player) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_PLAYER_ID);
+  }
+  const quizSession = find.quizSession(player.quizSessionId);
+  const sessionState = quizSession.state();
+  const numQuestions = quizSession.metadata.questions.length;
+  const atQuestion = quizSession.atQuestion;
+  return {
+    state: sessionState,
+    numQuestions: numQuestions,
+    atQuestion: atQuestion,
+  };
+}
+
+export function playerGetQuestionResult(
+  playerId: number,
+  questionPosition: number
+): {
+  questionId: number;
+  playersCorrectList: string[];
+  averageAnswerTime: number;
+  percentCorrect: number;
+} {
+  // If player ID does not exist
+  const player = find.player(playerId);
+  if (!player) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_PLAYER_ID);
+  }
+  // If question position is not valid for the session this player is in
+  const quizSession = find.quizSession(player.quizSessionId);
+  if (questionPosition <= 0 || questionPosition > quizSession.metadata.questions.length) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_POSITION);
+  }
+  // Session is not in ANSWER_SHOW state
+  if (quizSession.state() !== QuizSessionState.ANSWER_SHOW) {
+    throw new HttpError(400, ERROR_MESSAGES.SESSION_STATE_INVALID);
+  }
+  // If session is not currently on this question
+  if (quizSession.atQuestion !== questionPosition) {
+    throw new HttpError(400, ERROR_MESSAGES.SAME_POSITION);
+  }
+
+  const data = getData();
+  const questionIndex = questionPosition - 1;
+  const question = quizSession.metadata.questions[questionIndex];
+  const questionId = question.questionId;
+
+  const players = data.players.filter(p => p.quizSessionId === player.quizSessionId);
+
+  const playersCorrectList = players
+    .filter(p => p.submits.some(s => s.questionId === questionId && s.isRight))
+    .map(p => p.name);
+
+  const averageAnswerTime =
+    players.reduce(
+      (acc, p) => acc + p.submits.find(s => s.questionId === questionId)?.timeSpent,
+      0
+    ) / players.length;
+  const percentCorrect = playersCorrectList.length / players.length;
+
+  return {
+    questionId,
+    playersCorrectList,
+    averageAnswerTime,
+    percentCorrect,
   };
 }
