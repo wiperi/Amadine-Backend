@@ -841,7 +841,6 @@ describe('GET /v1/player/:playerid/results', () => {
       const player3Id = succ(playerJoinSession(sessionId, 'Glen Quagmire')).playerId;
       const player4Id = succ(playerJoinSession(sessionId, 'Joe Swanson')).playerId;
 
-
       // Update session state to FINAL_RESULTS state
       // LOBBY -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN
       succ(quizSessionUpdateState(token, quizId, sessionId, 'NEXT_QUESTION'));
@@ -891,7 +890,7 @@ describe('GET /v1/player/:playerid/results', () => {
         {
           name: 'Joe Swanson',
           score: 0,
-        }
+        },
       ]);
 
       expect(sessionResult.questionResults[0]).toStrictEqual(question1Result);
