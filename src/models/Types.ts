@@ -66,18 +66,12 @@ export type QuestionResultReturned = {
   percentCorrect: number;
 };
 
-export type RankedPlayer = {
+export type PlayerReturned = {
   name: string;
   score: number;
 };
 
-export type QuestionResult = {
-  questionId: number;
-  playersCorrectList: string[];
-  averageAnswerTime: number;
-  percentCorrect: number;
-};
 export type GetSessionResultReturned = {
-  usersRankedByScore: RankedPlayer[];
-  questionResults: QuestionResult[];
+  usersRankedByScore: PlayerReturned[];
+  questionResults: QuestionResultReturned[];
 };

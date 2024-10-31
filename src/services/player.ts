@@ -6,7 +6,7 @@ import {
   GetSessionResultReturned,
   MessagesReturned,
   QuestionResultReturned,
-  RankedPlayer,
+  PlayerReturned,
 } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import {
@@ -45,6 +45,8 @@ export function PlayerJoinSession(sessionId: number, name: string): { playerId: 
   const player: Player = new Player(playerId, sessionId, name);
 
   getData().players.push(player);
+
+  setData();
 
   return { playerId: playerId };
 }
@@ -119,23 +121,24 @@ export function adminPlayerSubmitAnswers(
 
   const submit = player.submits.find(s => s.questionId === question.questionId);
 
+  const newSubmit = {
+    questionId: question.questionId,
+    answerIds,
+    timeSubmitted: now,
+    timeSpent,
+    isRight: !userIsWrong,
+    score: 0,
+  };
+
   if (!submit) {
-    player.submits.push({
-      questionId: question.questionId,
-      answerIds,
-      timeSubmitted: now,
-      timeSpent,
-      isRight: !userIsWrong,
-    });
+    player.submits.push(newSubmit);
   } else {
-    submit.answerIds = answerIds;
-    submit.timeSpent = timeSpent;
-    submit.isRight = !userIsWrong;
+    player.submits.splice(player.submits.indexOf(submit), 1, newSubmit);
   }
 
   // Update player's total score
   player.totalScore += !userIsWrong ? question.points : 0;
-  
+
   setData();
 
   return {};
@@ -216,6 +219,8 @@ export function playerPostMessage(playerId: number, message: string): EmptyObjec
 
   quizSession.messages.push(msg);
 
+  setData();
+
   return {};
 }
 
@@ -281,30 +286,7 @@ export function playerGetQuestionResult(
     throw new HttpError(400, ERROR_MESSAGES.SAME_POSITION);
   }
 
-  const data = getData();
-  const questionIndex = questionPosition - 1;
-  const question = quizSession.metadata.questions[questionIndex];
-  const questionId = question.questionId;
-
-  const players = data.players.filter(p => p.quizSessionId === player.quizSessionId);
-
-  const playersCorrectList = players
-    .filter(p => p.submits.some(s => s.questionId === questionId && s.isRight))
-    .map(p => p.name);
-
-  const averageAnswerTime =
-    players.reduce(
-      (acc, p) => acc + p.submits.find(s => s.questionId === questionId)?.timeSpent,
-      0
-    ) / players.length;
-  const percentCorrect = playersCorrectList.length / players.length;
-
-  return {
-    questionId,
-    playersCorrectList,
-    averageAnswerTime,
-    percentCorrect,
-  };
+  return getQuestionResult(quizSession, questionPosition);
 }
 
 export function playerGetSessionResult(playerId: number): GetSessionResultReturned {
@@ -320,22 +302,14 @@ export function playerGetSessionResult(playerId: number): GetSessionResultReturn
     throw new HttpError(400, ERROR_MESSAGES.SESSION_STATE_INVALID);
   }
 
-  const usersRankedByScore: RankedPlayer[] = rankPlayerInSession(player.quizSessionId);
+  const results: QuestionResultReturned[] = [];
 
-  const QuestionResults: QuestionResultReturned[] = [];
-  // get results for each question in quiz
-  for (const question of quizSession.metadata.questions) {
-    const pos = quizSession.metadata.questions.indexOf(question) + 1;
-    const QuestionResultReturned: QuestionResultReturned = getQuestionResult(
-      quizSession,
-      pos,
-      player
-    );
-    QuestionResults.push(QuestionResultReturned);
+  for (let i = 0; i < quizSession.metadata.questions.length; i++) {
+    results.push(getQuestionResult(quizSession, i + 1));
   }
 
   return {
-    usersRankedByScore: usersRankedByScore,
-    questionResults: QuestionResults,
+    usersRankedByScore: rankPlayerInSession(player.quizSessionId),
+    questionResults: results,
   };
 }

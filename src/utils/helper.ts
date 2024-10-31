@@ -5,7 +5,7 @@ import { ERROR_MESSAGES } from '@/utils/errors';
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { QuizSessionState } from '@/models/Enums';
-import { QuestionResult, RankedPlayer } from '@/models/Types';
+import { QuestionResultReturned, PlayerReturned } from '@/models/Types';
 
 /**
  * Hashes a string using bcrypt.
@@ -378,44 +378,66 @@ export function isValidMessageBody(msg: string): boolean {
   return !(msg.length < 1 || msg.length > 100);
 }
 
-export function rankPlayerInSession(sessionId: number): RankedPlayer[] | [] {
-  const data = getData();
-  const rankedPlayers: RankedPlayer[] = [];
-  for (const player of data.players) {
-    if (player.quizSessionId === sessionId) {
-      const rankedPlayer: RankedPlayer = {
-        name: player.name,
-        score: player.totalScore,
-      };
-      rankedPlayers.push(rankedPlayer);
-    }
-  }
-
-  return rankedPlayers.sort((a, b) => b.score - a.score);
+export function rankPlayerInSession(sessionId: number): PlayerReturned[] {
+  return getData()
+    .players.filter(p => p.quizSessionId === sessionId)
+    .sort((a, b) => b.totalScore - a.totalScore)
+    .map(p => ({ name: p.name, score: p.totalScore }));
 }
 
 export function getQuestionResult(
   quizSession: QuizSession,
-  questionPosition: number,
-  player: Player
-): QuestionResult {
+  questionPosition: number
+): QuestionResultReturned {
   const data = getData();
   const questionIndex = questionPosition - 1;
   const question = quizSession.metadata.questions[questionIndex];
   const questionId = question.questionId;
+  const quizSessionId = quizSession.sessionId;
 
-  const players = data.players.filter(p => p.quizSessionId === player.quizSessionId);
+  const playersInSession = data.players.filter(p => p.quizSessionId === quizSessionId);
 
-  const playersCorrectList = players
-    .filter(p => p.submits.some(s => s.questionId === questionId && s.isRight))
-    .map(p => p.name);
+  // Filter correct players
+  const playersCorrect: (Omit<Player, 'submits'> & {
+    submit: (typeof Player.prototype.submits)[number];
+  })[] = [];
 
-  const averageAnswerTime =
-    players.reduce(
+  playersInSession.forEach(p => {
+    const submit = p.submits.find(s => s.questionId === questionId);
+
+    // Select the correct submit from submits
+    if (submit && submit.isRight) {
+      const { submits, ...rest } = p;
+      playersCorrect.push({
+        ...rest,
+        submit,
+      });
+    }
+  });
+
+  // Sort by time submitted
+  playersCorrect.sort((a, b) => a.submit.timeSubmitted - b.submit.timeSubmitted);
+
+  // Update score
+  playersCorrect.forEach((p, index) => {
+    console.log(p.submit.timeSubmitted);
+    const scaledScore = question.points / (index + 1);
+    p.submit.score = Math.round(scaledScore);
+
+    // Update total score
+    p.totalScore += p.submit.score;
+  });
+
+  const playersCorrectList = playersCorrect.map(p => p.name);
+
+  const averageAnswerTime = Math.round(
+    playersInSession.reduce(
       (acc, p) => acc + p.submits.find(s => s.questionId === questionId)?.timeSpent,
       0
-    ) / players.length;
-  const percentCorrect = playersCorrectList.length / players.length;
+    ) / playersInSession.length
+  );
+
+  const percentCorrect = Math.round((playersCorrectList.length / playersInSession.length) * 100);
 
   return {
     questionId,

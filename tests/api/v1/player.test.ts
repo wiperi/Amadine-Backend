@@ -1,4 +1,4 @@
-import { QuestionResult } from '@/models/Types';
+import { QuestionResultReturned } from '@/models/Types';
 import {
   userRegister,
   quizCreate,
@@ -565,24 +565,23 @@ describe('GET /v1/player/{playerid}/question/{questionposition}/results', () => 
       succ(quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN'));
       expect(quizSessionGetStatus(token, quizId, quizSessionId).body.state).toBe('QUESTION_OPEN');
       // Answer question
-      await new Promise(resolve => setTimeout(resolve, 1000));
       succ(playerSubmitAnswer(correctAnsIds, playerIds[0], 1));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       succ(playerSubmitAnswer(correctAnsIds, playerIds[1], 1));
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       succ(playerSubmitAnswer(wrongAnsIds, playerIds[2], 1));
       succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER'));
       expect(quizSessionGetStatus(token, quizId, quizSessionId).body.state).toBe('ANSWER_SHOW');
       // Check the result
       const res = succ(playerGetQuestionResult(playerIds[0], 1));
-      console.log(res);
       expect(res.questionId).toBe(questionId);
       expect(res.playersCorrectList).toContain('player1');
       expect(res.playersCorrectList).toContain('player2');
       expect(res.playersCorrectList).not.toContain('player3');
-      expect(res.averageAnswerTime).toBeGreaterThan(1.33 - 1);
-      expect(res.averageAnswerTime).toBeLessThan(1.33 + 1);
-      expect(res.percentCorrect).toBe(2 / 3);
-    });
+      expect(res.averageAnswerTime).toBeGreaterThan(2 - 1);
+      expect(res.averageAnswerTime).toBeLessThan(2 + 1);
+      expect(res.percentCorrect).toBe(67);
+    }, 10 * 1000);
   });
 
   describe('invalid cases', () => {
@@ -735,8 +734,8 @@ describe('GET /v1/player/:playerid/results', () => {
   let wrongAnsIds1: number[];
   let correctAnsIds2: number[];
   let wrongAnsIds2: number[];
-  let question1Result: QuestionResult;
-  let question2Result: QuestionResult;
+  let question1Result: QuestionResultReturned;
+  let question2Result: QuestionResultReturned;
   beforeEach(async () => {
     player1Id = succ(playerJoinSession(quizSessionId, 'Peter Griffin')).playerId;
     player2Id = succ(playerJoinSession(quizSessionId, 'Homer Simpson')).playerId;

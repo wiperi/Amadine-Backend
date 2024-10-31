@@ -296,6 +296,7 @@ export class Player {
     timeSubmitted: number;
     timeSpent: number;
     isRight: boolean;
+    score: number;
   }[] = [];
 
   constructor(playerId: number, quizSessionId: number, name: string) {
