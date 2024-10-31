@@ -790,6 +790,9 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results', () => {
     });
   });
   describe('invalid cases', () => {
+    test('invalid token', () => {
+      err(quizSessionGetFinalResult('invalid token', quizId, quizSessionId), 401);
+    });
     test('Session Id does not refer to a valid session within this quiz', () => {
       err(quizSessionGetFinalResult(token, 123, quizSessionId), 400);
     });
