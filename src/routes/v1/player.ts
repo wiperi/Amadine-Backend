@@ -7,6 +7,7 @@ import {
   playerGetMessage,
   playerGetSessionStatus,
   playerGetQuestionResult,
+  playerGetSessionResult,
 } from '@/services/player';
 import { tryCatch } from '@/utils/helper';
 
@@ -51,6 +52,7 @@ router.get('/:playerid(-?\\d+)', (req: Request, res: Response, next: NextFunctio
   const playerId = parseInt(req.params.playerid);
   tryCatch(() => playerGetSessionStatus(playerId), req, res, next);
 });
+
 router.get(
   '/:playerid(-?\\d+)/question/:questionposition(-?\\d+)/results',
   (req: Request, res: Response, next: NextFunction) => {
@@ -59,5 +61,10 @@ router.get(
     tryCatch(() => playerGetQuestionResult(playerId, questionposition), req, res, next);
   }
 );
+
+router.get('/:playerid(-?\\d+)/results', (req: Request, res: Response, next: NextFunction) => {
+  const playerId = parseInt(req.params.playerid);
+  tryCatch(() => playerGetSessionResult(playerId), req, res, next);
+});
 
 export default router;

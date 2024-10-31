@@ -34,6 +34,9 @@ app.use(cors());
 // Setup log log cleanup
 cleanupLogsWeekly();
 
+// serve static files
+app.use(express.static(config.publicPath));
+
 // for logging requests (print to file)
 const logStream = fs.createWriteStream(path.join(LOG_PATH, 'access.log'), { flags: 'a' });
 // - self-defined token for morgan formatting
