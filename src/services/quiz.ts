@@ -8,6 +8,7 @@ import {
   ParamQuestionBodyV2,
   QuizReturnedV2,
   QuizReturned,
+  QuestionResultReturned,
   QuizSessionResultReturned,
 } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
@@ -24,6 +25,8 @@ import {
   isQuizHasOngoingSessions,
   removeProperties,
   find,
+  rankPlayerInSession,
+  getQuestionResult,
 } from '@/utils/helper';
 import { PlayerAction, QuizSessionState } from '@/models/Enums';
 
@@ -874,23 +877,33 @@ export function adminQuizThumbnail(
 }
 
 export function quizSessionFinalResults(
+  authUserId: number,
   quizId: number,
   sessionId: number
 ): QuizSessionResultReturned {
+  // Session Id does not refer to a valid session within this quiz
+  const quizSession = find.quizSession(sessionId);
+  if (!quizSession || quizSession.quizId !== quizId) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_SESSION_ID);
+  }
+  // Session is not in FINAL_RESULTS state
+  if (quizSession.state() !== QuizSessionState.FINAL_RESULTS) {
+    throw new HttpError(400, ERROR_MESSAGES.SESSION_STATE_INVALID);
+  }
+
+  // Valid token is provided, but user is not an owner of this quiz or quiz doesn't exist
+  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
+
+  const results: QuestionResultReturned[] = [];
+
+  for (let i = 0; i < quizSession.metadata.questions.length; i++) {
+    results.push(getQuestionResult(quizSession, i + 1));
+  }
+
   return {
-    usersRankedByScore: [
-      {
-        name: 'Hayden',
-        score: 45,
-      },
-    ],
-    questionResults: [
-      {
-        questionId: 5546,
-        playersCorrectList: ['Hayden'],
-        averageAnswerTime: 45,
-        percentCorrect: 54,
-      },
-    ],
+    usersRankedByScore: rankPlayerInSession(sessionId),
+    questionResults: results,
   };
 }

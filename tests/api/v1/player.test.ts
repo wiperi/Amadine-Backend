@@ -1,4 +1,4 @@
-import { QuestionResult } from '@/models/Types';
+import { QuestionResultReturned } from '@/models/Types';
 import {
   userRegister,
   quizCreate,
@@ -555,34 +555,37 @@ describe('GET /v1/player/{playerid}/question/{questionposition}/results', () => 
   });
 
   describe('valid cases', () => {
-    test('player get correct question result', async () => {
-      // Start the session
-      expect(quizSessionGetStatus(token, quizId, quizSessionId).body.state).toBe('LOBBY');
-      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION'));
-      expect(quizSessionGetStatus(token, quizId, quizSessionId).body.state).toBe(
-        'QUESTION_COUNTDOWN'
-      );
-      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN'));
-      expect(quizSessionGetStatus(token, quizId, quizSessionId).body.state).toBe('QUESTION_OPEN');
-      // Answer question
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      succ(playerSubmitAnswer(correctAnsIds, playerIds[0], 1));
-      succ(playerSubmitAnswer(correctAnsIds, playerIds[1], 1));
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      succ(playerSubmitAnswer(wrongAnsIds, playerIds[2], 1));
-      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER'));
-      expect(quizSessionGetStatus(token, quizId, quizSessionId).body.state).toBe('ANSWER_SHOW');
-      // Check the result
-      const res = succ(playerGetQuestionResult(playerIds[0], 1));
-      console.log(res);
-      expect(res.questionId).toBe(questionId);
-      expect(res.playersCorrectList).toContain('player1');
-      expect(res.playersCorrectList).toContain('player2');
-      expect(res.playersCorrectList).not.toContain('player3');
-      expect(res.averageAnswerTime).toBeGreaterThan(1.33 - 1);
-      expect(res.averageAnswerTime).toBeLessThan(1.33 + 1);
-      expect(res.percentCorrect).toBe(2 / 3);
-    });
+    test(
+      'player get correct question result',
+      async () => {
+        // Start the session
+        expect(quizSessionGetStatus(token, quizId, quizSessionId).body.state).toBe('LOBBY');
+        succ(quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION'));
+        expect(quizSessionGetStatus(token, quizId, quizSessionId).body.state).toBe(
+          'QUESTION_COUNTDOWN'
+        );
+        succ(quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN'));
+        expect(quizSessionGetStatus(token, quizId, quizSessionId).body.state).toBe('QUESTION_OPEN');
+        // Answer question
+        succ(playerSubmitAnswer(correctAnsIds, playerIds[0], 1));
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        succ(playerSubmitAnswer(correctAnsIds, playerIds[1], 1));
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        succ(playerSubmitAnswer(wrongAnsIds, playerIds[2], 1));
+        succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER'));
+        expect(quizSessionGetStatus(token, quizId, quizSessionId).body.state).toBe('ANSWER_SHOW');
+        // Check the result
+        const res = succ(playerGetQuestionResult(playerIds[0], 1));
+        expect(res.questionId).toBe(questionId);
+        expect(res.playersCorrectList).toContain('player1');
+        expect(res.playersCorrectList).toContain('player2');
+        expect(res.playersCorrectList).not.toContain('player3');
+        expect(res.averageAnswerTime).toBeGreaterThan(2 - 1);
+        expect(res.averageAnswerTime).toBeLessThan(2 + 1);
+        expect(res.percentCorrect).toBe(67);
+      },
+      10 * 1000
+    );
   });
 
   describe('invalid cases', () => {
@@ -735,8 +738,8 @@ describe('GET /v1/player/:playerid/results', () => {
   let wrongAnsIds1: number[];
   let correctAnsIds2: number[];
   let wrongAnsIds2: number[];
-  let question1Result: QuestionResult;
-  let question2Result: QuestionResult;
+  let question1Result: QuestionResultReturned;
+  let question2Result: QuestionResultReturned;
   beforeEach(async () => {
     player1Id = succ(playerJoinSession(quizSessionId, 'Peter Griffin')).playerId;
     player2Id = succ(playerJoinSession(quizSessionId, 'Homer Simpson')).playerId;
@@ -804,6 +807,17 @@ describe('GET /v1/player/:playerid/results', () => {
       expect(stateInfo.state).toStrictEqual('FINAL_RESULTS');
       // player1: 6 + 5 points
       // player2: 6 + 0 points
+
+      // TODO: more comprehensive test
+      // There are at least 2 questions and 4 players in the session
+      // The first question has 2 players correct and 1 player incorrect, 1 player did not answer
+      // The second question has 1 player correct and 2 player incorrect, 1 player did not answer
+      // They answer each question in different order. ie. there will a time gap between submitting answer
+      // The final result should be
+      // player1: X + n + m points
+      // player2: X + n points
+      // player3: X points
+      // player4: 0 points
 
       const sessionResult = succ(playerGetSessionResult(player1Id));
       expect(sessionResult.usersRankedByScore).toStrictEqual([
