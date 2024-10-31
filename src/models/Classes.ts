@@ -293,6 +293,7 @@ export class Player {
   submits: {
     questionId: number;
     answerIds: number[];
+    timeSubmitted: number;
     timeSpent: number;
     isRight: boolean;
   }[] = [];

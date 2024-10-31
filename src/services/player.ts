@@ -1,4 +1,4 @@
-import { getData } from '@/dataStore';
+import { getData, setData } from '@/dataStore';
 import { QuizSession, Player, Message } from '@/models/Classes';
 import { QuizSessionState } from '@/models/Enums';
 import {
@@ -109,7 +109,8 @@ export function adminPlayerSubmitAnswers(
   }
 
   // Calculate time spent
-  const timeSpent = Math.floor(Date.now() / 1000) - quizSession.timeCurrentQuestionStarted;
+  const now = Math.floor(Date.now() / 1000);
+  const timeSpent = now - quizSession.timeCurrentQuestionStarted;
 
   // Check if user is wrong, if user submit any answer that is not correct
   const userIsWrong = question
@@ -122,6 +123,7 @@ export function adminPlayerSubmitAnswers(
     player.submits.push({
       questionId: question.questionId,
       answerIds,
+      timeSubmitted: now,
       timeSpent,
       isRight: !userIsWrong,
     });
@@ -133,6 +135,8 @@ export function adminPlayerSubmitAnswers(
 
   // Update player's total score
   player.totalScore += !userIsWrong ? question.points : 0;
+  
+  setData();
 
   return {};
 }
