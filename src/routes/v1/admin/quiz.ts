@@ -21,6 +21,7 @@ import {
   adminQuizSessionGetStatus,
   adminQuizThumbnail,
   quizSessionFinalResults,
+  quizSessionFinalResultsCSV,
 } from '@/services/quiz';
 import { tryCatch } from '@/utils/helper';
 
@@ -187,4 +188,13 @@ router.get(
   }
 );
 
+router.get(
+  '/:quizid(-?\\d+)/session/:sessionid(-?\\d+)/results/csv',
+  (req: Request, res: Response, next: NextFunction) => {
+    const quizId = parseInt(req.params.quizid);
+    const sessionId = parseInt(req.params.sessionid);
+    const { authUserId } = req.body;
+    tryCatch(() => quizSessionFinalResultsCSV(authUserId, quizId, sessionId), req, res, next);
+  }
+);
 export default router;

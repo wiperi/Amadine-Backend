@@ -29,6 +29,9 @@ import {
   getQuestionResult,
 } from '@/utils/helper';
 import { PlayerAction, QuizSessionState } from '@/models/Enums';
+import fs from 'fs';
+import path from 'path';
+import config from '@/config';
 
 /**
  * Update the description of the relevant quiz.
@@ -905,5 +908,90 @@ export function quizSessionFinalResults(
   return {
     usersRankedByScore: rankPlayerInSession(sessionId),
     questionResults: results,
+  };
+}
+
+export function quizSessionFinalResultsCSV(
+  authUserId: number,
+  quizId: number,
+  sessionId: number
+): { url: string } {
+  // Session Id does not refer to a valid session within this quiz
+  const data = getData();
+  const quizSession = find.quizSession(sessionId);
+  if (!quizSession || quizSession.quizId !== quizId) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_SESSION_ID);
+  }
+  // Session is not in FINAL_RESULTS state
+  if (quizSession.state() !== QuizSessionState.FINAL_RESULTS) {
+    throw new HttpError(400, ERROR_MESSAGES.SESSION_STATE_INVALID);
+  }
+
+  // Valid token is provided, but user is not an owner of this quiz or quiz doesn't exist
+  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
+  const playersInSession = data.players.filter(p => p.quizSessionId === sessionId);
+  const questions = quizSession.metadata.questions;
+  const playerScores = playersInSession.map(player => {
+    const scores = questions.map((question, index) => {
+      const submit = player.submits.find(s => s.questionId === question.questionId);
+      return {
+        score: submit ? submit.score : 0,
+        timeSpent: submit ? submit.timeSpent : 0,
+      };
+    });
+    return {
+      name: player.name,
+      scores,
+    };
+  });
+  const playerRanks = questions.map((question, questionIndex) => {
+    const scores = playerScores.map(player => ({
+      name: player.name,
+      score: player.scores[questionIndex].score,
+    }));
+    scores.sort((a, b) => b.score - a.score);
+
+    return scores.map((player, index) => ({
+      name: player.name,
+      rank: player.score > 0 ? index + 1 : 0,
+    }));
+  });
+  const csvData = playerScores.map(player => {
+    const row: { Player: string; [key: string]: number | string } = { Player: player.name };
+    player.scores.forEach((score, index) => {
+      row[`question${index + 1}score`] = score.score;
+      row[`question${index + 1}rank`] = playerRanks[index].find(r => r.name === player.name).rank;
+    });
+    return row;
+  });
+  csvData.sort((a, b) => a.Player.localeCompare(b.Player));
+  const fields = ['Player'];
+  questions.forEach((_, index) => {
+    fields.push(`question${index + 1}score`, `question${index + 1}rank`);
+  });
+
+  const csvRows = [];
+  csvRows.push(fields.join(','));
+  csvData.forEach(row => {
+    const values = fields.map(field => row[field]);
+    csvRows.push(values.join(','));
+  });
+  const csv = csvRows.join('\n');
+
+  // Save CSV to file
+  const filePath = path.join(
+    config.resultsPath,
+    `quiz${quizId}_session${sessionId}.csv`
+  );
+  if (!fs.existsSync(config.resultsPath)) {
+    fs.mkdirSync(config.resultsPath, { recursive: true });
+  }
+
+  fs.writeFileSync(filePath, csv);
+  const url = `${config.url}/results/quiz${quizId}_session${sessionId}.csv`;
+  return {
+    url,
   };
 }
