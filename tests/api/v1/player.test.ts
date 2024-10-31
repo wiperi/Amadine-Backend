@@ -804,6 +804,17 @@ describe('GET /v1/player/:playerid/results', () => {
       // player1: 6 + 5 points
       // player2: 6 + 0 points
 
+      // TODO: more comprehensive test
+      // There are at least 2 questions and 4 players in the session
+      // The first question has 2 players correct and 1 player incorrect, 1 player did not answer
+      // The second question has 1 player correct and 2 player incorrect, 1 player did not answer
+      // They answer each question in different order. ie. there will a time gap between submitting answer
+      // The final result should be
+      // player1: X + n + m points
+      // player2: X + n points
+      // player3: X points
+      // player4: 0 points
+
       const sessionResult = succ(playerGetSessionResult(player1Id));
       expect(sessionResult.usersRankedByScore).toStrictEqual([
         {
