@@ -71,7 +71,7 @@ export type PlayerReturned = {
   score: number;
 };
 
-export type GetSessionResultReturned = {
+export type QuizSessionResultReturned = {
   usersRankedByScore: PlayerReturned[];
   questionResults: QuestionResultReturned[];
 };

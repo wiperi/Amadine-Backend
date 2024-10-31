@@ -374,7 +374,7 @@ export function quizSessionGetFinalResult(
   quizId: number,
   sessionId: number
 ): ParsedResponse {
-  const res = request('GET', `${QUIZ_URL}/${quizId}/session/${sessionId}/result`, {
+  const res = request('GET', `${QUIZ_URL}/${quizId}/session/${sessionId}/results`, {
     headers: {
       token,
     },
@@ -387,7 +387,7 @@ export function quizSessionGetFinalResultCsvFormat(
   quizId: number,
   sessionId: number
 ): ParsedResponse {
-  const res = request('GET', `${QUIZ_URL}/${quizId}/session/${sessionId}/result/csv`, {
+  const res = request('GET', `${QUIZ_URL}/${quizId}/session/${sessionId}/results/csv`, {
     headers: {
       token,
     },
