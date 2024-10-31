@@ -1,9 +1,21 @@
 import { getData } from '@/dataStore';
 import { QuizSession, Player, Message } from '@/models/Classes';
 import { QuizSessionState } from '@/models/Enums';
-import { EmptyObject, MessagesReturned, QuestionResultReturned } from '@/models/Types';
+import {
+  EmptyObject,
+  GetSessionResultReturned,
+  MessagesReturned,
+  QuestionResultReturned,
+  RankedPlayer,
+} from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
-import { getNewID, getRandomName, isPlayerNameUnique } from '@/utils/helper';
+import {
+  getNewID,
+  getQuestionResult,
+  getRandomName,
+  isPlayerNameUnique,
+  rankPlayerInSession,
+} from '@/utils/helper';
 import { HttpError } from '@/utils/HttpError';
 import { find, isValidMessageBody } from '@/utils/helper';
 import errMessages from '@/utils/errorsV2';
@@ -288,5 +300,38 @@ export function playerGetQuestionResult(
     playersCorrectList,
     averageAnswerTime,
     percentCorrect,
+  };
+}
+
+export function playerGetSessionResult(playerId: number): GetSessionResultReturned {
+  // If player ID does not exist
+  const player = find.player(playerId);
+  if (!player) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_PLAYER_ID);
+  }
+
+  // if session is not in FINAL_RESULTS state
+  const quizSession = find.quizSession(player.quizSessionId);
+  if (quizSession.state() !== QuizSessionState.FINAL_RESULTS) {
+    throw new HttpError(400, ERROR_MESSAGES.SESSION_STATE_INVALID);
+  }
+
+  const usersRankedByScore: RankedPlayer[] = rankPlayerInSession(player.quizSessionId);
+
+  const QuestionResults: QuestionResultReturned[] = [];
+  // get results for each question in quiz
+  for (const question of quizSession.metadata.questions) {
+    const pos = quizSession.metadata.questions.indexOf(question) + 1;
+    const QuestionResultReturned: QuestionResultReturned = getQuestionResult(
+      quizSession,
+      pos,
+      player
+    );
+    QuestionResults.push(QuestionResultReturned);
+  }
+
+  return {
+    usersRankedByScore: usersRankedByScore,
+    questionResults: QuestionResults,
   };
 }
