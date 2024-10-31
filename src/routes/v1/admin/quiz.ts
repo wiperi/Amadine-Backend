@@ -20,6 +20,7 @@ import {
   adminQuizSessionUpdate,
   adminQuizSessionGetStatus,
   adminQuizThumbnail,
+  quizSessionFinalResults,
 } from '@/services/quiz';
 import { tryCatch } from '@/utils/helper';
 
@@ -175,5 +176,15 @@ router.put('/:quizid(-?\\d+)/thumbnail', (req: Request, res: Response, next: Nex
   const { authUserId, imgUrl } = req.body;
   tryCatch(() => adminQuizThumbnail(quizId, authUserId, imgUrl), req, res, next);
 });
+
+router.get(
+  '/:quizid(-?\\d+)/session/:sessionid(-?\\d+)/results',
+  (req: Request, res: Response, next: NextFunction) => {
+    const quizId = parseInt(req.params.quizid);
+    const sessionId = parseInt(req.params.sessionid);
+    const { authUserId } = req.body;
+    tryCatch(() => quizSessionFinalResults(authUserId, quizId, sessionId), req, res, next);
+  }
+);
 
 export default router;

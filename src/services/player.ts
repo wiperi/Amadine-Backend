@@ -3,7 +3,7 @@ import { QuizSession, Player, Message } from '@/models/Classes';
 import { QuizSessionState } from '@/models/Enums';
 import {
   EmptyObject,
-  GetSessionResultReturned,
+  QuizSessionResultReturned,
   MessagesReturned,
   QuestionResultReturned,
   PlayerReturned,
@@ -289,7 +289,7 @@ export function playerGetQuestionResult(
   return getQuestionResult(quizSession, questionPosition);
 }
 
-export function playerGetSessionResult(playerId: number): GetSessionResultReturned {
+export function playerGetSessionResult(playerId: number): QuizSessionResultReturned {
   // If player ID does not exist
   const player = find.player(playerId);
   if (!player) {
