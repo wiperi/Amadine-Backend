@@ -662,32 +662,30 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
   });
 });
 
+// Tests for QuizSessionFinalResults
+describe.skip('GET /v1/admin/quiz/:quizId/session/:sessionId/results', () => {
+  let quizId: number;
+  let quizSessionId: number;
+  let playerIds: number[];
+  let questionId: number;
+  let correctAnsIds: number[];
+  let wrongAnsIds: number[];
+  beforeEach(() => {
+    // Create new quiz
+    // Create new question
+    // Create new quiz session
+    // Create new players
+    // Get correct and wrong answer ids
+  });
 
-// // Tests for QuizSessionFinalResults
-// describe.skip('GET /v1/admin/quiz/:quizId/session/:sessionId/results', () => {
-//   let quizId: number;
-//   let quizSessionId: number;
-//   let playerIds: number[];
-//   let questionId: number;
-//   let correctAnsIds: number[];
-//   let wrongAnsIds: number[];
-//   beforeEach(() => {
-//     // Create new quiz
-//     // Create new question
-//     // Create new quiz session
-//     // Create new players
-//     // Get correct and wrong answer ids
-//   });
-
-
-//   describe('valid cases', () => {
-//     test('valid request', () => {
-//       succ(quizSessionGetFinalResult(token, quizId, quizSessionId));
-//     });
-//   });
-//   describe('invalid cases', () => {
-//     test('Session Id does not refer to a valid session within this quiz', () => {
-//       err(quizSessionGetFinalResult(token, 123, 123), 400);
-//     });
-//   });
-// });
+  describe('valid cases', () => {
+    test('valid request', () => {
+      succ(quizSessionGetFinalResult(token, quizId, quizSessionId));
+    });
+  });
+  describe('invalid cases', () => {
+    test('Session Id does not refer to a valid session within this quiz', () => {
+      err(quizSessionGetFinalResult(token, 123, 123), 400);
+    });
+  });
+});
