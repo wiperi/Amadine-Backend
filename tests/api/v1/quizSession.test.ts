@@ -679,7 +679,7 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results', () => {
   let player3Id: number;
   let question1Result: QuestionResultReturned;
   let question2Result: QuestionResultReturned;
-  beforeEach(async() => {
+  beforeEach(async () => {
     //in order to have 2 questions, a new auth will be created
     // Register a user and get the token
     const res = userRegister('dpst1093@unsw.edu.au', 'ValidPass123', 'Jack', 'Doe');
@@ -690,29 +690,29 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results', () => {
     quizId = createQuizRes.body.quizId;
     // Create new question
     let createQuestionRes = questionCreate(token, quizId, {
-    question: 'Are you my teacher ?',
-    duration: 60,
-    points: 6,
-    answers: [
-      { answer: 'Yes', correct: true },
-      { answer: 'You are puppets', correct: true },
-      { answer: 'No', correct: false },
-      { answer: 'Who knows', correct: false },
-    ],
+      question: 'Are you my teacher ?',
+      duration: 60,
+      points: 6,
+      answers: [
+        { answer: 'Yes', correct: true },
+        { answer: 'You are puppets', correct: true },
+        { answer: 'No', correct: false },
+        { answer: 'Who knows', correct: false },
+      ],
     });
     expect(createQuestionRes.statusCode).toBe(200);
-  createQuestionRes = questionCreate(token, quizId, {
-    question: 'Blue pill or red pill?',
-    duration: 60,
-    points: 5,
-    answers: [
-      { answer: 'Red', correct: true },
-      { answer: 'Blue', correct: false },
-      { answer: 'Whatever', correct: false },
-      { answer: "I don't know", correct: false },
-    ],
-  });
-  expect(createQuestionRes.statusCode).toBe(200);
+    createQuestionRes = questionCreate(token, quizId, {
+      question: 'Blue pill or red pill?',
+      duration: 60,
+      points: 5,
+      answers: [
+        { answer: 'Red', correct: true },
+        { answer: 'Blue', correct: false },
+        { answer: 'Whatever', correct: false },
+        { answer: "I don't know", correct: false },
+      ],
+    });
+    expect(createQuestionRes.statusCode).toBe(200);
     // Create new quiz session
     let createQuizSessionRes = quizSessionCreate(token, quizId, 2);
     expect(createQuizSessionRes.statusCode).toBe(200);
@@ -769,23 +769,21 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results', () => {
   describe('valid cases', () => {
     test('valid request', () => {
       const sessionRes = succ(quizSessionGetFinalResult(token, quizId, quizSessionId));
-      expect(sessionRes.usersRankedByScore).toStrictEqual(
-        [
-          {
-            "name": "Peter Griffin",
-            "score": 11,
-          },
-          {
-            "name": "Homer Simpson",
-            "score": 6,
-          },
-          {
-            "name": "Bart Simpson",
-            "score": 0,
-          }
-        ],
-      );
-      expect(sessionRes.questions).toStrictEqual
+      expect(sessionRes.usersRankedByScore).toStrictEqual([
+        {
+          name: 'Peter Griffin',
+          score: 11,
+        },
+        {
+          name: 'Homer Simpson',
+          score: 6,
+        },
+        {
+          name: 'Bart Simpson',
+          score: 0,
+        },
+      ]);
+      expect(sessionRes.questions).toStrictEqual;
       expect(sessionRes.questionResults[0]).toStrictEqual(question1Result);
       expect(sessionRes.questionResults[1]).toStrictEqual(question2Result);
       console.log(sessionRes.questionResults[0]);
@@ -798,12 +796,14 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results', () => {
     test('session is not in FINAL_RESULTS STATE', () => {
       succ(quizSessionUpdateState(token, quizId, quizSessionId, 'END'));
       // Now session state is in END state
-      err(quizSessionGetFinalResult(token,quizId, quizSessionId), 400);
+      err(quizSessionGetFinalResult(token, quizId, quizSessionId), 400);
     });
     test('Valid token is provided, but user is not an owner of this quiz or quiz does not exist', () => {
-      const userRegisterRes = succ(userRegister('somebody@some.com', 'Somebody123', 'Some', 'Body'));
+      const userRegisterRes = succ(
+        userRegister('somebody@some.com', 'Somebody123', 'Some', 'Body')
+      );
       const newToken = userRegisterRes.token;
       err(quizSessionGetFinalResult(newToken, quizId, quizSessionId), 403);
-    })
+    });
   });
 });

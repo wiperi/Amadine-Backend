@@ -427,7 +427,7 @@ export function getQuestionResult(
     // Update total score
     p.totalScore += p.submit.score;
   });
-  // Sort by total score 
+  // Sort by total score
   const playersCorrectList = playersCorrect.map(p => p.name).sort((a, b) => a.localeCompare(b));
 
   const averageAnswerTime = Math.round(
