@@ -427,14 +427,14 @@ export function getQuestionResult(
     // Update total score
     p.totalScore += p.submit.score;
   });
-
-  const playersCorrectList = playersCorrect.map(p => p.name);
+  // Sort by total score
+  const playersCorrectList = playersCorrect.map(p => p.name).sort((a, b) => a.localeCompare(b));
 
   const averageAnswerTime = Math.round(
-    playersInSession.reduce(
-      (acc, p) => acc + p.submits.find(s => s.questionId === questionId)?.timeSpent,
-      0
-    ) / playersInSession.length
+    playersInSession.reduce((acc, p) => {
+      const submit = p.submits.find(s => s.questionId === questionId);
+      return submit ? acc + submit.timeSpent : acc;
+    }, 0) / playersInSession.length
   );
 
   const percentCorrect = Math.round((playersCorrectList.length / playersInSession.length) * 100);
