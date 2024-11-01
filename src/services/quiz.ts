@@ -981,10 +981,7 @@ export function quizSessionFinalResultsCSV(
   const csv = csvRows.join('\n');
 
   // Save CSV to file
-  const filePath = path.join(
-    config.resultsPath,
-    `quiz${quizId}_session${sessionId}.csv`
-  );
+  const filePath = path.join(config.resultsPath, `quiz${quizId}_session${sessionId}.csv`);
   if (!fs.existsSync(config.resultsPath)) {
     fs.mkdirSync(config.resultsPath, { recursive: true });
   }
