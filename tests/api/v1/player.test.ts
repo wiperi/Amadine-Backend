@@ -66,7 +66,7 @@ beforeEach(() => {
   // Create a quiz session
   const createQuizSessionRes = quizSessionCreate(token, quizId, 2);
   expect(createQuizSessionRes.statusCode).toBe(200);
-  quizSessionId = createQuizSessionRes.body.newSessionId;
+  quizSessionId = createQuizSessionRes.body.sessionId;
 });
 
 afterAll(() => {
