@@ -134,10 +134,7 @@ export function adminPlayerSubmitAnswers(
   } else {
     player.submits.splice(player.submits.indexOf(submit), 1, newSubmit);
   }
-
-  // Update player's total score
-  player.totalScore += !userIsWrong ? question.points : 0;
-
+  
   setData();
 
   return {};
