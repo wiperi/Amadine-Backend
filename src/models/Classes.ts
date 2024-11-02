@@ -259,7 +259,11 @@ export class QuizSession {
 
     if (this.state() === FINAL_RESULTS) {
       // Save results to file
-      const sessionResult = { todo: 'todo' };
+      const sessionResult = quizSessionFinalResults(
+        this.metadata.authUserId,
+        this.quizId,
+        this.sessionId
+      );
       const filePath = path.join(
         config.resultsPath,
         `quiz${this.quizId}_session${this.sessionId}.json`

@@ -10,9 +10,13 @@ import {
   quizSessionGetStatus,
   playerJoinSession,
   quizSessionGetFinalResult,
+  quizGetDetails,
+  playerSubmitAnswer,
+  playerGetQuestionResult,
   succ,
   err,
 } from './helpers';
+import { QuestionResultReturned } from '@/models/Types';
 
 const ERROR = { error: expect.any(String) };
 
@@ -48,7 +52,7 @@ beforeEach(() => {
   // Create a quiz session
   const createQuizSessionRes = quizSessionCreate(token, quizId, 2);
   expect(createQuizSessionRes.statusCode).toBe(200);
-  quizSessionId = createQuizSessionRes.body.newSessionId;
+  quizSessionId = createQuizSessionRes.body.sessionId;
 });
 
 afterAll(() => {
@@ -142,8 +146,8 @@ describe('POST /v1/admin/quiz/:quizId/session/start', () => {
     test('successfully create quiz session', () => {
       const res = quizSessionCreate(token, quizId, 2);
       expect(res.statusCode).toStrictEqual(200);
-      expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
-      const res1 = quizSessionGetStatus(token, quizId, res.body.newSessionId);
+      expect(res.body).toStrictEqual({ sessionId: expect.any(Number) });
+      const res1 = quizSessionGetStatus(token, quizId, res.body.sessionId);
       expect(res1.statusCode).toBe(200);
       expect(res1.body.state).toStrictEqual('LOBBY');
     });
@@ -154,13 +158,13 @@ describe('POST /v1/admin/quiz/:quizId/session/start', () => {
       }
       const res = quizSessionCreate(token, quizId, 2);
       expect(res.statusCode).toStrictEqual(200);
-      expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
+      expect(res.body).toStrictEqual({ sessionId: expect.any(Number) });
     });
     test('successfully create quiz session when autoStartNum is 0', () => {
       const res = quizSessionCreate(token, quizId, 0);
       expect(res.statusCode).toStrictEqual(200);
-      expect(res.body).toStrictEqual({ newSessionId: expect.any(Number) });
-      const res1 = quizSessionGetStatus(token, quizId, res.body.newSessionId);
+      expect(res.body).toStrictEqual({ sessionId: expect.any(Number) });
+      const res1 = quizSessionGetStatus(token, quizId, res.body.sessionId);
       expect(res1.statusCode).toBe(200);
       expect(res1.body.state).toStrictEqual('QUESTION_COUNTDOWN');
     });
@@ -507,7 +511,7 @@ describe('GET /v1/admin/quiz/:quizId/sessions', () => {
       // Create a session for this test
       const createQuizSessionRes = quizSessionCreate(token, quizId, 2);
       expect(createQuizSessionRes.statusCode).toBe(200);
-      quizSessionId = createQuizSessionRes.body.newSessionId;
+      quizSessionId = createQuizSessionRes.body.sessionId;
 
       const res = quizSessionGetActivity(token, quizId);
       expect(res.statusCode).toBe(200);
@@ -533,7 +537,7 @@ describe('GET /v1/admin/quiz/:quizId/sessions', () => {
       for (let i = 0; i < 3; i++) {
         const createSessionRes = quizSessionCreate(token, quizId, 2);
         expect(createSessionRes.statusCode).toBe(200);
-        activeSessionIds.push(createSessionRes.body.newSessionId);
+        activeSessionIds.push(createSessionRes.body.sessionId);
       }
 
       // Create 2 sessions and mark them as inactive using quizSessionUpdateState
@@ -541,7 +545,7 @@ describe('GET /v1/admin/quiz/:quizId/sessions', () => {
       for (let i = 0; i < 2; i++) {
         const createSessionRes = quizSessionCreate(token, quizId, 2); // Create session
         expect(createSessionRes.statusCode).toBe(200);
-        const sessionId = createSessionRes.body.newSessionId;
+        const sessionId = createSessionRes.body.sessionId;
         inactiveSessionIds.push(sessionId);
 
         // Mark this session as inactive using quizSessionUpdateState
@@ -662,32 +666,148 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
   });
 });
 
+// Tests for QuizSessionFinalResults
+describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results', () => {
+  let token: string;
+  let quizId: number;
+  let quizSessionId: number;
+  let correctAnsIds1: number[];
+  let correctAnsIds2: number[];
+  let wrongAnsIds1: number[];
+  let wrongAnsIds2: number[];
+  let player1Id: number;
+  let player2Id: number;
+  let player3Id: number;
+  let question1Result: QuestionResultReturned;
+  let question2Result: QuestionResultReturned;
+  beforeEach(async () => {
+    //in order to have 2 questions, a new auth will be created
+    // Register a user and get the token
+    const res = userRegister('dpst1093@unsw.edu.au', 'ValidPass123', 'Jack', 'Doe');
+    token = res.body.token;
+    // Create new quiz
+    let createQuizRes = quizCreate(token, 'Bad Quiz', 'A bad quiz');
+    expect(createQuizRes.statusCode).toBe(200);
+    quizId = createQuizRes.body.quizId;
+    // Create new question
+    let createQuestionRes = questionCreate(token, quizId, {
+      question: 'Are you my teacher ?',
+      duration: 60,
+      points: 6,
+      answers: [
+        { answer: 'Yes', correct: true },
+        { answer: 'You are puppets', correct: true },
+        { answer: 'No', correct: false },
+        { answer: 'Who knows', correct: false },
+      ],
+    });
+    expect(createQuestionRes.statusCode).toBe(200);
+    createQuestionRes = questionCreate(token, quizId, {
+      question: 'Blue pill or red pill?',
+      duration: 60,
+      points: 5,
+      answers: [
+        { answer: 'Red', correct: true },
+        { answer: 'Blue', correct: false },
+        { answer: 'Whatever', correct: false },
+        { answer: "I don't know", correct: false },
+      ],
+    });
+    expect(createQuestionRes.statusCode).toBe(200);
+    // Create new quiz session
+    let createQuizSessionRes = quizSessionCreate(token, quizId, 2);
+    expect(createQuizSessionRes.statusCode).toBe(200);
+    quizSessionId = createQuizSessionRes.body.sessionId;
+    // Create new players
+    player1Id = succ(playerJoinSession(quizSessionId, 'Peter Griffin')).playerId;
+    player2Id = succ(playerJoinSession(quizSessionId, 'Homer Simpson')).playerId;
+    player3Id = succ(playerJoinSession(quizSessionId, 'Bart Simpson')).playerId;
+    const question1Info = succ(quizGetDetails(token, quizId)).questions[0];
+    correctAnsIds1 = question1Info.answers
+      .filter((a: { correct: boolean }) => a.correct)
+      .map((a: { answerId: number }) => a.answerId);
+    wrongAnsIds1 = question1Info.answers
+      .filter((a: { correct: boolean }) => !a.correct)
+      .map((a: { answerId: number }) => a.answerId);
 
-// // Tests for QuizSessionFinalResults
-// describe.skip('GET /v1/admin/quiz/:quizId/session/:sessionId/results', () => {
-//   let quizId: number;
-//   let quizSessionId: number;
-//   let playerIds: number[];
-//   let questionId: number;
-//   let correctAnsIds: number[];
-//   let wrongAnsIds: number[];
-//   beforeEach(() => {
-//     // Create new quiz
-//     // Create new question
-//     // Create new quiz session
-//     // Create new players
-//     // Get correct and wrong answer ids
-//   });
+    const question2Info = succ(quizGetDetails(token, quizId)).questions[1];
+    correctAnsIds2 = question2Info.answers
+      .filter((a: { correct: boolean }) => a.correct)
+      .map((a: { answerId: number }) => a.answerId);
+    wrongAnsIds2 = question2Info.answers
+      .filter((a: { correct: boolean }) => !a.correct)
+      .map((a: { answerId: number }) => a.answerId);
 
+    // Update session state to FINAL_RESULTS state
+    // LOBBY -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN
+    succ(quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION'));
+    // QUESTION_COUNTDOWN -> (SKIP_COUNTDOWN) -> QUESTION_OPEN
+    succ(quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN'));
+    // Now is QUESTION_OPEN state, let players both answer the question correctly
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    succ(playerSubmitAnswer(correctAnsIds1, player1Id, 1));
+    succ(playerSubmitAnswer(correctAnsIds1, player2Id, 1));
+    // QUESTION_OPEN -> (GO_TO_ANSWER) -> ANSWER_SHOW
+    succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER'));
+    question1Result = succ(playerGetQuestionResult(player1Id, 1));
+    // ANSWER_SHOW -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN
+    succ(quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION'));
+    // QUESTION_COUNTDOWN -> (SKIP_COUNTDOWN) -> QUESTION_OPEN
+    succ(quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN'));
+    // Now is QUESTION_OPEN state, let player1 be correct and player2 be incorrect
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    succ(playerSubmitAnswer(correctAnsIds2, player1Id, 2));
+    succ(playerSubmitAnswer(wrongAnsIds2, player2Id, 2));
+    // QUESTION_OPEN -> (GO_TO_ANSWER) -> ANSWER_SHOW
+    succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER'));
+    question2Result = succ(playerGetQuestionResult(player1Id, 2));
+    // ANSWER_SHOW -> (GO_TO_FINAL_RESULTS) -> FINAL_RESULTS
+    succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_FINAL_RESULTS'));
+    const stateInfo = succ(quizSessionGetStatus(token, quizId, quizSessionId));
+    expect(stateInfo.state).toStrictEqual('FINAL_RESULTS');
+  });
 
-//   describe('valid cases', () => {
-//     test('valid request', () => {
-//       succ(quizSessionGetFinalResult(token, quizId, quizSessionId));
-//     });
-//   });
-//   describe('invalid cases', () => {
-//     test('Session Id does not refer to a valid session within this quiz', () => {
-//       err(quizSessionGetFinalResult(token, 123, 123), 400);
-//     });
-//   });
-// });
+  describe('valid cases', () => {
+    test('valid request', () => {
+      const sessionRes = succ(quizSessionGetFinalResult(token, quizId, quizSessionId));
+      expect(sessionRes.usersRankedByScore).toStrictEqual([
+        {
+          name: 'Peter Griffin',
+          score: 11,
+        },
+        {
+          name: 'Homer Simpson',
+          score: 6,
+        },
+        {
+          name: 'Bart Simpson',
+          score: 0,
+        },
+      ]);
+      expect(sessionRes.questions).toStrictEqual;
+      expect(sessionRes.questionResults[0]).toStrictEqual(question1Result);
+      expect(sessionRes.questionResults[1]).toStrictEqual(question2Result);
+      console.log(sessionRes.questionResults[0]);
+    });
+  });
+  describe('invalid cases', () => {
+    test('invalid token', () => {
+      err(quizSessionGetFinalResult('invalid token', quizId, quizSessionId), 401);
+    });
+    test('Session Id does not refer to a valid session within this quiz', () => {
+      err(quizSessionGetFinalResult(token, 123, quizSessionId), 400);
+    });
+    test('session is not in FINAL_RESULTS STATE', () => {
+      succ(quizSessionUpdateState(token, quizId, quizSessionId, 'END'));
+      // Now session state is in END state
+      err(quizSessionGetFinalResult(token, quizId, quizSessionId), 400);
+    });
+    test('Valid token is provided, but user is not an owner of this quiz or quiz does not exist', () => {
+      const userRegisterRes = succ(
+        userRegister('somebody@some.com', 'Somebody123', 'Some', 'Body')
+      );
+      const newToken = userRegisterRes.token;
+      err(quizSessionGetFinalResult(newToken, quizId, quizSessionId), 403);
+    });
+  });
+});

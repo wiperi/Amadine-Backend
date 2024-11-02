@@ -325,7 +325,7 @@ describe('DELETE /v2/admin/quiz/:quizId/question/:questionId', () => {
       // Start a session for the quiz
       const sessionRes = quizSessionCreate(token, quizId, 2); // Create a session
       expect(sessionRes.statusCode).toBe(200);
-      const sessionId = sessionRes.body.newSessionId;
+      const sessionId = sessionRes.body.sessionId;
       const endSessionRes = quizSessionUpdateState(token, quizId, sessionId, 'END');
       expect(endSessionRes.statusCode).toBe(200);
 

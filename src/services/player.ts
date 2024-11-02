@@ -6,7 +6,6 @@ import {
   QuizSessionResultReturned,
   MessagesReturned,
   QuestionResultReturned,
-  PlayerReturned,
 } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import {
