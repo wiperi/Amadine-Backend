@@ -1,4 +1,3 @@
-import exp from 'constants';
 import {
   userRegister,
   quizCreate,
@@ -18,6 +17,7 @@ import {
   err,
 } from './helpers';
 import { QuestionResultReturned } from '@/models/Types';
+
 const ERROR = { error: expect.any(String) };
 
 let token: string;
@@ -668,15 +668,16 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
 
 // Tests for QuizSessionFinalResults
 describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results', () => {
+  let token: string;
   let quizId: number;
   let quizSessionId: number;
   let correctAnsIds1: number[];
   let correctAnsIds2: number[];
   let wrongAnsIds1: number[];
   let wrongAnsIds2: number[];
-  let player1Id: number;
-  let player2Id: number;
-  let player3Id: number;
+  let Peter: number;
+  let Homer: number;
+  let Bart: number;
   let question1Result: QuestionResultReturned;
   let question2Result: QuestionResultReturned;
   beforeEach(async () => {
@@ -718,9 +719,9 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results', () => {
     expect(createQuizSessionRes.statusCode).toBe(200);
     quizSessionId = createQuizSessionRes.body.sessionId;
     // Create new players
-    player1Id = succ(playerJoinSession(quizSessionId, 'Peter Griffin')).playerId;
-    player2Id = succ(playerJoinSession(quizSessionId, 'Homer Simpson')).playerId;
-    player3Id = succ(playerJoinSession(quizSessionId, 'Bart Simpson')).playerId;
+    Peter = succ(playerJoinSession(quizSessionId, 'Peter Griffin')).playerId;
+    Homer = succ(playerJoinSession(quizSessionId, 'Homer Simpson')).playerId;
+    Bart = succ(playerJoinSession(quizSessionId, 'Bart Simpson')).playerId;
     const question1Info = succ(quizGetDetails(token, quizId)).questions[0];
     correctAnsIds1 = question1Info.answers
       .filter((a: { correct: boolean }) => a.correct)
@@ -743,23 +744,23 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results', () => {
     // QUESTION_COUNTDOWN -> (SKIP_COUNTDOWN) -> QUESTION_OPEN
     succ(quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN'));
     // Now is QUESTION_OPEN state, let players both answer the question correctly
+    succ(playerSubmitAnswer(correctAnsIds1, Peter, 1));
     await new Promise(resolve => setTimeout(resolve, 1000));
-    succ(playerSubmitAnswer(correctAnsIds1, player1Id, 1));
-    succ(playerSubmitAnswer(correctAnsIds1, player2Id, 1));
+    succ(playerSubmitAnswer(correctAnsIds1, Homer, 1));
     // QUESTION_OPEN -> (GO_TO_ANSWER) -> ANSWER_SHOW
     succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER'));
-    question1Result = succ(playerGetQuestionResult(player1Id, 1));
+    question1Result = succ(playerGetQuestionResult(Peter, 1));
     // ANSWER_SHOW -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN
     succ(quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION'));
     // QUESTION_COUNTDOWN -> (SKIP_COUNTDOWN) -> QUESTION_OPEN
     succ(quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN'));
     // Now is QUESTION_OPEN state, let player1 be correct and player2 be incorrect
+    succ(playerSubmitAnswer(correctAnsIds2, Peter, 2));
     await new Promise(resolve => setTimeout(resolve, 1000));
-    succ(playerSubmitAnswer(correctAnsIds2, player1Id, 2));
-    succ(playerSubmitAnswer(wrongAnsIds2, player2Id, 2));
+    succ(playerSubmitAnswer(wrongAnsIds2, Homer, 2));
     // QUESTION_OPEN -> (GO_TO_ANSWER) -> ANSWER_SHOW
     succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER'));
-    question2Result = succ(playerGetQuestionResult(player1Id, 2));
+    question2Result = succ(playerGetQuestionResult(Peter, 2));
     // ANSWER_SHOW -> (GO_TO_FINAL_RESULTS) -> FINAL_RESULTS
     succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_FINAL_RESULTS'));
     const stateInfo = succ(quizSessionGetStatus(token, quizId, quizSessionId));
@@ -776,7 +777,7 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results', () => {
         },
         {
           name: 'Homer Simpson',
-          score: 6,
+          score: 3,
         },
         {
           name: 'Bart Simpson',
