@@ -732,8 +732,8 @@ describe('GET /v1/player/:playerId', () => {
  * Test for playerGetSessionResult
  */
 describe('GET /v1/player/:playerid/results', () => {
-  let player1Id: number;
-  let player2Id: number;
+  let Peter: number;
+  let Homer: number;
   let correctAnsIds1: number[];
   let wrongAnsIds1: number[];
   let correctAnsIds2: number[];
@@ -741,8 +741,8 @@ describe('GET /v1/player/:playerid/results', () => {
   let question1Result: QuestionResultReturned;
   let question2Result: QuestionResultReturned;
   beforeEach(async () => {
-    player1Id = succ(playerJoinSession(quizSessionId, 'Peter Griffin')).playerId;
-    player2Id = succ(playerJoinSession(quizSessionId, 'Homer Simpson')).playerId;
+    Peter = succ(playerJoinSession(quizSessionId, 'Peter Griffin')).playerId;
+    Homer = succ(playerJoinSession(quizSessionId, 'Homer Simpson')).playerId;
 
     const question1Info = succ(quizGetDetails(token, quizId)).questions[0];
     correctAnsIds1 = question1Info.answers
@@ -766,23 +766,23 @@ describe('GET /v1/player/:playerid/results', () => {
     // QUESTION_COUNTDOWN -> (SKIP_COUNTDOWN) -> QUESTION_OPEN
     succ(quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN'));
     // Now is QUESTION_OPEN state, let players both answer the question correctly
+    succ(playerSubmitAnswer(correctAnsIds1, Peter, 1));
     await new Promise(resolve => setTimeout(resolve, 1000));
-    succ(playerSubmitAnswer(correctAnsIds1, player1Id, 1));
-    succ(playerSubmitAnswer(correctAnsIds1, player2Id, 1));
+    succ(playerSubmitAnswer(correctAnsIds1, Homer, 1));
     // QUESTION_OPEN -> (GO_TO_ANSWER) -> ANSWER_SHOW
     succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER'));
-    question1Result = succ(playerGetQuestionResult(player1Id, 1));
+    question1Result = succ(playerGetQuestionResult(Peter, 1));
     // ANSWER_SHOW -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN
     succ(quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION'));
     // QUESTION_COUNTDOWN -> (SKIP_COUNTDOWN) -> QUESTION_OPEN
     succ(quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN'));
     // Now is QUESTION_OPEN state, let player1 be correct and player2 be incorrect
+    succ(playerSubmitAnswer(correctAnsIds2, Peter, 2));
     await new Promise(resolve => setTimeout(resolve, 1000));
-    succ(playerSubmitAnswer(correctAnsIds2, player1Id, 2));
-    succ(playerSubmitAnswer(wrongAnsIds2, player2Id, 2));
+    succ(playerSubmitAnswer(wrongAnsIds2, Homer, 2));
     // QUESTION_OPEN -> (GO_TO_ANSWER) -> ANSWER_SHOW
     succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER'));
-    question2Result = succ(playerGetQuestionResult(player1Id, 2));
+    question2Result = succ(playerGetQuestionResult(Peter, 2));
     // ANSWER_SHOW -> (GO_TO_FINAL_RESULTS) -> FINAL_RESULTS
     succ(quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_FINAL_RESULTS'));
     const stateInfo = succ(quizSessionGetStatus(token, quizId, quizSessionId));
@@ -797,15 +797,15 @@ describe('GET /v1/player/:playerid/results', () => {
     test('session is not in FINAL_RESULTS STATE', () => {
       succ(quizSessionUpdateState(token, quizId, quizSessionId, 'END'));
       // Now session state is in END state
-      err(playerGetSessionResult(player1Id), 400);
+      err(playerGetSessionResult(Peter), 400);
     });
   });
 
   describe('valid cases', () => {
     test('return correct answer with 2 players', () => {
       // player1: 6 + 5 points
-      // player2: 6 + 0 points
-      const sessionResult = succ(playerGetSessionResult(player1Id));
+      // player2: 3 + 0 points
+      const sessionResult = succ(playerGetSessionResult(Peter));
       expect(sessionResult.usersRankedByScore).toStrictEqual([
         {
           name: 'Peter Griffin',
@@ -813,7 +813,7 @@ describe('GET /v1/player/:playerid/results', () => {
         },
         {
           name: 'Homer Simpson',
-          score: 6,
+          score: 3,
         },
       ]);
 
@@ -832,13 +832,13 @@ describe('GET /v1/player/:playerid/results', () => {
       // Create a new quizSession
       const createQuizSessionRes = quizSessionCreate(token, quizId, 2);
       expect(createQuizSessionRes.statusCode).toBe(200);
-      const sessionId = createQuizSessionRes.body.newSessionId;
+      const sessionId = createQuizSessionRes.body.sessionId;
 
       // this quizSession has 2 questions and 4 players
-      const player1Id = succ(playerJoinSession(sessionId, 'Peter Griffin')).playerId;
-      const player2Id = succ(playerJoinSession(sessionId, 'Homer Simpson')).playerId;
-      const player3Id = succ(playerJoinSession(sessionId, 'Glen Quagmire')).playerId;
-      const player4Id = succ(playerJoinSession(sessionId, 'Joe Swanson')).playerId;
+      const Peter = succ(playerJoinSession(sessionId, 'Peter Griffin')).playerId;
+      const Homer = succ(playerJoinSession(sessionId, 'Homer Simpson')).playerId;
+      const Glen = succ(playerJoinSession(sessionId, 'Glen Quagmire')).playerId;
+      const Joe = succ(playerJoinSession(sessionId, 'Joe Swanson')).playerId;
 
       // Update session state to FINAL_RESULTS state
       // LOBBY -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN
@@ -847,44 +847,45 @@ describe('GET /v1/player/:playerid/results', () => {
       succ(quizSessionUpdateState(token, quizId, sessionId, 'SKIP_COUNTDOWN'));
       // Now is QUESTION_OPEN state, let players both answer the question correctly
       // First question has 2 players correct and 1 player incorrect, 1 player did not answer
+      succ(playerSubmitAnswer(correctAnsIds1, Peter, 1));
       await new Promise(resolve => setTimeout(resolve, 1000));
-      succ(playerSubmitAnswer(correctAnsIds1, player1Id, 1));
-      succ(playerSubmitAnswer(wrongAnsIds1, player3Id, 1));
-      succ(playerSubmitAnswer(correctAnsIds1, player2Id, 1));
+      succ(playerSubmitAnswer(correctAnsIds1, Homer, 1));
+      succ(playerSubmitAnswer(wrongAnsIds1, Glen, 1));
       // QUESTION_OPEN -> (GO_TO_ANSWER) -> ANSWER_SHOW
       succ(quizSessionUpdateState(token, quizId, sessionId, 'GO_TO_ANSWER'));
-      question1Result = succ(playerGetQuestionResult(player1Id, 1));
+      question1Result = succ(playerGetQuestionResult(Peter, 1));
       // ANSWER_SHOW -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN
       succ(quizSessionUpdateState(token, quizId, sessionId, 'NEXT_QUESTION'));
       // QUESTION_COUNTDOWN -> (SKIP_COUNTDOWN) -> QUESTION_OPEN
       succ(quizSessionUpdateState(token, quizId, sessionId, 'SKIP_COUNTDOWN'));
       // Now is QUESTION_OPEN state, let player1 be correct and player2 be incorrect
       // Second question has 1 player correct, 2 players incorrect, 1 player did not answer
+      succ(playerSubmitAnswer(correctAnsIds2, Homer, 2));
       await new Promise(resolve => setTimeout(resolve, 1000));
-      succ(playerSubmitAnswer(wrongAnsIds2, player2Id, 2));
-      succ(playerSubmitAnswer(wrongAnsIds2, player3Id, 2));
-      succ(playerSubmitAnswer(correctAnsIds2, player1Id, 2));
+      succ(playerSubmitAnswer(correctAnsIds2, Glen, 2));
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      succ(playerSubmitAnswer(correctAnsIds2, Peter, 2));
       // QUESTION_OPEN -> (GO_TO_ANSWER) -> ANSWER_SHOW
       succ(quizSessionUpdateState(token, quizId, sessionId, 'GO_TO_ANSWER'));
-      question2Result = succ(playerGetQuestionResult(player1Id, 2));
+      question2Result = succ(playerGetQuestionResult(Peter, 2));
       // ANSWER_SHOW -> (GO_TO_FINAL_RESULTS) -> FINAL_RESULTS
       succ(quizSessionUpdateState(token, quizId, sessionId, 'GO_TO_FINAL_RESULTS'));
       const stateInfo = succ(quizSessionGetStatus(token, quizId, sessionId));
       expect(stateInfo.state).toStrictEqual('FINAL_RESULTS');
 
-      const sessionResult = succ(playerGetSessionResult(player1Id));
+      const sessionResult = succ(playerGetSessionResult(Peter));
       expect(sessionResult.usersRankedByScore).toStrictEqual([
         {
           name: 'Peter Griffin',
-          score: 11,
+          score: 6 + 2,
         },
         {
           name: 'Homer Simpson',
-          score: 6,
+          score: 3 + 5,
         },
         {
           name: 'Glen Quagmire',
-          score: 0,
+          score: 3,
         },
         {
           name: 'Joe Swanson',
