@@ -398,52 +398,59 @@ export function getQuestionResult(
   const playersInSession = data.players.filter(p => p.quizSessionId === quizSessionId);
 
   // Filter correct players
-  const playersCorrect: (Omit<Player, 'submits'> & {
-    submit: (typeof Player.prototype.submits)[number];
-  })[] = [];
-
-  playersInSession.forEach(p => {
-    const submit = p.submits.find(s => s.questionId === questionId);
-
-    // Select the correct submit from submits
-    if (submit && submit.isRight) {
-      const { submits, ...rest } = p;
-      playersCorrect.push({
-        ...rest,
-        submit,
-      });
-    }
-  });
-
+  // Select the correct submit from submits
   // Sort by time submitted
-  playersCorrect.sort((a, b) => a.submit.timeSubmitted - b.submit.timeSubmitted);
-
   // Update score
-  playersCorrect.forEach((p, index) => {
-    console.log(p.submit.timeSubmitted);
-    const scaledScore = question.points / (index + 1);
-    p.submit.score = Math.round(scaledScore);
-
-    // Update total score
-    p.totalScore += p.submit.score;
-  });
-
+  // Update total score
   // Sort by name
-  const playersCorrectList = playersCorrect.map(p => p.name).sort((a, b) => a.localeCompare(b));
+  // Calculate average answer time
+  // Calculate percent correct
 
-  const averageAnswerTime = Math.round(
-    playersInSession.reduce((acc, p) => {
-      const submit = p.submits.find(s => s.questionId === questionId);
-      return submit ? acc + submit.timeSpent : acc;
-    }, 0) / playersInSession.length
-  );
+  let numPlayers = playersInSession.length;
+  let totalAnswerTime = 0;
+  let numCorrectPlayer = 0;
+  let playersCorrectList: string[] = [];
+  const map = new Map<Player, (typeof Player.prototype.submits[number])>();
 
-  const percentCorrect = Math.round((playersCorrectList.length / playersInSession.length) * 100);
+  playersInSession
+    .filter(p => {
+      const sub = p.submits.find(s => s.questionId === questionId);
+
+      // Answered
+      if (!sub) return false;
+      totalAnswerTime += sub.timeSpent;
+      
+      // Answered correctly
+      if (!sub.isRight) return false;
+
+      numCorrectPlayer++;
+      map.set(p, sub);
+      return true;
+    })
+    // Sort by time submitted
+    .sort((a, b) => map.get(a)!.timeSubmitted - map.get(b)!.timeSubmitted)
+    .filter((p, index) => {
+      // Score has already been calculated, skip
+      if (map.get(p).score !== 0) return true;
+
+      // Update score
+      const score = Math.round(question.points / (index + 1));
+      map.get(p).score = score;
+      p.totalScore += score;
+      // console.log(`${p.name} got ${score} pts, new total score is ${p.totalScore}`); // debug
+      return true;
+    })
+    // Sort by name
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .filter(p => {
+      playersCorrectList.push(p.name);
+      return true;
+    })
 
   return {
     questionId,
     playersCorrectList,
-    averageAnswerTime,
-    percentCorrect,
+    averageAnswerTime: Math.round(totalAnswerTime / numPlayers),
+    percentCorrect: Math.round((numCorrectPlayer / numPlayers) * 100),
   };
 }
