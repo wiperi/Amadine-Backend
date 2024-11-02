@@ -550,7 +550,7 @@ export function adminQuizSessionStart(
   authUserId: number,
   quizId: number,
   autoStartNum: number
-): { newSessionId: number } {
+): { sessionId: number } {
   const data = getData();
   const quiz = find.quiz(quizId);
   if (!quiz) {
@@ -584,7 +584,7 @@ export function adminQuizSessionStart(
   }
   setData(data);
 
-  return { newSessionId: newSessionId };
+  return { sessionId: newSessionId };
 }
 
 export function adminQuizSessionsActivity(
