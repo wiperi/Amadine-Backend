@@ -82,12 +82,13 @@ function loadData(): void {
           q.answers.forEach((a: any) => Object.setPrototypeOf(a, Answer.prototype))
       )
   );
-  rawData.quizSessions.forEach(
-    (qs: any) =>
-      Object.setPrototypeOf(qs, QuizSession.prototype) &&
-      qs.messages.forEach((m: any) => Object.setPrototypeOf(m, Message.prototype)) &&
-      Object.setPrototypeOf(qs.stateMachine, StateMachine.prototype)
-  );
+  rawData.quizSessions.forEach((qs: any) => {
+    Object.setPrototypeOf(qs, QuizSession.prototype);
+    Object.setPrototypeOf(qs.stateMachine, StateMachine.prototype);
+    Object.setPrototypeOf(qs.metadata, Quiz.prototype);
+    qs.messages.forEach((m: any) => Object.setPrototypeOf(m, Message.prototype));
+  });
+
   rawData.players.forEach((p: any) => Object.setPrototypeOf(p, Player.prototype));
 
   data = rawData;
