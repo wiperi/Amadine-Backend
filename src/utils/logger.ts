@@ -9,10 +9,11 @@ const fileFormat = winston.format.printf(logObj => {
 });
 
 const consoleFormat = winston.format.printf(logObj => {
-  const { res, req } = logObj.message;
+  const { res, req, stack } = logObj.message;
   const message = {
-    req: req,
-    res: res,
+    req,
+    res,
+    stack,
   };
   return JSON.stringify(message, null, 2);
 });
