@@ -406,11 +406,12 @@ export function getQuestionResult(
   // Calculate average answer time
   // Calculate percent correct
 
-  let numPlayers = playersInSession.length;
+  const numPlayers = playersInSession.length;
   let totalAnswerTime = 0;
   let numCorrectPlayer = 0;
-  let playersCorrectList: string[] = [];
-  const map = new Map<Player, (typeof Player.prototype.submits[number])>();
+  const playersCorrectList: string[] = [];
+  type Submit = (typeof Player.prototype.submits)[number];
+  const map = new Map<Player, Submit>();
 
   playersInSession
     .filter(p => {
@@ -419,7 +420,7 @@ export function getQuestionResult(
       // Answered
       if (!sub) return false;
       totalAnswerTime += sub.timeSpent;
-      
+
       // Answered correctly
       if (!sub.isRight) return false;
 
@@ -445,7 +446,7 @@ export function getQuestionResult(
     .filter(p => {
       playersCorrectList.push(p.name);
       return true;
-    })
+    });
 
   return {
     questionId,

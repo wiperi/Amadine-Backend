@@ -134,7 +134,7 @@ export function adminPlayerSubmitAnswers(
   } else {
     player.submits.splice(player.submits.indexOf(submit), 1, newSubmit);
   }
-  
+
   setData();
 
   return {};
