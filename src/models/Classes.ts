@@ -4,7 +4,7 @@ import { StateMachine } from './StateMachine';
 import fs from 'fs';
 import path from 'path';
 import config from '@/config';
-
+import { getQuestionResultCSVfile } from '@/utils/helper';
 const {
   LOBBY,
   QUESTION_COUNTDOWN,
@@ -272,8 +272,9 @@ export class QuizSession {
       if (!fs.existsSync(config.resultsPath)) {
         fs.mkdirSync(config.resultsPath, { recursive: true });
       }
-      // TODO: Parse to CSV format
       fs.writeFileSync(filePath, JSON.stringify(sessionResult, null, 2));
+      // csv format
+      getQuestionResultCSVfile(this.quizId, this.sessionId);
     }
   }
 
