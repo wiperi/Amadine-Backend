@@ -6,7 +6,9 @@ import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { QuizSessionState } from '@/models/Enums';
 import { QuestionResultReturned, PlayerReturned } from '@/models/Types';
-
+import fs from 'fs';
+import path from 'path';
+import config from '@/config';
 /**
  * Hashes a string using bcrypt.
  */
@@ -454,4 +456,63 @@ export function getQuestionResult(
     averageAnswerTime: Math.round(totalAnswerTime / numPlayers),
     percentCorrect: Math.round((numCorrectPlayer / numPlayers) * 100),
   };
+}
+export function getQuestionResultCSVfile(quizId: number, sessionId: number): void {
+  const data = getData();
+  const quizSession = find.quizSession(sessionId);
+  const playersInSession = data.players.filter(p => p.quizSessionId === sessionId);
+  const questions = quizSession.metadata.questions;
+  const playerScores = playersInSession.map(player => {
+    const scores = questions.map((question, index) => {
+      const submit = player.submits.find(s => s.questionId === question.questionId);
+      return {
+        score: submit ? submit.score : 0,
+        timeSpent: submit ? submit.timeSpent : 0,
+      };
+    });
+    return {
+      name: player.name,
+      scores,
+    };
+  });
+  const playerRanks = questions.map((question, questionIndex) => {
+    const scores = playerScores.map(player => ({
+      name: player.name,
+      score: player.scores[questionIndex].score,
+    }));
+    scores.sort((a, b) => b.score - a.score);
+
+    return scores.map((player, index) => ({
+      name: player.name,
+      rank: player.score > 0 ? index + 1 : 0,
+    }));
+  });
+  const csvData = playerScores.map(player => {
+    const row: { Player: string; [key: string]: number | string } = { Player: player.name };
+    player.scores.forEach((score, index) => {
+      row[`question${index + 1}score`] = score.score;
+      row[`question${index + 1}rank`] = playerRanks[index].find(r => r.name === player.name).rank;
+    });
+    return row;
+  });
+  csvData.sort((a, b) => a.Player.localeCompare(b.Player));
+  const fields = ['Player'];
+  questions.forEach((_, index) => {
+    fields.push(`question${index + 1}score`, `question${index + 1}rank`);
+  });
+
+  const csvRows = [];
+  csvRows.push(fields.join(','));
+  csvData.forEach(row => {
+    const values = fields.map(field => row[field]);
+    csvRows.push(values.join(','));
+  });
+  const csv = csvRows.join('\n');
+
+  // Save CSV to file
+  const filePath = path.join(config.resultsPath, `quiz${quizId}_session${sessionId}.csv`);
+  if (!fs.existsSync(config.resultsPath)) {
+    fs.mkdirSync(config.resultsPath, { recursive: true });
+  }
+  fs.writeFileSync(filePath, csv);
 }
