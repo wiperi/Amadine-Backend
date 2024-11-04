@@ -1,6 +1,6 @@
 import { getData, setData } from '@/dataStore';
 import { QuizSession, Player, Message } from '@/models/Classes';
-import { QuizSessionState } from '@/models/Enums';
+import { QuizSessionState, PlayerAction } from '@/models/Enums';
 import {
   EmptyObject,
   QuizSessionResultReturned,
@@ -46,9 +46,9 @@ export function PlayerJoinSession(sessionId: number, name: string): { playerId: 
 
   getData().players.push(player);
 
-  // if (find.players(sessionId).length >= quizSession.autoStartNum) {
-  //   quizSession.dispatch(PlayerAction.NEXT_QUESTION);
-  // }
+  if (find.players(sessionId).length >= quizSession.autoStartNum) {
+     quizSession.dispatch(PlayerAction.NEXT_QUESTION);
+   }
 
   setData();
 

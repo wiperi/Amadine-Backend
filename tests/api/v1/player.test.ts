@@ -64,7 +64,7 @@ beforeEach(() => {
   });
 
   // Create a quiz session
-  const createQuizSessionRes = quizSessionCreate(token, quizId, 2);
+  const createQuizSessionRes = quizSessionCreate(token, quizId, 5);
   expect(createQuizSessionRes.statusCode).toBe(200);
   quizSessionId = createQuizSessionRes.body.sessionId;
 });
@@ -830,7 +830,7 @@ describe('GET /v1/player/:playerid/results', () => {
       // player4: 0 points
 
       // Create a new quizSession
-      const createQuizSessionRes = quizSessionCreate(token, quizId, 2);
+      const createQuizSessionRes = quizSessionCreate(token, quizId, 5);
       expect(createQuizSessionRes.statusCode).toBe(200);
       const sessionId = createQuizSessionRes.body.sessionId;
 
