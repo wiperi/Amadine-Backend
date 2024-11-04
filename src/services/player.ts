@@ -1,6 +1,6 @@
 import { getData, setData } from '@/dataStore';
 import { QuizSession, Player, Message } from '@/models/Classes';
-import { PlayerAction, QuizSessionState } from '@/models/Enums';
+import { QuizSessionState } from '@/models/Enums';
 import {
   EmptyObject,
   QuizSessionResultReturned,
