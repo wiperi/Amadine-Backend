@@ -40,7 +40,7 @@ router.put(
 router.post('/:playerid(-?\\d+)/chat', (req: Request, res: Response, next: NextFunction) => {
   const playerId = parseInt(req.params.playerid);
   const { message } = req.body.message;
-  tryCatch(() => playerPostMessage(playerId, message.messageBody), req, res, next);
+  tryCatch(() => playerPostMessage(playerId, message), req, res, next);
 });
 
 router.get('/:playerid(-?\\d+)/chat', (req: Request, res: Response, next: NextFunction) => {

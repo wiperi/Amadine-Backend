@@ -6,6 +6,7 @@ import {
   QuizSessionResultReturned,
   MessagesReturned,
   QuestionResultReturned,
+  MessageParam,
 } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import {
@@ -203,19 +204,19 @@ export function playerGetQuestionInfo(
   };
 }
 
-export function playerPostMessage(playerId: number, message: string): EmptyObject {
+export function playerPostMessage(playerId: number, message: MessageParam): EmptyObject {
   const player = find.player(playerId);
   if (!player) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_PLAYER_ID);
   }
 
-  if (!isValidMessageBody(message)) {
+  if (!isValidMessageBody(message.messageBody)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_MESSAGE_BODY);
   }
 
   const quizSession = find.quizSession(player.quizSessionId);
 
-  const msg = new Message(playerId, player.name, message);
+  const msg = new Message(playerId, player.name, message.messageBody);
 
   quizSession.messages.push(msg);
 
