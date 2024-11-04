@@ -1,3 +1,4 @@
+import request from 'sync-request-curl';
 import {
   userRegister,
   quizCreate,
@@ -18,7 +19,6 @@ import {
   err,
 } from './helpers';
 import { QuestionResultReturned } from '@/models/Types';
-import axios from 'axios';
 const ERROR = { error: expect.any(String) };
 
 let token: string;
@@ -940,8 +940,8 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results/csv', () => {
       const sessionRes = succ(quizSessionGetFinalResultCsvFormat(token, quizId, quizSessionId));
       console.log(sessionRes.url);
       expect(sessionRes.url).toStrictEqual(expect.any(String));
-      const response = await axios.get(sessionRes.url);
-      expect(response.status).toBe(200);
+      const response = request('GET', sessionRes.url);
+      expect(response.statusCode).toBe(200);
     });
   });
 });

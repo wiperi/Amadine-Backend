@@ -6,9 +6,6 @@ import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { QuizSessionState } from '@/models/Enums';
 import { QuestionResultReturned, PlayerReturned } from '@/models/Types';
-import fs from 'fs';
-import path from 'path';
-import config from '@/config';
 /**
  * Hashes a string using bcrypt.
  */
@@ -457,7 +454,7 @@ export function getQuestionResult(
     percentCorrect: Math.round((numCorrectPlayer / numPlayers) * 100),
   };
 }
-export function getQuestionResultCSVfile(quizId: number, sessionId: number): void {
+export function getQuizSessionResultCSV(quizId: number, sessionId: number): string {
   const data = getData();
   const quizSession = find.quizSession(sessionId);
   const playersInSession = data.players.filter(p => p.quizSessionId === sessionId);
@@ -509,10 +506,5 @@ export function getQuestionResultCSVfile(quizId: number, sessionId: number): voi
   });
   const csv = csvRows.join('\n');
 
-  // Save CSV to file
-  const filePath = path.join(config.resultsPath, `quiz${quizId}_session${sessionId}.csv`);
-  if (!fs.existsSync(config.resultsPath)) {
-    fs.mkdirSync(config.resultsPath, { recursive: true });
-  }
-  fs.writeFileSync(filePath, csv);
+  return csv;
 }

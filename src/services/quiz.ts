@@ -29,7 +29,7 @@ import {
   getQuestionResult,
 } from '@/utils/helper';
 import { PlayerAction, QuizSessionState } from '@/models/Enums';
-import config from '@/config';
+import config from '@/_config';
 
 /**
  * Update the description of the relevant quiz.
