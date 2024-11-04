@@ -29,6 +29,8 @@ let data: DataStore = {
   players: [],
 };
 
+export const quizSessionTimers: Map<number, ReturnType<typeof setTimeout>> = new Map();
+
 // YOU SHOULD MODIFY THIS OBJECT ABOVE ONLY
 
 // YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1

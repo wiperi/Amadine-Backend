@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import config from '@/_config';
 import { getQuizSessionResultCSV } from '@/utils/helper';
+import { quizSessionTimers } from '@/dataStore';
 const {
   LOBBY,
   QUESTION_COUNTDOWN,
@@ -225,14 +226,25 @@ export class QuizSession {
   dispatch(action: PlayerAction): void {
     this.stateMachine.dispatch(action);
 
+    this.onStateChange(this.state());
+  }
+
+  onStateChange(state: QuizSessionState): void {
+    if (quizSessionTimers.has(this.sessionId)) {
+      clearTimeout(quizSessionTimers.get(this.sessionId));
+    }
+
     if (this.state() === QUESTION_COUNTDOWN) {
       this.atQuestion++;
       const currentQuestion = this.atQuestion;
-      setTimeout(() => {
-        if (this.atQuestion === currentQuestion && this.state() === QUESTION_COUNTDOWN) {
-          this.stateMachine.jumpTo(QUESTION_OPEN);
-        }
-      }, 3000);
+      quizSessionTimers.set(
+        this.sessionId,
+        setTimeout(() => {
+          if (this.atQuestion === currentQuestion && this.state() === QUESTION_COUNTDOWN) {
+            this.dispatch(SKIP_COUNTDOWN);
+          }
+        }, 3000)
+      );
     }
 
     if (this.state() === QUESTION_OPEN) {
@@ -242,13 +254,18 @@ export class QuizSession {
       this.timeCurrentQuestionStarted = Math.floor(Date.now() / 1000);
       // Store current question position
       const currentQuestion = this.atQuestion;
-      setTimeout(() => {
-        // If session is still on the same question and hasn't changed state
-        if (this.atQuestion === currentQuestion && this.state() === QUESTION_OPEN) {
-          this.stateMachine.jumpTo(QUESTION_CLOSE);
-          this.timeCurrentQuestionStarted = undefined;
-        }
-      }, duration * 1000);
+
+      quizSessionTimers.set(
+        this.sessionId,
+        setTimeout(() => {
+          // If session is still on the same question and hasn't changed state
+          if (this.atQuestion === currentQuestion && this.state() === QUESTION_OPEN) {
+            this.stateMachine.jumpTo(QUESTION_CLOSE);
+            this.onStateChange(this.state());
+            this.timeCurrentQuestionStarted = undefined;
+          }
+        }, duration * 1000)
+      );
     }
 
     if (this.state() === END) {
