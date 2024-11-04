@@ -1,7 +1,7 @@
 import express, { json, Request, Response, NextFunction } from 'express';
 import { echo } from './utils/newecho';
 import morgan from 'morgan';
-import config from './config';
+import config from './_config';
 import cors from 'cors';
 import YAML from 'yaml';
 import sui from 'swagger-ui-express';

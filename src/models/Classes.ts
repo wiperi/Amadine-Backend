@@ -1,9 +1,8 @@
-import { quizSessionFinalResults } from '@/services/quiz';
 import { QuizSessionState, Color, PlayerAction } from './Enums';
 import { StateMachine } from './StateMachine';
 import fs from 'fs';
 import path from 'path';
-import config from '@/config';
+import config from '@/_config';
 import { getQuizSessionResultCSV } from '@/utils/helper';
 const {
   LOBBY,

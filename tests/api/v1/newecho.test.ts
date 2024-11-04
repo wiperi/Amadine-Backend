@@ -1,6 +1,6 @@
 // Do not delete this file
 import request from 'sync-request-curl';
-import config from '../../../src/config';
+import config from '../../../src/_config';
 
 const port = config.port;
 const url = config.url;

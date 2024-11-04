@@ -1,7 +1,7 @@
 import schedule from 'node-schedule';
 import fs from 'fs';
 import path from 'path';
-import config from '@/config';
+import config from '@/_config';
 
 const LOG_PATH = config.logPath;
 

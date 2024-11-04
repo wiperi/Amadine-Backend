@@ -1,6 +1,6 @@
 import winston from 'winston';
 import path from 'path';
-import config from '@/config';
+import config from '@/_config';
 
 const LOG_PATH = config.logPath;
 
