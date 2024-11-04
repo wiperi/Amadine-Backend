@@ -269,6 +269,8 @@ export const find = {
     getData().userSessions.find(session => session.sessionId === sessionId),
   player: (playerId: number): Player | undefined =>
     getData().players.find(player => player.playerId === playerId),
+  players: (sessionId: number): Player[] =>
+    getData().players.filter(player => player.quizSessionId === sessionId),
 };
 
 /**

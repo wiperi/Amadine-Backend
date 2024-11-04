@@ -788,7 +788,6 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results', () => {
       expect(sessionRes.questions).toStrictEqual;
       expect(sessionRes.questionResults[0]).toStrictEqual(question1Result);
       expect(sessionRes.questionResults[1]).toStrictEqual(question2Result);
-      console.log(sessionRes.questionResults[0]);
     });
   });
   describe('invalid cases', () => {
@@ -938,7 +937,6 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results/csv', () => {
   describe('valid cases', () => {
     test('valid request', async () => {
       const sessionRes = succ(quizSessionGetFinalResultCsvFormat(token, quizId, quizSessionId));
-      console.log(sessionRes.url);
       expect(sessionRes.url).toStrictEqual(expect.any(String));
       const response = request('GET', sessionRes.url);
       expect(response.statusCode).toBe(200);

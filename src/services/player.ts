@@ -45,6 +45,10 @@ export function PlayerJoinSession(sessionId: number, name: string): { playerId: 
 
   getData().players.push(player);
 
+  // if (find.players(sessionId).length >= quizSession.autoStartNum) {
+  //   quizSession.dispatch(PlayerAction.NEXT_QUESTION);
+  // }
+
   setData();
 
   return { playerId: playerId };
