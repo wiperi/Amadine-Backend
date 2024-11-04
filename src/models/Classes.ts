@@ -4,7 +4,7 @@ import { StateMachine } from './StateMachine';
 import fs from 'fs';
 import path from 'path';
 import config from '@/config';
-
+import { getQuizSessionResultCSV } from '@/utils/helper';
 const {
   LOBBY,
   QUESTION_COUNTDOWN,
@@ -259,21 +259,16 @@ export class QuizSession {
 
     if (this.state() === FINAL_RESULTS) {
       // Save results to file
-      const sessionResult = quizSessionFinalResults(
-        this.metadata.authUserId,
-        this.quizId,
-        this.sessionId
-      );
+      const result = getQuizSessionResultCSV(this.quizId, this.sessionId);
       const filePath = path.join(
         config.resultsPath,
-        `quiz${this.quizId}_session${this.sessionId}.json`
+        `quiz${this.quizId}_session${this.sessionId}.csv`
       );
       // If results not exist , create file
       if (!fs.existsSync(config.resultsPath)) {
         fs.mkdirSync(config.resultsPath, { recursive: true });
       }
-      // TODO: Parse to CSV format
-      fs.writeFileSync(filePath, JSON.stringify(sessionResult, null, 2));
+      fs.writeFileSync(filePath, result);
     }
   }
 

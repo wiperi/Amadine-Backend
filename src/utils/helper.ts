@@ -6,7 +6,6 @@ import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { QuizSessionState } from '@/models/Enums';
 import { QuestionResultReturned, PlayerReturned } from '@/models/Types';
-
 /**
  * Hashes a string using bcrypt.
  */
@@ -398,51 +397,114 @@ export function getQuestionResult(
   const playersInSession = data.players.filter(p => p.quizSessionId === quizSessionId);
 
   // Filter correct players
-  const playersCorrect: (Omit<Player, 'submits'> & {
-    submit: (typeof Player.prototype.submits)[number];
-  })[] = [];
-
-  playersInSession.forEach(p => {
-    const submit = p.submits.find(s => s.questionId === questionId);
-
-    // Select the correct submit from submits
-    if (submit && submit.isRight) {
-      const { submits, ...rest } = p;
-      playersCorrect.push({
-        ...rest,
-        submit,
-      });
-    }
-  });
-
+  // Select the correct submit from submits
   // Sort by time submitted
-  playersCorrect.sort((a, b) => a.submit.timeSubmitted - b.submit.timeSubmitted);
-
   // Update score
-  playersCorrect.forEach((p, index) => {
-    console.log(p.submit.timeSubmitted);
-    const scaledScore = question.points / (index + 1);
-    p.submit.score = Math.round(scaledScore);
+  // Update total score
+  // Sort by name
+  // Calculate average answer time
+  // Calculate percent correct
 
-    // Update total score
-    p.totalScore += p.submit.score;
-  });
-  // Sort by total score
-  const playersCorrectList = playersCorrect.map(p => p.name).sort((a, b) => a.localeCompare(b));
+  const numPlayers = playersInSession.length;
+  let totalAnswerTime = 0;
+  let numCorrectPlayer = 0;
+  const playersCorrectList: string[] = [];
+  type Submit = (typeof Player.prototype.submits)[number];
+  const map = new Map<Player, Submit>();
 
-  const averageAnswerTime = Math.round(
-    playersInSession.reduce((acc, p) => {
-      const submit = p.submits.find(s => s.questionId === questionId);
-      return submit ? acc + submit.timeSpent : acc;
-    }, 0) / playersInSession.length
-  );
+  playersInSession
+    .filter(p => {
+      const sub = p.submits.find(s => s.questionId === questionId);
 
-  const percentCorrect = Math.round((playersCorrectList.length / playersInSession.length) * 100);
+      // Answered
+      if (!sub) return false;
+      totalAnswerTime += sub.timeSpent;
+
+      // Answered correctly
+      if (!sub.isRight) return false;
+
+      numCorrectPlayer++;
+      map.set(p, sub);
+      return true;
+    })
+    // Sort by time submitted
+    .sort((a, b) => map.get(a)!.timeSubmitted - map.get(b)!.timeSubmitted)
+    .filter((p, index) => {
+      // Score has already been calculated, skip
+      if (map.get(p).score !== 0) return true;
+
+      // Update score
+      const score = Math.round(question.points / (index + 1));
+      map.get(p).score = score;
+      p.totalScore += score;
+      // console.log(`${p.name} got ${score} pts, new total score is ${p.totalScore}`); // debug
+      return true;
+    })
+    // Sort by name
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .filter(p => {
+      playersCorrectList.push(p.name);
+      return true;
+    });
 
   return {
     questionId,
     playersCorrectList,
-    averageAnswerTime,
-    percentCorrect,
+    averageAnswerTime: Math.round(totalAnswerTime / numPlayers),
+    percentCorrect: Math.round((numCorrectPlayer / numPlayers) * 100),
   };
+}
+export function getQuizSessionResultCSV(quizId: number, sessionId: number): string {
+  const data = getData();
+  const quizSession = find.quizSession(sessionId);
+  const playersInSession = data.players.filter(p => p.quizSessionId === sessionId);
+  const questions = quizSession.metadata.questions;
+  const playerScores = playersInSession.map(player => {
+    const scores = questions.map((question, index) => {
+      const submit = player.submits.find(s => s.questionId === question.questionId);
+      return {
+        score: submit ? submit.score : 0,
+        timeSpent: submit ? submit.timeSpent : 0,
+      };
+    });
+    return {
+      name: player.name,
+      scores,
+    };
+  });
+  const playerRanks = questions.map((question, questionIndex) => {
+    const scores = playerScores.map(player => ({
+      name: player.name,
+      score: player.scores[questionIndex].score,
+    }));
+    scores.sort((a, b) => b.score - a.score);
+
+    return scores.map((player, index) => ({
+      name: player.name,
+      rank: player.score > 0 ? index + 1 : 0,
+    }));
+  });
+  const csvData = playerScores.map(player => {
+    const row: { Player: string; [key: string]: number | string } = { Player: player.name };
+    player.scores.forEach((score, index) => {
+      row[`question${index + 1}score`] = score.score;
+      row[`question${index + 1}rank`] = playerRanks[index].find(r => r.name === player.name).rank;
+    });
+    return row;
+  });
+  csvData.sort((a, b) => a.Player.localeCompare(b.Player));
+  const fields = ['Player'];
+  questions.forEach((_, index) => {
+    fields.push(`question${index + 1}score`, `question${index + 1}rank`);
+  });
+
+  const csvRows = [];
+  csvRows.push(fields.join(','));
+  csvData.forEach(row => {
+    const values = fields.map(field => row[field]);
+    csvRows.push(values.join(','));
+  });
+  const csv = csvRows.join('\n');
+
+  return csv;
 }

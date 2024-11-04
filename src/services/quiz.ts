@@ -29,6 +29,7 @@ import {
   getQuestionResult,
 } from '@/utils/helper';
 import { PlayerAction, QuizSessionState } from '@/models/Enums';
+import config from '@/config';
 
 /**
  * Update the description of the relevant quiz.
@@ -905,5 +906,31 @@ export function quizSessionFinalResults(
   return {
     usersRankedByScore: rankPlayerInSession(sessionId),
     questionResults: results,
+  };
+}
+
+export function quizSessionFinalResultsCSV(
+  authUserId: number,
+  quizId: number,
+  sessionId: number
+): { url: string } {
+  // Session Id does not refer to a valid session within this quiz
+  const quizSession = find.quizSession(sessionId);
+  if (!quizSession || quizSession.quizId !== quizId) {
+    throw new HttpError(400, ERROR_MESSAGES.INVALID_SESSION_ID);
+  }
+  // Session is not in FINAL_RESULTS state
+  if (quizSession.state() !== QuizSessionState.FINAL_RESULTS) {
+    throw new HttpError(400, ERROR_MESSAGES.SESSION_STATE_INVALID);
+  }
+
+  // Valid token is provided, but user is not an owner of this quiz or quiz doesn't exist
+  if (!isQuizIdOwnedByUser(quizId, authUserId)) {
+    throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
+  }
+
+  const url = `${config.url}:${config.port}/results/quiz${quizId}_session${sessionId}.csv`;
+  return {
+    url,
   };
 }
