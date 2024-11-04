@@ -253,7 +253,48 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
   });
 
   describe('QUESTION_COUNTDOWN state', () => {
-    // Tests for QUESTION_COUNTDOWN state will be added here by yibin
+    beforeEach(() => {
+      const res = playerJoinSession(quizSessionId, 'John Wick');
+      expect(res.statusCode).toBe(200);
+      // goto QUESTION_COUNTDOWN state
+      // LOBBY -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN
+      quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+
+      // use get quizSession status to ensure quizSession is in state QUESTION_COUNTDOWN
+      const getStatusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+      expect(getStatusInfo.statusCode).toBe(200);
+      expect(getStatusInfo.body.state).toBe('QUESTION_COUNTDOWN');
+    });
+    describe('valid cases', () => {
+      test('QUESTION_COUNTDOWN -> (END) -> END', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'END');
+        expect(res.statusCode).toBe(200);
+        const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+        expect(statusInfo.statusCode).toBe(200);
+        expect(statusInfo.body.state).toBe('END');
+      });
+
+      test('QUESTION_COUNTDOWN -> (SKIP_COUNTDOWN) -> QUESTION_OPEN', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
+        expect(res.statusCode).toBe(200);
+        const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+        expect(statusInfo.statusCode).toBe(200);
+        expect(statusInfo.body.state).toBe('QUESTION_OPEN');
+      });
+    });
+
+    describe('invalid cases', () => {
+      test('QUESTION_COUNTDOWN -> (GO_TO_ANSWER))', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER');
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+      test('QUESTION_COUNTDOWN -> (NEXT_QUESTION)', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+        expect(res.statusCode).toBe(400);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+    });
   });
 
   describe('QUESTION_OPEN state', () => {
