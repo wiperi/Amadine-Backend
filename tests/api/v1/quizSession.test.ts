@@ -256,11 +256,8 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
     beforeEach(() => {
       const res = playerJoinSession(quizSessionId, 'John Wick');
       expect(res.statusCode).toBe(200);
-      // goto QUESTION_COUNTDOWN state
-      // LOBBY -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN
       quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
 
-      // use get quizSession status to ensure quizSession is in state QUESTION_COUNTDOWN
       const getStatusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
       expect(getStatusInfo.statusCode).toBe(200);
       expect(getStatusInfo.body.state).toBe('QUESTION_COUNTDOWN');
