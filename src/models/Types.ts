@@ -78,4 +78,4 @@ export type QuizSessionResultReturned = {
 
 export type MessageParam = {
   messageBody: string;
-}
+};
