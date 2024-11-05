@@ -448,9 +448,7 @@ export function playerGetMessage(playerId: number): ParsedResponse {
 
 export function playerPostMessage(playerId: number, message: object): ParsedResponse {
   const res = request('POST', `${PLAYER_URL}/${playerId}/chat`, {
-    json: {
-      message,
-    },
+    json: message
   });
   return parse(res);
 }

@@ -20,7 +20,6 @@ import {
   err,
   playerGetSessionResult,
 } from './helpers';
-import exp from 'constants';
 
 const ERROR = { error: expect.any(String) };
 
