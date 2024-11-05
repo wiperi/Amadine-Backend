@@ -119,9 +119,7 @@ export function adminPlayerSubmitAnswers(
   const timeSpent = now - quizSession.timeCurrentQuestionStarted;
 
   // Check if user is wrong, if user submit any answer that is not correct
-  const userIsWrong = question
-    .answers
-    .some(a => answerIdsSet.has(a.answerId) && !a.correct);
+  const userIsWrong = question.answers.some(a => answerIdsSet.has(a.answerId) && !a.correct);
 
   const submit = player.submits.find(s => s.questionId === question.questionId);
 

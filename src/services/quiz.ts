@@ -638,14 +638,13 @@ export function adminQuizSessionGetStatus(
     metadata: {
       ...metaPruned,
       numQuestions: metadata.questions.length,
-      duration: metadata.duration()
+      duration: metadata.duration(),
     },
   };
 }
 
 export function adminQuizInfoV2(authUserId: number, quizId: number): QuizReturnedV2 {
   const quiz = find.quiz(quizId);
-
 
   const res = {
     ...adminQuizInfo(authUserId, quizId),
