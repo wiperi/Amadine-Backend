@@ -280,6 +280,7 @@ export class QuizSession {
     }
 
     if (this.state() === FINAL_RESULTS) {
+      this.atQuestion = 0;
       // Save results to file
       const result = getQuizSessionResultCSV(this.quizId, this.sessionId);
       const filePath = path.join(
