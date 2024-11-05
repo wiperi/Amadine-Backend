@@ -1,11 +1,12 @@
 import { getData, setData } from '@/dataStore';
 import { QuizSession, Player, Message } from '@/models/Classes';
-import { QuizSessionState } from '@/models/Enums';
+import { QuizSessionState, PlayerAction } from '@/models/Enums';
 import {
   EmptyObject,
   QuizSessionResultReturned,
   MessagesReturned,
   QuestionResultReturned,
+  MessageParam,
 } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import {
@@ -45,9 +46,9 @@ export function PlayerJoinSession(sessionId: number, name: string): { playerId: 
 
   getData().players.push(player);
 
-  // if (find.players(sessionId).length >= quizSession.autoStartNum) {
-  //   quizSession.dispatch(PlayerAction.NEXT_QUESTION);
-  // }
+  if (find.players(sessionId).length >= quizSession.autoStartNum) {
+    quizSession.dispatch(PlayerAction.NEXT_QUESTION);
+  }
 
   setData();
 
@@ -203,19 +204,19 @@ export function playerGetQuestionInfo(
   };
 }
 
-export function playerPostMessage(playerId: number, message: string): EmptyObject {
+export function playerPostMessage(playerId: number, message: MessageParam): EmptyObject {
   const player = find.player(playerId);
   if (!player) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_PLAYER_ID);
   }
 
-  if (!isValidMessageBody(message)) {
+  if (!isValidMessageBody(message.messageBody)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_MESSAGE_BODY);
   }
 
   const quizSession = find.quizSession(player.quizSessionId);
 
-  const msg = new Message(playerId, player.name, message);
+  const msg = new Message(playerId, player.name, message.messageBody);
 
   quizSession.messages.push(msg);
 

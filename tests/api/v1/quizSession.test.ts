@@ -51,7 +51,7 @@ beforeEach(() => {
   expect(createQuestionRes.statusCode).toBe(200);
 
   // Create a quiz session
-  const createQuizSessionRes = quizSessionCreate(token, quizId, 2);
+  const createQuizSessionRes = quizSessionCreate(token, quizId, 5);
   expect(createQuizSessionRes.statusCode).toBe(200);
   quizSessionId = createQuizSessionRes.body.sessionId;
 });
@@ -754,7 +754,7 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results', () => {
     });
     expect(createQuestionRes.statusCode).toBe(200);
     // Create new quiz session
-    let createQuizSessionRes = quizSessionCreate(token, quizId, 2);
+    let createQuizSessionRes = quizSessionCreate(token, quizId, 5);
     expect(createQuizSessionRes.statusCode).toBe(200);
     quizSessionId = createQuizSessionRes.body.sessionId;
     // Create new players
@@ -899,7 +899,7 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results/csv', () => {
     });
     expect(createQuestionRes.statusCode).toBe(200);
     // Create new quiz session
-    const createQuizSessionRes = quizSessionCreate(token, quizId, 2);
+    const createQuizSessionRes = quizSessionCreate(token, quizId, 5);
     expect(createQuizSessionRes.statusCode).toBe(200);
     quizSessionId = createQuizSessionRes.body.sessionId;
     // Create new players
