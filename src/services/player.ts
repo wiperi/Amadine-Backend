@@ -99,7 +99,7 @@ export function adminPlayerSubmitAnswers(
   // Answer IDs are not valid for this particular question
   const questionIndex = questionPosition - 1;
   const question = quizSession.metadata.questions[questionIndex];
-  if (!question.getAnswersSlice().some(a => answerIds.includes(a.answerId))) {
+  if (!question.answers.some(a => answerIds.includes(a.answerId))) {
     throw new HttpError(400, errMessages.question.answerIdsInvalid);
   }
 
@@ -119,9 +119,7 @@ export function adminPlayerSubmitAnswers(
   const timeSpent = now - quizSession.timeCurrentQuestionStarted;
 
   // Check if user is wrong, if user submit any answer that is not correct
-  const userIsWrong = question
-    .getAnswersSlice()
-    .some(a => answerIdsSet.has(a.answerId) && !a.correct);
+  const userIsWrong = question.answers.some(a => answerIdsSet.has(a.answerId) && !a.correct);
 
   const submit = player.submits.find(s => s.questionId === question.questionId);
 
@@ -166,9 +164,8 @@ export function playerGetQuestionInfo(
   }
   // If question position is not valid for the session this player is in
   const quizSession = find.quizSession(player.quizSessionId);
-  const quizId = quizSession.quizId;
-  const quiz = find.quiz(quizId);
-  if (questionPosition < 0 || questionPosition > quiz.questions.length) {
+  const metadata = quizSession.metadata;
+  if (questionPosition < 0 || questionPosition > metadata.questions.length) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_POSITION);
   }
 
@@ -187,8 +184,8 @@ export function playerGetQuestionInfo(
     throw new HttpError(400, ERROR_MESSAGES.SESSION_STATE_INVALID);
   }
 
-  const returnedQuestions = quiz.questions[questionPosition - 1];
-  const returnedAnswers = returnedQuestions.getAnswersSlice();
+  const returnedQuestions = metadata.questions[questionPosition - 1];
+  const returnedAnswers = returnedQuestions.answers;
   // we don't want to return the correct key
   returnedAnswers.forEach(answer => {
     delete answer.correct;
