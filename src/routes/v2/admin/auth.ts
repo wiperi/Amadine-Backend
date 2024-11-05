@@ -15,7 +15,7 @@ router.post('/login', (req: Request, res: Response, next: NextFunction) => {
 });
 
 router.post('/logout', (req: Request, res: Response, next: NextFunction) => {
-  const { token } = req.body;
+  const token = req.headers.token as string;
   tryCatch(() => adminAuthLogout(token), req, res, next);
 });
 
