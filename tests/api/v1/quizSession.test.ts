@@ -196,6 +196,72 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
     });
 
     describe('invalid cases', () => {
+      test('invalid token', () => {
+        const res = quizSessionUpdateState('invalidToken', quizId, quizSessionId, 'END');
+        expect(res.statusCode).toBe(401);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+
+      test('invalid quizId', () => {
+        const res = quizSessionUpdateState(token, 0, quizSessionId, 'END');
+        expect(res.statusCode).toBe(403);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+
+      test('quiz is inactive', () => {
+        const deleteRes = quizDelete(token, quizId);
+        expect(deleteRes.statusCode).toBe(200);
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'END');
+        expect(res.statusCode).toBe(403);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+
+      test('user is not an owner of this quiz', () => {
+        const registerRes = userRegister(
+          'PeterGriffin@gmail.com',
+          'PumpkinEater123',
+          'Peter',
+          'Griffin'
+        );
+        expect(registerRes.statusCode).toBe(200);
+        const userToken = registerRes.body.token;
+        const res = quizSessionUpdateState(userToken, quizId, quizSessionId, 'END');
+        expect(res.statusCode).toBe(403);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+
+      test('session Id does not refer to a valid session', () => {
+        const res = quizSessionUpdateState(token, quizId, 0, 'END');
+        expect(res.statusCode).toBe(403);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+
+      test('session Id does not refer to a valid session within the quiz', () => {
+        const createQuizRes = quizCreate(token, 'New Quiz', 'A test quiz');
+        expect(createQuizRes.statusCode).toBe(200);
+        const newQuizId = createQuizRes.body.quizId;
+
+        const createQuestionRes = questionCreate(token, newQuizId, {
+          question: 'Are you my master?',
+          duration: 1,
+          points: 6,
+          answers: [
+            { answer: 'Yes', correct: true },
+            { answer: 'No', correct: false },
+            { answer: 'Maybe', correct: false },
+          ],
+        });
+        expect(createQuestionRes.statusCode).toBe(200);
+
+        // Create a quiz session
+        const createQuizSessionRes = quizSessionCreate(token, newQuizId, 5);
+        expect(createQuizSessionRes.statusCode).toBe(200);
+        const newQuizSessionId = createQuizSessionRes.body.sessionId;
+        const res = quizSessionUpdateState(token, quizId, newQuizSessionId, 'END');
+        expect(res.statusCode).toBe(403);
+        expect(res.body).toStrictEqual(ERROR);
+      });
+
       test('INVALID ACTION: SKIP_COUNTDOWN', () => {
         const res = quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
         expect(res.statusCode).toBe(400);
@@ -641,13 +707,19 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
     expect(res.body).toStrictEqual(ERROR);
   });
 
+  test('invalid quizId', () => {
+    const res = quizSessionGetStatus(token, 0, quizSessionId);
+    expect(res.statusCode).toBe(403);
+    expect(res.body).toStrictEqual(ERROR);
+  });
+
   test('user is not the owner of the quiz', () => {
     const userRegisterRes = userRegister('cheong1024@mail.com', 'Cheong1024', 'Cheong', 'Zhang');
     expect(userRegisterRes.statusCode).toBe(200);
     const token1 = userRegisterRes.body.token;
-    const quizId = 1;
-    const res = quizSessionGetStatus(token1, quizId, quizId);
+    const res = quizSessionGetStatus(token1, quizId, quizSessionId);
     expect(res.statusCode).toBe(403);
+    expect(res.body).toStrictEqual(ERROR);
   });
 
   test('Session Id does not refer to a valid session within this quiz', () => {

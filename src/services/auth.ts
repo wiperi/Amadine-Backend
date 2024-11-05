@@ -211,10 +211,6 @@ export async function adminUserPasswordUpdate(
 
   const user = find.user(authUserId);
 
-  if (!user) {
-    throw new HttpError(400, ERROR_MESSAGES.UID_NOT_EXIST);
-  }
-
   if (!(await hashCompare(oldPassword, user.password))) {
     throw new HttpError(400, ERROR_MESSAGES.WRONG_OLD_PASSWORD);
   }

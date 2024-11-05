@@ -18,7 +18,6 @@ import {
   isValidQuizId,
   isValidQuizName,
   isValidQuizDescription,
-  recursiveFind,
   getInactiveQuizSession,
   getActiveQuizSession,
   isValidImgUrl,
@@ -331,9 +330,9 @@ export function adminQuizQuestionUpdate(
   questionId: number,
   questionBody: ParamQuestionBody
 ): EmptyObject {
-  if (recursiveFind(questionBody, undefined)) {
-    throw new HttpError(403, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
-  }
+  // if (recursiveFind(questionBody, undefined)) {
+  //   throw new HttpError(403, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
+  // }
 
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);
@@ -758,9 +757,9 @@ export function adminQuizQuestionUpdateV2(
   questionId: number,
   questionBody: ParamQuestionBodyV2
 ): EmptyObject {
-  if (recursiveFind(questionBody, undefined)) {
-    throw new HttpError(403, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
-  }
+  // if (recursiveFind(questionBody, undefined)) {
+  //   throw new HttpError(403, ERROR_MESSAGES.MISSING_REQUIRED_FIELDS);
+  // }
 
   if (!isValidQuizId(quizId)) {
     throw new HttpError(403, ERROR_MESSAGES.INVALID_QUIZ_ID);

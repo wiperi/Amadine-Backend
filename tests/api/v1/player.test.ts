@@ -138,6 +138,22 @@ describe('POST /v1/player/join', () => {
       expect(getInfoRes.statusCode).toBe(200);
       expect(getInfoRes.body.players).toStrictEqual(['Peter Griffin', 'Glen Quagmire']);
     });
+
+    test('when number of player is reach auto start number, state become QUESTION_COUNTDOWN', () => {
+      const peter = playerJoinSession(quizSessionId, 'Peter Griffin');
+      const quagmire = playerJoinSession(quizSessionId, 'Glen Quagmire');
+      const meg = playerJoinSession(quizSessionId, 'Meg Griffin');
+      const chris = playerJoinSession(quizSessionId, 'Chris Griffin');
+      const brian = playerJoinSession(quizSessionId, 'Brian Griffin');
+      expect(peter.statusCode).toBe(200);
+      expect(quagmire.statusCode).toBe(200);
+      expect(meg.statusCode).toBe(200);
+      expect(chris.statusCode).toBe(200);
+      expect(brian.statusCode).toBe(200);
+      const stateRes = quizSessionGetStatus(token, quizId, quizSessionId);
+      expect(stateRes.statusCode).toBe(200);
+      expect(stateRes.body.state).toStrictEqual('QUESTION_COUNTDOWN');
+    });
   });
 });
 
@@ -267,7 +283,7 @@ describe('GET /v1/player/:playerId/question/:questionposition', () => {
     test('player is not in PLAYING state', () => {
       const res = quizSessionUpdateState(token, quizId, quizSessionId, 'END');
       expect(res.statusCode).toBe(200);
-      const errorRes = playerGetQuestionInfo(playerId, 1);
+      const errorRes = playerGetQuestionInfo(playerId, 0);
       expect(errorRes.statusCode).toBe(400);
       expect(errorRes.body).toStrictEqual(ERROR);
     });

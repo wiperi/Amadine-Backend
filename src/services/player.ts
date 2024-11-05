@@ -68,9 +68,9 @@ export function adminPlayerSubmitAnswers(
 
   // Session is not in QUESTION_OPEN state
   const quizSession = find.quizSession(player.quizSessionId);
-  if (!quizSession) {
-    throw new HttpError(400, errMessages.quizSession.notFound(player.quizSessionId));
-  }
+  // if (!quizSession) {
+  //   throw new HttpError(400, errMessages.quizSession.notFound(player.quizSessionId));
+  // }
 
   if (quizSession.state !== QuizSessionState.QUESTION_OPEN) {
     throw new HttpError(400, errMessages.quizSession.questionNotOpen);
