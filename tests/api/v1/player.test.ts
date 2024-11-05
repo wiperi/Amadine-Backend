@@ -221,23 +221,17 @@ describe('PUT /v1/player/{playerid}/question/{questionposition}/answer', () => {
     });
 
     test('answer IDs are not valid for this particular question', () => {
-      const invalidAnswerIds = [999999, 1000000];
-      const res = playerSubmitAnswer(invalidAnswerIds, playerId, 1);
-      expect(res.statusCode).toBe(400);
-      expect(res.body).toStrictEqual(ERROR);
+      err(playerSubmitAnswer([-1, -999], playerId, 1), 400);
+      err(playerSubmitAnswer([answerIds[0], -1], playerId, 1), 400);
+      err(playerSubmitAnswer([...answerIds, -1], playerId, 1), 400);
     });
 
     test('duplicate answer IDs provided', () => {
-      const duplicateAnswerIds = [answerIds[0], answerIds[0]];
-      const res = playerSubmitAnswer(duplicateAnswerIds, playerId, 1);
-      expect(res.statusCode).toBe(400);
-      expect(res.body).toStrictEqual(ERROR);
+      err(playerSubmitAnswer([answerIds[0], answerIds[0]], playerId, 1), 400);
     });
 
     test('less than 1 answer ID submitted', () => {
-      const res = playerSubmitAnswer([], playerId, 1);
-      expect(res.statusCode).toBe(400);
-      expect(res.body).toStrictEqual(ERROR);
+      err(playerSubmitAnswer([], playerId, 1), 400);
     });
   });
 });
