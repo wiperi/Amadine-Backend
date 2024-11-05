@@ -126,6 +126,11 @@ describe('POST /v1/admin/quiz', () => {
       expect(res2.statusCode).toBe(400);
       expect(res2.body).toStrictEqual(ERROR);
     });
+    test('invalid quiz description', () => {
+      const res = quizCreate(token, 'Test Quiz', 'morethanthirtycharsmorethanthirtysjfeirosaiohdlhfoahiterwieruiowhgjslhajvcaklsierouiewotqhitowehtklhlqajfkldjsiotieowhtj');
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    })
   });
 });
 /*
