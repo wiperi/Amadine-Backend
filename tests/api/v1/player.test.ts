@@ -262,7 +262,7 @@ describe('GET /v1/player/:playerId/question/:questionposition', () => {
 
   describe('invalid cases', () => {
     test('playerId does not refer to a valid player', () => {
-      const errorRes = playerGetQuestionInfo(playerId + 1, 0);
+      const errorRes = playerGetQuestionInfo(playerId + 1, 1);
       expect(errorRes.statusCode).toBe(400);
       expect(errorRes.body).toStrictEqual(ERROR);
     });
@@ -283,7 +283,7 @@ describe('GET /v1/player/:playerId/question/:questionposition', () => {
     test('player is not in PLAYING state', () => {
       const res = quizSessionUpdateState(token, quizId, quizSessionId, 'END');
       expect(res.statusCode).toBe(200);
-      const errorRes = playerGetQuestionInfo(playerId, 0);
+      const errorRes = playerGetQuestionInfo(playerId, 1);
       expect(errorRes.statusCode).toBe(400);
       expect(errorRes.body).toStrictEqual(ERROR);
     });
@@ -292,8 +292,9 @@ describe('GET /v1/player/:playerId/question/:questionposition', () => {
     test('session is not currently on this question', () => {
       quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
       quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
-
-      const res = playerGetQuestionInfo(playerId, 0);
+      quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER');
+      quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+      const res = playerGetQuestionInfo(playerId, 1);
       expect(res.statusCode).toBe(400);
       expect(res.body).toStrictEqual(ERROR);
     });
