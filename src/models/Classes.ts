@@ -96,7 +96,7 @@ export class Question {
   thumbnailUrl: string = '#';
   points: number;
 
-  private answers: Answer[] = [];
+  answers: Answer[] = [];
 
   private getRandomUniqueColor(): Color {
     const unusedColor: Color[] = Object.values(Color);
@@ -299,7 +299,8 @@ export class QuizSession {
     this.sessionId = sessionId;
     this.quizId = quiz.quizId;
 
-    this.metadata = quiz;
+    this.metadata = JSON.parse(JSON.stringify(quiz));
+    Object.setPrototypeOf(this.metadata, Quiz.prototype);
 
     this.autoStartNum = autoStartNum;
   }

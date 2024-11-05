@@ -74,7 +74,6 @@ export function adminQuizInfo(authUserId: number, quizId: number): QuizReturned 
 
   const returnedQuestions = quiz.questions.map(question => ({
     ...removeProperties(question, 'thumbnailUrl'),
-    answers: question.getAnswersSlice(),
   }));
 
   const res = removeProperties(quiz, 'thumbnailUrl', 'questions', 'active', 'authUserId');
@@ -621,27 +620,25 @@ export function adminQuizSessionGetStatus(
   if (quiz.authUserId !== authUserId) {
     throw new HttpError(403, ERROR_MESSAGES.NOT_AUTHORIZED);
   }
-  const quizSession = data.quizSessions.find(s => s.sessionId === quizSessionId);
+
+  const quizSession = find.quizSession(quizSessionId);
   if (!quizSession) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_SESSION_ID);
   }
+  const metadata = quizSession.metadata;
   const players = data.players.filter(player => player.quizSessionId === quizSessionId);
   const playerNames = players.map(player => player.name);
   // metadata should be deep copied without active and authUserId
-  const metadata = removeProperties(quiz, 'active', 'authUserId');
+  const metaPruned = removeProperties(metadata, 'active', 'authUserId');
 
   return {
     state: quizSession.state(),
     atQuestion: quizSession.atQuestion,
     players: playerNames,
     metadata: {
-      ...metadata,
-      numQuestions: quiz.questions.length,
-      duration: quiz.duration(),
-      questions: quiz.questions.map(question => ({
-        ...question,
-        answers: question.getAnswersSlice(),
-      })),
+      ...metaPruned,
+      numQuestions: metadata.questions.length,
+      duration: metadata.duration()
     },
   };
 }
@@ -649,14 +646,10 @@ export function adminQuizSessionGetStatus(
 export function adminQuizInfoV2(authUserId: number, quizId: number): QuizReturnedV2 {
   const quiz = find.quiz(quizId);
 
-  const returnedQuestions = quiz.questions.map(question => ({
-    ...question,
-    answers: question.getAnswersSlice(),
-  }));
 
   const res = {
     ...adminQuizInfo(authUserId, quizId),
-    questions: returnedQuestions,
+    questions: quiz.questions,
     thumbnailUrl: quiz.thumbnailUrl,
   };
 

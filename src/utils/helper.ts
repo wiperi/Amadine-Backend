@@ -117,7 +117,7 @@ export function getNewID(
       dataSet = [];
       for (const quiz of data.quizzes) {
         for (const question of quiz.questions) {
-          for (const answer of question.getAnswersSlice()) {
+          for (const answer of question.answers) {
             dataSet.push(answer);
           }
         }

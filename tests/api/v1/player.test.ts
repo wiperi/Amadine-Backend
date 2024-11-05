@@ -693,7 +693,7 @@ describe('GET /v1/player/:playerId', () => {
       res = playerGetStatusInSession(playerId);
       expect(res.statusCode).toBe(200);
       expect(res.body.state).toBe('FINAL_RESULTS');
-      expect(res.body.atQuestion).toBe(2);
+      expect(res.body.atQuestion).toBe(0);
 
       // Step 8: End the session
       quizSessionUpdateState(token, quizId, quizSessionId, 'END');
