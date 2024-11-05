@@ -15,16 +15,6 @@ export function userLogout(token: string): ParsedResponse {
   return parse(res);
 }
 
-export function userLogin(email: string, password: string): ParsedResponse {
-  const res = request('POST', `${AUTH_URL}/login`, {
-    json: {
-      email,
-      password,
-    },
-  });
-  return parse(res);
-}
-
 export function userGetDetails(token: string): ParsedResponse {
   const res = request('GET', `${USER_URL}/details`, {
     headers: {
