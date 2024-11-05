@@ -287,6 +287,16 @@ describe('GET /v1/player/:playerId/question/:questionposition', () => {
       expect(errorRes.statusCode).toBe(400);
       expect(errorRes.body).toStrictEqual(ERROR);
     });
+
+    // test for session is not currently on this question
+    test('session is not currently on this question', () => {
+      quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+      quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
+
+      const res = playerGetQuestionInfo(playerId, 0);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
+    });
   });
 
   describe('valid cases', () => {
