@@ -906,7 +906,7 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results', () => {
       err(quizSessionGetFinalResult('invalid token', quizId, quizSessionId), 401);
     });
     test('Session Id does not refer to a valid session within this quiz', () => {
-      err(quizSessionGetFinalResult(token, 123, quizSessionId), 400);
+      err(quizSessionGetFinalResult(token, quizId, quizSessionId + 1), 400);
     });
     test('session is not in FINAL_RESULTS STATE', () => {
       succ(quizSessionUpdateState(token, quizId, quizSessionId, 'END'));
@@ -919,6 +919,9 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results', () => {
       );
       const newToken = userRegisterRes.token;
       err(quizSessionGetFinalResult(newToken, quizId, quizSessionId), 403);
+    });
+    test('Valid token is provided, but quiz does not exist', () => {
+      err(quizSessionGetFinalResult(token, quizId + 1, quizSessionId), 403);
     });
   });
 });
@@ -1029,7 +1032,7 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results/csv', () => {
       err(quizSessionGetFinalResultCsvFormat('invalid token', quizId, quizSessionId), 401);
     });
     test('Session Id does not refer to a valid session within this quiz', () => {
-      err(quizSessionGetFinalResultCsvFormat(token, 123, quizSessionId), 400);
+      err(quizSessionGetFinalResultCsvFormat(token, quizId, quizSessionId + 1), 400);
     });
     test('session is not in FINAL_RESULTS STATE', () => {
       succ(quizSessionUpdateState(token, quizId, quizSessionId, 'END'));
@@ -1042,6 +1045,9 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId/results/csv', () => {
       );
       const newToken = userRegisterRes.token;
       err(quizSessionGetFinalResultCsvFormat(newToken, quizId, quizSessionId), 403);
+    });
+    test('Valid token is provided, but quiz does not exist', () => {
+      err(quizSessionGetFinalResultCsvFormat(token, quizId + 1, quizSessionId), 403);
     });
   });
 
