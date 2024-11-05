@@ -224,12 +224,18 @@ export class QuizSession {
    * @throws Error if the action is not valid.
    */
   dispatch(action: PlayerAction): void {
+    this.beforeStateChange(action);
     this.stateMachine.dispatch(action);
-
-    this.onStateChange(this.state());
+    this.onStateChange();
   }
 
-  onStateChange(state: QuizSessionState): void {
+  beforeStateChange(action: PlayerAction): void {
+    if (this.atQuestion === this.metadata.questions.length && action === NEXT_QUESTION) {
+      throw new Error('Already the last question');
+    }
+  }
+
+  onStateChange(): void {
     if (quizSessionTimers.has(this.sessionId)) {
       clearTimeout(quizSessionTimers.get(this.sessionId));
     }
@@ -261,7 +267,7 @@ export class QuizSession {
           // If session is still on the same question and hasn't changed state
           if (this.atQuestion === currentQuestion && this.state() === QUESTION_OPEN) {
             this.stateMachine.jumpTo(QUESTION_CLOSE);
-            this.onStateChange(this.state());
+            this.onStateChange();
             this.timeCurrentQuestionStarted = undefined;
           }
         }, duration * 1000)
