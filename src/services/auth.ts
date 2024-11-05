@@ -96,7 +96,7 @@ export async function adminAuthRegister(
 
   data.userSessions.push(new UserSession(getNewID('user session'), userId, token));
 
-  setData(data);
+  setData();
 
   return { token };
 }
@@ -244,7 +244,7 @@ export function adminAuthLogout(token: string): EmptyObject {
   const { userSessions } = getData();
   for (let i = 0; i < userSessions.length; i++) {
     if (userSessions[i].token === token) {
-      userSessions.splice(i);
+      userSessions.splice(i, 1);
       break;
     }
   }
