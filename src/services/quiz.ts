@@ -18,7 +18,6 @@ import {
   isValidQuizId,
   isValidQuizName,
   isValidQuizDescription,
-  recursiveFind,
   getInactiveQuizSession,
   getActiveQuizSession,
   isValidImgUrl,

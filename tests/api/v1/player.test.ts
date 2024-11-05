@@ -154,7 +154,7 @@ describe('POST /v1/player/join', () => {
       const stateRes = quizSessionGetStatus(token, quizId, quizSessionId);
       expect(stateRes.statusCode).toBe(200);
       expect(stateRes.body.state).toStrictEqual('QUESTION_COUNTDOWN');
-    })
+    });
   });
 });
 

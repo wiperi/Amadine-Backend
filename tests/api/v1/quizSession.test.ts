@@ -217,7 +217,12 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
       });
 
       test('user is not an owner of this quiz', () => {
-        const registerRes = userRegister('PeterGriffin@gmail.com', 'PumpkinEater123', 'Peter', 'Griffin');
+        const registerRes = userRegister(
+          'PeterGriffin@gmail.com',
+          'PumpkinEater123',
+          'Peter',
+          'Griffin'
+        );
         expect(registerRes.statusCode).toBe(200);
         const userToken = registerRes.body.token;
         const res = quizSessionUpdateState(userToken, quizId, quizSessionId, 'END');
@@ -706,7 +711,7 @@ describe('GET /v1/admin/quiz/:quizId/session/:sessionId', () => {
     const res = quizSessionGetStatus(token, 0, quizSessionId);
     expect(res.statusCode).toBe(403);
     expect(res.body).toStrictEqual(ERROR);
-  })
+  });
 
   test('user is not the owner of the quiz', () => {
     const userRegisterRes = userRegister('cheong1024@mail.com', 'Cheong1024', 'Cheong', 'Zhang');

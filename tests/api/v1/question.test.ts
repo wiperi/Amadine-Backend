@@ -264,7 +264,7 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
       const res = questionCreate(token, 0, questionBody);
       expect(res.statusCode).toBe(403);
       expect(res.body).toStrictEqual(ERROR);
-    })
+    });
 
     test('user is not the owner of the quiz', () => {
       // Register another user
