@@ -566,7 +566,7 @@ export function adminQuizSessionStart(
     throw new HttpError(400, ERROR_MESSAGES.QUIZ_INACTIVE);
   }
   const activeSessions = data.quizSessions.filter(
-    s => s.quizId === quizId && s.state() !== QuizSessionState.END
+    s => s.quizId === quizId && s.state !== QuizSessionState.END
   );
   if (activeSessions.length >= 10) {
     throw new HttpError(400, ERROR_MESSAGES.QUIZ_TOO_MANY_SESSIONS);
@@ -632,7 +632,7 @@ export function adminQuizSessionGetStatus(
   const metaPruned = removeProperties(metadata, 'active', 'authUserId');
 
   return {
-    state: quizSession.state(),
+    state: quizSession.state,
     atQuestion: quizSession.atQuestion,
     players: playerNames,
     metadata: {
@@ -880,7 +880,7 @@ export function quizSessionFinalResults(
     throw new HttpError(400, ERROR_MESSAGES.INVALID_SESSION_ID);
   }
   // Session is not in FINAL_RESULTS state
-  if (quizSession.state() !== QuizSessionState.FINAL_RESULTS) {
+  if (quizSession.state !== QuizSessionState.FINAL_RESULTS) {
     throw new HttpError(400, ERROR_MESSAGES.SESSION_STATE_INVALID);
   }
 
@@ -912,7 +912,7 @@ export function quizSessionFinalResultsCSV(
     throw new HttpError(400, ERROR_MESSAGES.INVALID_SESSION_ID);
   }
   // Session is not in FINAL_RESULTS state
-  if (quizSession.state() !== QuizSessionState.FINAL_RESULTS) {
+  if (quizSession.state !== QuizSessionState.FINAL_RESULTS) {
     throw new HttpError(400, ERROR_MESSAGES.SESSION_STATE_INVALID);
   }
 
