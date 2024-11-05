@@ -5,6 +5,7 @@ import path from 'path';
 import config from '@/_config';
 import { getQuizSessionResultCSV } from '@/utils/helper';
 import { quizSessionTimers } from '@/dataStore';
+import { ST } from './ST';
 const {
   LOBBY,
   QUESTION_COUNTDOWN,
@@ -188,7 +189,7 @@ export class QuizSession {
   atQuestion: number = 0; // Question index starting from 1, 0 means not started
   timeCreated: number = Math.floor(Date.now() / 1000);
 
-  private static transitions = StateMachine.parseTransitions<QuizSessionState, PlayerAction>([
+  private static transitions = ST.parse<QuizSessionState, PlayerAction>([
     { from: LOBBY, action: GO_TO_END, to: END },
     { from: LOBBY, action: NEXT_QUESTION, to: QUESTION_COUNTDOWN },
     { from: QUESTION_COUNTDOWN, action: SKIP_COUNTDOWN, to: QUESTION_OPEN },
@@ -205,37 +206,16 @@ export class QuizSession {
     { from: ANSWER_SHOW, action: GO_TO_END, to: END },
   ]);
 
-  private stateMachine = new StateMachine<QuizSessionState, PlayerAction>(
-    QuizSessionState.LOBBY,
-    QuizSession.transitions
-  );
-
-  /**
-   * Gets the current state of the quiz session.
-   * @returns The current state of the quiz session.
-   */
-  state(): QuizSessionState {
-    return this.stateMachine.getCurrentState();
-  }
-
-  /**
-   * Dispatches an action to the state machine and handles automatic state transitions.
-   * @param action - The action to dispatch.
-   * @throws Error if the action is not valid.
-   */
-  dispatch(action: PlayerAction): void {
-    this.beforeStateChange(action);
-    this.stateMachine.dispatch(action);
-    this.onStateChange();
-  }
-
-  beforeStateChange(action: PlayerAction): void {
+  private beforeStateChange = (action: PlayerAction) => {
     if (this.atQuestion === this.metadata.questions.length && action === NEXT_QUESTION) {
       throw new Error('Already the last question');
     }
   }
 
-  onStateChange(): void {
+  private onStateChange = () => {
+    console.log('this', this);
+
+
     if (quizSessionTimers.has(this.sessionId)) {
       clearTimeout(quizSessionTimers.get(this.sessionId));
     }
@@ -294,6 +274,32 @@ export class QuizSession {
       fs.writeFileSync(filePath, result);
     }
   }
+
+  private stateMachine = new ST<QuizSessionState, PlayerAction>({
+    _state: LOBBY,
+    rules: QuizSession.transitions,
+    beforeStateChange: this.beforeStateChange,
+    afterStateChange: this.onStateChange,
+  });
+
+  /**
+   * Gets the current state of the quiz session.
+   * @returns The current state of the quiz session.
+   */
+  state(): QuizSessionState {
+    return this.stateMachine.getCurrentState();
+  }
+
+  /**
+   * Dispatches an action to the state machine and handles automatic state transitions.
+   * @param action - The action to dispatch.
+   * @throws Error if the action is not valid.
+   */
+  dispatch(action: PlayerAction): void {
+    this.stateMachine.dispatch(action);
+  }
+
+
 
   constructor(sessionId: number, quiz: Quiz, autoStartNum: number) {
     this.sessionId = sessionId;

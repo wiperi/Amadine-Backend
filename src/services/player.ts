@@ -106,7 +106,7 @@ export function adminPlayerSubmitAnswers(
   const questionIndex = questionPosition - 1;
   const question = quizSession.metadata.questions[questionIndex];
   const validIdSet = new Set(question.answers.map(a => a.answerId));
-  
+
   if (!answerIds.every(id => validIdSet.has(id))) {
     throw new HttpError(400, errMessages.question.answerIdsInvalid);
   }
