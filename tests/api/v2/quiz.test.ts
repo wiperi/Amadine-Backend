@@ -187,7 +187,7 @@ describe('POST /v2/admin/quiz/:quizid/transfer', () => {
       expect(createQuestionRes.statusCode).toBe(200);
       const res2 = quizSessionCreate(token, quizId, 2);
       expect(res2.statusCode).toBe(200);
-      
+
       const newUserRes = userRegister('newuser@example.com', 'ValidPass123', 'Jane', 'Smith');
       expect(newUserRes.statusCode).toBe(200);
 
