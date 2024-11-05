@@ -304,7 +304,7 @@ export function getActiveQuizSession(quizId: number): number[] {
   const quizSessions = data.quizSessions.filter(session => session.quizId === quizId);
 
   return quizSessions
-    .filter(session => session.state() !== QuizSessionState.END)
+    .filter(session => session.state !== QuizSessionState.END)
     .map(session => session.sessionId)
     .sort((a, b) => a - b);
 }
@@ -315,7 +315,7 @@ export function getInactiveQuizSession(quizId: number): number[] {
   const quizSessions = data.quizSessions.filter(session => session.quizId === quizId);
 
   return quizSessions
-    .filter(session => session.state() === QuizSessionState.END)
+    .filter(session => session.state === QuizSessionState.END)
     .map(session => session.sessionId)
     .sort((a, b) => a - b);
 }
@@ -334,7 +334,7 @@ export function isValidImgUrl(imgUrl: string): boolean {
 
 export function isQuizHasOngoingSessions(quizId: number): boolean {
   return (
-    getData().quizSessions.filter(s => s.quizId === quizId && s.state() !== QuizSessionState.END)
+    getData().quizSessions.filter(s => s.quizId === quizId && s.state !== QuizSessionState.END)
       .length > 0
   );
 }

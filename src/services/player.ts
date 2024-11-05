@@ -31,7 +31,7 @@ export function PlayerJoinSession(sessionId: number, name: string): { playerId: 
     throw new HttpError(400, ERROR_MESSAGES.INVALID_SESSION_ID);
   }
 
-  if (quizSession.state() !== QuizSessionState.LOBBY) {
+  if (quizSession.state !== QuizSessionState.LOBBY) {
     throw new HttpError(400, ERROR_MESSAGES.SESSION_NOT_IN_LOBBY_STATE);
   }
 
@@ -72,7 +72,7 @@ export function adminPlayerSubmitAnswers(
     throw new HttpError(400, errMessages.quizSession.notFound(player.quizSessionId));
   }
 
-  if (quizSession.state() !== QuizSessionState.QUESTION_OPEN) {
+  if (quizSession.state !== QuizSessionState.QUESTION_OPEN) {
     throw new HttpError(400, errMessages.quizSession.questionNotOpen);
   }
 
@@ -176,7 +176,7 @@ export function playerGetQuestionInfo(
   }
 
   // Session is in LOBBY, QUESTION_COUNTDOWN, FINAL_RESULTS or END state
-  const quizSessionState = quizSession.state();
+  const quizSessionState = quizSession.state;
   if (
     quizSessionState === QuizSessionState.LOBBY ||
     quizSessionState === QuizSessionState.QUESTION_COUNTDOWN ||
@@ -253,7 +253,7 @@ export function playerGetSessionStatus(playerId: number): {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_PLAYER_ID);
   }
   const quizSession = find.quizSession(player.quizSessionId);
-  const sessionState = quizSession.state();
+  const sessionState = quizSession.state;
   const numQuestions = quizSession.metadata.questions.length;
   const atQuestion = quizSession.atQuestion;
   return {
@@ -278,7 +278,7 @@ export function playerGetQuestionResult(
     throw new HttpError(400, ERROR_MESSAGES.INVALID_POSITION);
   }
   // Session is not in ANSWER_SHOW state
-  if (quizSession.state() !== QuizSessionState.ANSWER_SHOW) {
+  if (quizSession.state !== QuizSessionState.ANSWER_SHOW) {
     throw new HttpError(400, ERROR_MESSAGES.SESSION_STATE_INVALID);
   }
   // If session is not currently on this question
@@ -298,7 +298,7 @@ export function playerGetSessionResult(playerId: number): QuizSessionResultRetur
 
   // if session is not in FINAL_RESULTS state
   const quizSession = find.quizSession(player.quizSessionId);
-  if (quizSession.state() !== QuizSessionState.FINAL_RESULTS) {
+  if (quizSession.state !== QuizSessionState.FINAL_RESULTS) {
     throw new HttpError(400, ERROR_MESSAGES.SESSION_STATE_INVALID);
   }
 
