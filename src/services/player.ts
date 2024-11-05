@@ -96,17 +96,19 @@ export function adminPlayerSubmitAnswers(
     );
   }
 
-  // Answer IDs are not valid for this particular question
-  const questionIndex = questionPosition - 1;
-  const question = quizSession.metadata.questions[questionIndex];
-  if (!question.answers.some(a => answerIds.includes(a.answerId))) {
-    throw new HttpError(400, errMessages.question.answerIdsInvalid);
-  }
-
   // There are duplicate answer IDs provided
   const answerIdsSet = new Set(answerIds);
   if (answerIds.length !== answerIdsSet.size) {
     throw new HttpError(400, errMessages.question.duplicateAnswerIds);
+  }
+
+  // Answer IDs are not valid for this particular question
+  const questionIndex = questionPosition - 1;
+  const question = quizSession.metadata.questions[questionIndex];
+  const validIdSet = new Set(question.answers.map(a => a.answerId));
+
+  if (!answerIds.every(id => validIdSet.has(id))) {
+    throw new HttpError(400, errMessages.question.answerIdsInvalid);
   }
 
   // Less than 1 answer ID was submitted
