@@ -396,14 +396,6 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
         expect(statusInfo.statusCode).toBe(200);
         expect(statusInfo.body.state).toBe('ANSWER_SHOW');
       });
-
-      test('QUESTION_CLOSE -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN', () => {
-        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
-        expect(res.statusCode).toBe(400);
-        // const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
-        // expect(statusInfo.statusCode).toBe(200);
-        // expect(statusInfo.body.state).toBe('QUESTION_COUNTDOWN');
-      });
     });
 
     describe('invalid cases', () => {
@@ -411,6 +403,15 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
         const res = quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
         expect(res.statusCode).toBe(400);
         expect(res.body).toStrictEqual(ERROR);
+      });
+
+      // this will be valid if it is not the last question
+      test('QUESTION_CLOSE -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+        expect(res.statusCode).toBe(400);
+        // const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+        // expect(statusInfo.statusCode).toBe(200);
+        // expect(statusInfo.body.state).toBe('QUESTION_COUNTDOWN');
       });
     });
   });
@@ -495,14 +496,6 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
         expect(statusInfo.statusCode).toBe(200);
         expect(statusInfo.body.state).toBe('FINAL_RESULTS');
       });
-
-      test('ANSWER_SHOW -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN', () => {
-        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
-        expect(res.statusCode).toBe(400);
-        // const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
-        // expect(statusInfo.statusCode).toBe(200);
-        // expect(statusInfo.body.state).toBe('QUESTION_COUNTDOWN');
-      });
     });
 
     describe('invalid cases', () => {
@@ -515,6 +508,14 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
         const res = quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
         expect(res.statusCode).toBe(400);
         expect(res.body).toStrictEqual(ERROR);
+      });
+
+      test('ANSWER_SHOW -> (NEXT_QUESTION) -> QUESTION_COUNTDOWN', () => {
+        const res = quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+        expect(res.statusCode).toBe(400);
+        // const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+        // expect(statusInfo.statusCode).toBe(200);
+        // expect(statusInfo.body.state).toBe('QUESTION_COUNTDOWN');
       });
     });
   });
