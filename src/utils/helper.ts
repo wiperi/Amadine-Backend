@@ -248,17 +248,6 @@ export function isValidQuizDescription(quizDescription: string): boolean {
   return quizDescription.length <= 100;
 }
 
-/**
- * Checks if the given user ID is valid by verifying its presence in the user list.
- *
- * @param id
- * @returns Returns true if the user ID is found in the user list, otherwise false.
- */
-export function isValidUserId(id: number): boolean {
-  const userList = getData().users;
-  return userList.some(user => user.userId === id);
-}
-
 export const find = {
   user: (userId: number): User | undefined => getData().users.find(user => user.userId === userId),
   quiz: (quizId: number): Quiz | undefined =>

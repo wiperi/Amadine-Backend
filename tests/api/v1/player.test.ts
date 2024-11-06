@@ -283,7 +283,7 @@ describe('GET /v1/player/:playerId/question/:questionposition', () => {
     test('player is not in PLAYING state', () => {
       const res = quizSessionUpdateState(token, quizId, quizSessionId, 'END');
       expect(res.statusCode).toBe(200);
-      const errorRes = playerGetQuestionInfo(playerId, 1);
+      const errorRes = playerGetQuestionInfo(playerId, 0);
       expect(errorRes.statusCode).toBe(400);
       expect(errorRes.body).toStrictEqual(ERROR);
     });
