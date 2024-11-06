@@ -34,7 +34,6 @@ const errMessages = {
   },
   quizSession: {
     invalidId: 'Invalid session id',
-    notFound: (id: number) => `Quiz session ${id} not found`,
     notBelongToQuiz: 'Quiz session does not belong to this quiz',
     invalidAction: 'Action provided is not a valid Action enum',
     notInLobbyState: 'Session is not in LOBBY state',
