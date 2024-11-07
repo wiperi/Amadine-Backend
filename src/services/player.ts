@@ -187,11 +187,9 @@ export function playerGetQuestionInfo(
   }
 
   const returnedQuestions = metadata.questions[questionPosition - 1];
-  const returnedAnswers = returnedQuestions.answers;
+  const returnedAnswers = returnedQuestions.answers.map(({ correct, ...rest }) => rest);
   // we don't want to return the correct key
-  returnedAnswers.forEach(answer => {
-    delete answer.correct;
-  });
+  // however we shouldn't delete it
 
   return {
     questionId: returnedQuestions.questionId,
