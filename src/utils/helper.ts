@@ -40,24 +40,6 @@ export async function tryCatch(fn: any, req: Request, res: Response, next: NextF
 }
 
 /**
- * Recursively searches for a target value within an object or its nested properties.
- *
- * @param obj - The object to search within.
- * @param target - The value to search for.
- * @returns True if the target is found, false otherwise.
- */
-export function recursiveFind(obj: any, target: any): boolean {
-  if (obj === target) return true;
-  for (const key in obj) {
-    if (obj[key] === target) return true;
-    if (typeof obj[key] === 'object' && obj[key] !== null) {
-      if (recursiveFind(obj[key], target)) return true;
-    }
-  }
-  return false;
-}
-
-/**
  * Generates a globally unique ID based on the specified type.
  *
  * @param type - The type of ID to generate.
@@ -92,11 +74,6 @@ export function getNewID(
   let dataSet: any[] = [];
 
   switch (type) {
-    case undefined:
-      console.log(
-        'This Id type is deprecated, you should use a specific type like user, quiz, question, etc.'
-      );
-      return numberInRange(1, 1000000000);
     case 'user':
       idGenerator = () => numberInRange(1 * Math.pow(10, 9), 10 * Math.pow(10, 9) - 1);
       return getUniqueID(idGenerator, data.users);

@@ -121,24 +121,12 @@ export class Question {
    * @param end The end index of the specified portion of the array. This is exclusive of the element at the index 'end'. If end is undefined, then the slice extends to the end of the array.
    * @returns
    */
-  getAnswersSlice(start?: number, end?: number): Answer[] {
-    return this.answers.slice(start, end);
-  }
 
   setAnswers(answers: Answer[]): void {
     answers.forEach(answer => {
       answer.colour = this.getRandomUniqueColor();
     });
     this.answers = answers;
-  }
-
-  addAnswer(answer: Answer): void {
-    answer.colour = this.getRandomUniqueColor();
-    this.answers.push(answer);
-  }
-
-  deleteAnswer(answerId: number): void {
-    this.answers = this.answers.filter(answer => answer.answerId !== answerId);
   }
 
   constructor(
