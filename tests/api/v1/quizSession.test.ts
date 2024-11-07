@@ -344,6 +344,13 @@ describe('PUT /v1/admin/quiz/:quizId/session/:sessionId', () => {
         expect(statusInfo.statusCode).toBe(200);
         expect(statusInfo.body.state).toBe('QUESTION_OPEN');
       });
+
+      test('QUESTION_COUNTDOWN -> wait for 3 seconds -> QUESTION_OPEN', async () => {
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        const statusInfo = quizSessionGetStatus(token, quizId, quizSessionId);
+        expect(statusInfo.statusCode).toBe(200);
+        expect(statusInfo.body.state).toBe('QUESTION_OPEN');
+      });
     });
 
     describe('invalid cases', () => {

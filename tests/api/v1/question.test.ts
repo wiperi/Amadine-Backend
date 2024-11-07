@@ -8,6 +8,7 @@ import {
   questionDuplicate,
   questionDelete,
   questionUpdate,
+  err,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -892,6 +893,13 @@ describe('PUT /v1/admin/quiz/:quizid/question/:questionid', () => {
       };
       const res = questionUpdate(token, quizId, questionId, updatedQuestionBody);
       expect(res.statusCode).toBe(400);
+
+      Array(10)
+        .fill(0)
+        .forEach((_, i) => {
+          updatedQuestionBody.answers.push({ answer: `Answer${i}`, correct: i > 5 ? true : false });
+        });
+      err(questionUpdate(token, quizId, questionId, updatedQuestionBody), 400);
     });
 
     test('Invalid question duration (not a positive number)', () => {

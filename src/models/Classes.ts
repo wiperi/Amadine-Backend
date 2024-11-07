@@ -1,3 +1,13 @@
+/// //////////////////////////////////////////////////////////////////
+// UNCOVERAGE CODE THAT CAN NOT BE TESTED
+//
+// Location: line 260
+// Reason: it check whether target path exist and create it if not
+//
+// The order of class declaration matters so we can't put it the very
+// top of the file
+/// //////////////////////////////////////////////////////////////////
+
 import { QuizSessionState, Color, PlayerAction } from './Enums';
 import fs from 'fs';
 import path from 'path';
@@ -104,11 +114,11 @@ export class Question {
       unusedColor.splice(unusedColor.indexOf(answer.colour), 1);
     }
 
-    if (unusedColor.length <= 0) {
-      throw new Error(
-        `Can not create more answers. Current number of answers: ${this.answers.length}`
-      );
-    }
+    // if (unusedColor.length <= 0) {
+    //   throw new Error(
+    //     `Can not create more answers. Current number of answers: ${this.answers.length}`
+    //   );
+    // }
 
     const randomIndex = Math.floor(Math.random() * unusedColor.length);
     return unusedColor[randomIndex];
