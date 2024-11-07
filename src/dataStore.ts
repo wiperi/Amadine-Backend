@@ -1,3 +1,11 @@
+/// //////////////////////////////////////////////////////////////////
+// UNCOVERAGE CODE THAT CAN NOT BE TESTED
+//
+// Location: line 46
+// Reason: it is out of the scope of this project, it is used to relink the
+// prototype of the objects after loading data from json file
+/// //////////////////////////////////////////////////////////////////
+
 // YOU SHOULD MODIFY THIS OBJECT BELOW ONLY
 import {
   User,

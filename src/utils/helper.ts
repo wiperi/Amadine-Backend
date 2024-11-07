@@ -1,43 +1,15 @@
 import { getData } from '@/dataStore';
 import isEmail from 'validator/lib/isEmail';
-import { User, Quiz, QuizSession, Player, UserSession } from '@/models/Classes';
+import { User, Quiz, QuizSession, Player } from '@/models/Classes';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { QuizSessionState } from '@/models/Enums';
 import { QuestionResultReturned, PlayerReturned } from '@/models/Types';
-/**
- * Hashes a string using bcrypt.
- */
-export async function hash(str: string): Promise<string> {
-  return await bcrypt.hash(str, 1);
-}
 
-/**
- * Compares a string with a hashed value.
- */
-export async function hashCompare(str: string, hash: string): Promise<boolean> {
-  return await bcrypt.compare(str, hash);
-}
-
-/**
- * Executes a function, if success, return the response
- * if error, catch it and pass to next middleware
- *
- * @param fn - The function to execute.
- * @param req - The Express request object.
- * @param res - The Express response object.
- * @param next - The Express next function.
- * @returns The JSON response if the function executes successfully.
- * @throws Passes any caught error to the next middleware.
- */
-export async function tryCatch(fn: any, req: Request, res: Response, next: NextFunction) {
-  try {
-    return res.json(await fn());
-  } catch (error) {
-    next(error);
-  }
-}
+/// //////////////////////////////////////////////////////////////////
+// START: UNCOVERAGE CODE THAT CAN NOT BE TESTED
+/// //////////////////////////////////////////////////////////////////
 
 /**
  * Generates a globally unique ID based on the specified type.
@@ -111,6 +83,43 @@ export function getNewID(
       return getUniqueID(idGenerator, data.players);
     default:
       throw new Error(ERROR_MESSAGES.INVALID_ID_TYPE);
+  }
+}
+
+/// //////////////////////////////////////////////////////////////////
+// END: UNCOVERAGE CODE THAT CAN NOT BE TESTED
+/// //////////////////////////////////////////////////////////////////
+
+/**
+ * Hashes a string using bcrypt.
+ */
+export async function hash(str: string): Promise<string> {
+  return await bcrypt.hash(str, 1);
+}
+
+/**
+ * Compares a string with a hashed value.
+ */
+export async function hashCompare(str: string, hash: string): Promise<boolean> {
+  return await bcrypt.compare(str, hash);
+}
+
+/**
+ * Executes a function, if success, return the response
+ * if error, catch it and pass to next middleware
+ *
+ * @param fn - The function to execute.
+ * @param req - The Express request object.
+ * @param res - The Express response object.
+ * @param next - The Express next function.
+ * @returns The JSON response if the function executes successfully.
+ * @throws Passes any caught error to the next middleware.
+ */
+export async function tryCatch(fn: any, req: Request, res: Response, next: NextFunction) {
+  try {
+    return res.json(await fn());
+  } catch (error) {
+    next(error);
   }
 }
 
@@ -231,8 +240,8 @@ export const find = {
     getData().quizzes.find(quiz => quiz.quizId === quizId),
   quizSession: (sessionId: number): QuizSession | undefined =>
     getData().quizSessions.find(session => session.sessionId === sessionId),
-  userSession: (sessionId: number): UserSession | undefined =>
-    getData().userSessions.find(session => session.sessionId === sessionId),
+  // userSession: (sessionId: number): UserSession | undefined =>
+  //   getData().userSessions.find(session => session.sessionId === sessionId),
   player: (playerId: number): Player | undefined =>
     getData().players.find(player => player.playerId === playerId),
   players: (sessionId: number): Player[] =>

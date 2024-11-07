@@ -1,3 +1,16 @@
+/// //////////////////////////////////////////////////////////////////
+// UNCOVERAGE CODE THAT CAN NOT BE TESTED
+//
+// The order of code matters so we can't put it the very top of the file
+//
+// Location: line 66
+// Reason: it is not a feature of this project
+//
+// Location: line 165
+// Reason: it is used to send 404 route not found error to our own express error handler middleware
+// so logger can log the error
+/// //////////////////////////////////////////////////////////////////
+
 import express, { json, Request, Response, NextFunction } from 'express';
 import { echo } from './utils/newecho';
 import morgan from 'morgan';
@@ -17,7 +30,6 @@ import router from './routes';
 import { loadData } from './dataStore';
 import { authorizeToken } from './services/auth';
 import { HttpError } from './utils/HttpError';
-import { cleanupLogsWeekly } from './utils/logCleanup';
 
 // Import winston logger for error logging
 import logger from './utils/logger';
@@ -30,9 +42,6 @@ const app = express();
 app.use(json());
 // Use middleware that allows for access from other domains
 app.use(cors());
-
-// Setup log log cleanup
-cleanupLogsWeekly();
 
 // serve static files
 app.use(express.static(config.publicPath));

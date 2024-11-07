@@ -132,12 +132,12 @@ export class StateMachine<S extends Token, A extends Token> {
         parsed.set(from, new Map());
       }
 
-      // If edge already exist, error
-      if (parsed.get(from).has(action)) {
-        throw new Error(
-          `State ${String(from)} has already an transition ${String(action)}, to ${String(to)}`
-        );
-      }
+      // // If edge already exist, error
+      // if (parsed.get(from).has(action)) {
+      //   throw new Error(
+      //     `State ${String(from)} has already an transition ${String(action)}, to ${String(to)}`
+      //   );
+      // }
 
       // Create edge
       parsed.get(from).set(action, { to, callBack });
