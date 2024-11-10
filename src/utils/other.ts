@@ -1,5 +1,5 @@
 import { getData, quizSessionTimers, setData } from '@/dataStore';
-import config from '@/_config';
+import config from '@/config';
 import fs from 'fs';
 import path from 'path';
 /**

@@ -1,5 +1,5 @@
 import request, { Response } from 'sync-request-curl';
-import config from '../../../src/_config';
+import config from '../../../src/config';
 
 const AUTH_URL = `${config.url}:${config.port}/v1/admin/auth`;
 const QUIZ_URL = `${config.url}:${config.port}/v1/admin/quiz`;

@@ -12,7 +12,7 @@ import {
   isValidUserName,
 } from '@/utils/helper';
 import jwt from 'jsonwebtoken';
-import config from '@/_config';
+import config from '@/config';
 import { Request, Response, NextFunction } from 'express';
 import { hash, hashCompare } from '@/utils/helper';
 

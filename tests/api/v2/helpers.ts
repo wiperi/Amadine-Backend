@@ -1,5 +1,5 @@
 import request from 'sync-request-curl';
-import config from '../../../src/_config';
+import config from '../../../src/config';
 import { parse, ParsedResponse } from '../v1/helpers';
 
 const AUTH_URL = `${config.url}:${config.port}/v2/admin/auth`;

@@ -1,7 +1,7 @@
 import { QuizSessionState, Color, PlayerAction } from './Enums';
 import fs from 'fs';
 import path from 'path';
-import config from '@/_config';
+import config from '@/config';
 import { getQuizSessionResultCSV } from '@/utils/helper';
 import { quizSessionTimers } from '@/dataStore';
 import { StateMachine } from './StateMachine';
