@@ -75,3 +75,7 @@ export type QuizSessionResultReturned = {
   usersRankedByScore: PlayerReturned[];
   questionResults: QuestionResultReturned[];
 };
+
+export type MessageParam = {
+  messageBody: string;
+};

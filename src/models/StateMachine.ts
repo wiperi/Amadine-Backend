@@ -1,211 +1,148 @@
-export type Transition<STATE, ACTION, CALLBACK> = {
-  from: STATE;
-  action: ACTION;
-  to: STATE;
-  callbacks: CALLBACK[];
+/**
+ * Valid types of the state and action
+ */
+type Token = string | number | symbol;
+
+/**
+ * A type representing a state transition.
+ * @template S - The type of the state
+ * @template A - The type of the action
+ */
+type Transition<S extends Token, A extends Token> = {
+  from: S;
+  action: A;
+  to: S;
+  callBack?: () => void | undefined;
 };
 
 /**
- * StateMachine class represents a finite state machine.
- * It manages state transitions based on defined actions and allows for callback execution.
- *
- * @template STATE - The type for states (string, number, or symbol)
- * @template ACTION - The type for actions (string, number, or symbol)
- * @template INSTANCE - The type of the instance object, callbacks can access instance and make side effects (default: object)
- * @template CALLBACK - The type of callback function (default: function with instance, from, action, and to parameters)
+ * A type representing the properties of the state machine.
+ * @template S - The type of the state
+ * @template A - The type of the action
  */
-export class StateMachine<
-  STATE extends string | number | symbol,
-  ACTION extends string | number | symbol,
-  INSTANCE extends object = undefined,
-  CALLBACK extends (instance: INSTANCE, from: STATE, action: ACTION, to: STATE) => unknown = (
-    instance: INSTANCE,
-    from: STATE,
-    action: ACTION,
-    to: STATE
-  ) => unknown,
-> {
-  // The instance object that the state machine operates on
-  protected instance: INSTANCE;
-  // The current state of the state machine
-  protected currentState: STATE;
+type Props<S extends Token, A extends Token> = {
+  state: S;
+  rules: Map<S, Map<A, { to: S; callBack: () => void | undefined }>>;
+  beforeStateChange?: (action: A) => void | undefined;
+  afterStateChange?: (action: A) => void | undefined;
+};
 
-  // Static map to store all transitions
-  protected static transitions: Map<
-    string | number | symbol,
-    Map<string | number | symbol, string | number | symbol>
-  >;
-
-  // Static map to store all callbacks
-  protected static callBackMap: Map<string, object[]>;
+/**
+ * A finite state machine.
+ * It manages state transitions based on defined actions and allows for callback execution.
+ * @template S - The type of the state
+ * @template A - The type of the action
+ */
+export class StateMachine<S extends Token, A extends Token> {
+  private _state: Props<S, A>['state'];
+  private rules: Props<S, A>['rules'];
+  private beforeStateChange?: Props<S, A>['beforeStateChange'];
+  private afterStateChange?: Props<S, A>['afterStateChange'];
 
   /**
-   * @param initial - The initial state
-   * @param transtions - Array of transitions
-   * @param instance - The instance object, callbacks can access instance and make side effects
-   *
-   * The transitions is a static property of the class,
-   * so a class have only one set of transitions, i.e. every instance of the class share the same transitions rules
-   * use StateMachine.parseTransitions to parse transitions from an array of objects
+   * Creates an instance of the state machine.
+   * @param props - The properties of the state machine.
+   * @example
+   * const stateMachine = new ST<string, string>({
+   *  state: 'A',
+   *  rules: ST.parse<string, string>({
+   *    { from: 'A', action: 'B', to: 'C' },
+   *    { from: 'A', action: 'D', to: 'E', callBack: () => console.log('D') },
+   *  }),
+   *  beforeStateChange: (action) => console.log('Before state change', action),
+   *  afterStateChange: (action) => console.log('After state change', action),
+   * });
    */
-  constructor(
-    initial: STATE,
-    transitions: Transition<STATE, ACTION, CALLBACK>[],
-    instance?: INSTANCE
-  ) {
-    this.instance = instance;
-    this.currentState = initial;
+  constructor(props: Props<S, A>) {
+    const { state, rules, beforeStateChange, afterStateChange } = props;
+    this._state = state;
+    this.rules = rules;
+    this.beforeStateChange = beforeStateChange;
+    this.afterStateChange = afterStateChange;
+  }
 
-    // Initialize static maps if they don't exist
-    if (!StateMachine.transitions && !StateMachine.callBackMap) {
-      StateMachine.transitions = new Map<STATE, Map<ACTION, STATE>>();
-      StateMachine.callBackMap = new Map<string, CALLBACK[]>();
+  /**
+   * Gets the current state of the state machine.
+   * @returns The current state.
+   */
+  get state() {
+    return this._state;
+  }
 
-      // Add each transition and callback
-      transitions.forEach(t => {
-        this.addTransition(t);
-        this.addCallBack(t);
-      });
+  /**
+   * Dispatches an action to the state machine, causing a state transition.
+   * @param action - The action to dispatch.
+   * @throws Error if the current state is final or the action is not valid for the current state.
+   */
+  dispatch(action: A) {
+    this.beforeStateChange?.(action);
+
+    const vertex = this.rules.get(this._state);
+    // No outbound edge from current state
+    if (!vertex) {
+      throw new Error(`State ${String(this._state)} is final`);
     }
-  }
-
-  /**
-   * Static method to parse transitions
-   * @param transitions - Array of transition objects
-   * @returns Array of Transition objects
-   */
-  static parseTransitions<
-    STATE extends string | number | symbol,
-    ACTION extends string | number | symbol,
-    INSTANCE extends object = undefined,
-    CALLBACK extends (instance: INSTANCE, from: STATE, action: ACTION, to: STATE) => unknown = (
-      instance: INSTANCE,
-      from: STATE,
-      action: ACTION,
-      to: STATE
-    ) => unknown,
-  >(
-    transitions: { from: STATE; action: ACTION; to: STATE; callbacks?: CALLBACK[] }[]
-  ): Transition<STATE, ACTION, CALLBACK>[] {
-    return transitions.map(t => ({
-      from: t.from,
-      action: t.action,
-      to: t.to,
-      callbacks: t.callbacks,
-    }));
-  }
-
-  /**
-   * Get the current state of the state machine
-   * @returns The current state
-   */
-  getCurrentState() {
-    return this.currentState;
-  }
-
-  /**
-   * Add a new transition to the state machine
-   * @param t - The transition to add
-   */
-  addTransition(t: Transition<STATE, ACTION, CALLBACK>) {
-    const { from, action, to } = t;
-
-    // If vertex not exist, create one
-    if (!StateMachine.transitions.has(from)) {
-      StateMachine.transitions.set(from, new Map<ACTION, STATE>());
-    }
-
-    // If edge already exist, error
-    if (StateMachine.transitions.get(from).has(action)) {
+    // Action not exist for current state
+    if (!vertex.has(action)) {
       throw new Error(
-        `State ${String(from)} has already an transition ${String(action)}, to ${String(to)}`
+        `Action ${String(action)} can not apply to current state ${String(this._state)}`
       );
     }
 
-    StateMachine.transitions.get(from)!.set(action, to);
+    const { to, callBack } = vertex.get(action);
+
+    this._state = to;
+    callBack && callBack();
+
+    this.afterStateChange?.(action);
   }
 
   /**
-   * Add a callback to the state machine
-   * @param t - The transition containing the callback
+   * Jumps to a specific state without any action, then triggers the afterStateChange callback.
+   * @param state - The state to jump to.
    */
-  addCallBack(t: Transition<STATE, ACTION, CALLBACK>) {
-    const { from, action, to, callbacks } = t;
-    const key = `${String(from)}>${String(action)}>${String(to)}`;
+  jumpTo(state: S) {
+    this._state = state;
 
-    if (!StateMachine.callBackMap.has(key)) {
-      StateMachine.callBackMap.set(key, []);
-    }
-
-    callbacks && StateMachine.callBackMap.get(key).push(...callbacks);
+    this.afterStateChange?.(null);
   }
 
   /**
-   * Dispatch an action to transition the state machine
-   * @param action - The action to dispatch
+   * Parses an array of transitions into a rules map.
+   * @param transitions - The array of transitions to parse.
+   * @returns The parsed rules map.
+   * @throws Error if a transition already exists for a state-action pair.
+   * @example
+   * const transitions = [
+   *  { from: 'A', action: 'B', to: 'C' },
+   *  { from: 'A', action: 'D', to: 'E', callBack: () => console.log('D') },
+   * ];
+   * const rules = ST.parse<string, string>(transitions);
    */
-  dispatch(action: ACTION) {
-    const currentVertex = StateMachine.transitions.get(this.currentState);
-    if (!currentVertex) {
-      // There is no out edge of current state
-      throw new Error(`State ${String(this.currentState)} is final`);
-    }
+  static parse<S extends Token, A extends Token>(
+    transitions: Transition<S, A>[]
+  ): Props<S, A>['rules'] {
+    const parsed = new Map<S, Map<A, { to: S; callBack:() => void | undefined }>>();
 
-    if (!currentVertex.has(action)) {
-      // action can not apply to current state
-      throw new Error(
-        `Action ${String(action)} can not apply to current state ${String(this.currentState)}`
-      );
-    }
+    transitions.forEach(t => {
+      const { from, action, to, callBack } = t;
 
-    const next = currentVertex.get(action) as STATE;
-    this.triggerCallBack(this.currentState, action, next);
+      // If vertex not exist, create one
+      if (!parsed.has(from)) {
+        parsed.set(from, new Map());
+      }
 
-    this.currentState = next;
-  }
+      // // If edge already exist, error
+      // if (parsed.get(from).has(action)) {
+      //   throw new Error(
+      //     `State ${String(from)} has already an transition ${String(action)}, to ${String(to)}`
+      //   );
+      // }
 
-  /**
-   * Check if an action can be dispatched from a given state
-   * @param from - The state to dispatch from
-   * @param action - The action to dispatch
-   * @returns The next state if the action can be dispatched, undefined otherwise
-   */
-  canDispatch(from: STATE, action: ACTION): STATE | undefined {
-    const currentVertex = StateMachine.transitions.get(from);
-    if (!currentVertex) {
-      // There is no out edge of current state
-      throw new Error(`State ${String(from)} is final`);
-    }
-
-    if (!currentVertex.has(action)) {
-      // action can not apply to current state
-      throw new Error(`Action ${String(action)} can not apply to current state ${String(from)}`);
-    }
-
-    const next = currentVertex.get(action) as STATE;
-    this.triggerCallBack(from, action, next);
-    return next;
-  }
-
-  /**
-   * Jump to a specific state
-   * @param state - The state to jump to
-   */
-  jumpTo(state: STATE) {
-    this.currentState = state;
-  }
-
-  /**
-   * Trigger callbacks associated with a transition
-   * @param from - The state transitioning from
-   * @param action - The action causing the transition
-   * @param to - The state transitioning to
-   */
-  protected triggerCallBack(from: STATE, action: ACTION, to: STATE) {
-    const key = `${String(from)}>${String(action)}>${String(to)}`;
-
-    StateMachine.callBackMap.get(key)?.forEach((f: CALLBACK) => {
-      f(this.instance, from, action, to);
+      // Create edge
+      parsed.get(from).set(action, { to, callBack });
     });
+
+    return parsed;
   }
 }

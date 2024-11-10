@@ -1,9 +1,10 @@
 import { QuizSessionState, Color, PlayerAction } from './Enums';
-import { StateMachine } from './StateMachine';
 import fs from 'fs';
 import path from 'path';
 import config from '@/_config';
 import { getQuizSessionResultCSV } from '@/utils/helper';
+import { quizSessionTimers } from '@/dataStore';
+import { StateMachine } from './StateMachine';
 const {
   LOBBY,
   QUESTION_COUNTDOWN,
@@ -95,7 +96,7 @@ export class Question {
   thumbnailUrl: string = '#';
   points: number;
 
-  private answers: Answer[] = [];
+  answers: Answer[] = [];
 
   private getRandomUniqueColor(): Color {
     const unusedColor: Color[] = Object.values(Color);
@@ -111,17 +112,6 @@ export class Question {
 
     const randomIndex = Math.floor(Math.random() * unusedColor.length);
     return unusedColor[randomIndex];
-  }
-
-  /**
-   * Return a copy of seleciton of answers
-   *
-   * @param start The beginning index of the specified portion of the array. If start is undefined, then the slice begins at index 0.
-   * @param end The end index of the specified portion of the array. This is exclusive of the element at the index 'end'. If end is undefined, then the slice extends to the end of the array.
-   * @returns
-   */
-  getAnswersSlice(start?: number, end?: number): Answer[] {
-    return this.answers.slice(start, end);
   }
 
   setAnswers(answers: Answer[]): void {
@@ -187,7 +177,7 @@ export class QuizSession {
   atQuestion: number = 0; // Question index starting from 1, 0 means not started
   timeCreated: number = Math.floor(Date.now() / 1000);
 
-  private static transitions = StateMachine.parseTransitions<QuizSessionState, PlayerAction>([
+  private static transitions = StateMachine.parse<QuizSessionState, PlayerAction>([
     { from: LOBBY, action: GO_TO_END, to: END },
     { from: LOBBY, action: NEXT_QUESTION, to: QUESTION_COUNTDOWN },
     { from: QUESTION_COUNTDOWN, action: SKIP_COUNTDOWN, to: QUESTION_OPEN },
@@ -204,17 +194,77 @@ export class QuizSession {
     { from: ANSWER_SHOW, action: GO_TO_END, to: END },
   ]);
 
-  private stateMachine = new StateMachine<QuizSessionState, PlayerAction>(
-    QuizSessionState.LOBBY,
-    QuizSession.transitions
-  );
+  private stateMachine = new StateMachine<QuizSessionState, PlayerAction>({
+    state: LOBBY,
+    rules: QuizSession.transitions,
+    beforeStateChange: action => {
+      if (this.atQuestion === this.metadata.questions.length && action === NEXT_QUESTION) {
+        throw new Error('Already the last question');
+      }
+    },
+    afterStateChange: () => {
+      if (quizSessionTimers.has(this.sessionId)) {
+        clearTimeout(quizSessionTimers.get(this.sessionId));
+      }
+
+      if (this.state === QUESTION_COUNTDOWN) {
+        this.atQuestion++;
+        const currentQuestionCountdown = this.atQuestion;
+        quizSessionTimers.set(
+          this.sessionId,
+          setTimeout(() => {
+            if (this.atQuestion === currentQuestionCountdown && this.state === QUESTION_COUNTDOWN) {
+              this.dispatch(SKIP_COUNTDOWN);
+            }
+          }, 3000)
+        );
+      } else if (this.state === QUESTION_OPEN) {
+        // Get question duration
+        const duration = this.metadata.questions[this.atQuestion - 1].duration;
+        // Set time when question started
+        this.timeCurrentQuestionStarted = Math.floor(Date.now() / 1000);
+        // Store current question position
+        const currentQuestionOpen = this.atQuestion;
+
+        quizSessionTimers.set(
+          this.sessionId,
+          setTimeout(() => {
+            // If session is still on the same question and hasn't changed state
+            if (this.atQuestion === currentQuestionOpen && this.state === QUESTION_OPEN) {
+              this.stateMachine.jumpTo(QUESTION_CLOSE);
+              this.timeCurrentQuestionStarted = undefined;
+            }
+          }, duration * 1000)
+        );
+      } else if (this.state === END) {
+        this.atQuestion = 0;
+        this.timeCurrentQuestionStarted = undefined;
+      } else if (this.state === FINAL_RESULTS) {
+        this.atQuestion = 0;
+        this.timeCurrentQuestionStarted = undefined;
+
+        // Get csv result
+        const result = getQuizSessionResultCSV(this.quizId, this.sessionId);
+        const filePath = path.join(
+          config.resultsPath,
+          `quiz${this.quizId}_session${this.sessionId}.csv`
+        );
+        // If path not exist, create directory recursively
+        if (!fs.existsSync(config.resultsPath)) {
+          fs.mkdirSync(config.resultsPath, { recursive: true });
+        }
+        // Write result to file
+        fs.writeFileSync(filePath, result);
+      }
+    },
+  });
 
   /**
    * Gets the current state of the quiz session.
    * @returns The current state of the quiz session.
    */
-  state(): QuizSessionState {
-    return this.stateMachine.getCurrentState();
+  get state() {
+    return this.stateMachine.state;
   }
 
   /**
@@ -224,58 +274,14 @@ export class QuizSession {
    */
   dispatch(action: PlayerAction): void {
     this.stateMachine.dispatch(action);
-
-    if (this.state() === QUESTION_COUNTDOWN) {
-      this.atQuestion++;
-      const currentQuestion = this.atQuestion;
-      setTimeout(() => {
-        if (this.atQuestion === currentQuestion && this.state() === QUESTION_COUNTDOWN) {
-          this.stateMachine.jumpTo(QUESTION_OPEN);
-        }
-      }, 3000);
-    }
-
-    if (this.state() === QUESTION_OPEN) {
-      // Get question duration
-      const duration = this.metadata.questions[this.atQuestion - 1].duration;
-      // Set time when question started
-      this.timeCurrentQuestionStarted = Math.floor(Date.now() / 1000);
-      // Store current question position
-      const currentQuestion = this.atQuestion;
-      setTimeout(() => {
-        // If session is still on the same question and hasn't changed state
-        if (this.atQuestion === currentQuestion && this.state() === QUESTION_OPEN) {
-          this.stateMachine.jumpTo(QUESTION_CLOSE);
-          this.timeCurrentQuestionStarted = undefined;
-        }
-      }, duration * 1000);
-    }
-
-    if (this.state() === END) {
-      this.atQuestion = 0;
-      this.timeCurrentQuestionStarted = undefined;
-    }
-
-    if (this.state() === FINAL_RESULTS) {
-      // Save results to file
-      const result = getQuizSessionResultCSV(this.quizId, this.sessionId);
-      const filePath = path.join(
-        config.resultsPath,
-        `quiz${this.quizId}_session${this.sessionId}.csv`
-      );
-      // If results not exist , create file
-      if (!fs.existsSync(config.resultsPath)) {
-        fs.mkdirSync(config.resultsPath, { recursive: true });
-      }
-      fs.writeFileSync(filePath, result);
-    }
   }
 
   constructor(sessionId: number, quiz: Quiz, autoStartNum: number) {
     this.sessionId = sessionId;
     this.quizId = quiz.quizId;
 
-    this.metadata = quiz;
+    this.metadata = JSON.parse(JSON.stringify(quiz));
+    Object.setPrototypeOf(this.metadata, Quiz.prototype);
 
     this.autoStartNum = autoStartNum;
   }

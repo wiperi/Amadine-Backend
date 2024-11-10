@@ -64,7 +64,7 @@ beforeEach(() => {
   });
 
   // Create a quiz session
-  const createQuizSessionRes = quizSessionCreate(token, quizId, 2);
+  const createQuizSessionRes = quizSessionCreate(token, quizId, 5);
   expect(createQuizSessionRes.statusCode).toBe(200);
   quizSessionId = createQuizSessionRes.body.sessionId;
 });
@@ -137,6 +137,22 @@ describe('POST /v1/player/join', () => {
       const getInfoRes = quizSessionGetStatus(token, quizId, quizSessionId);
       expect(getInfoRes.statusCode).toBe(200);
       expect(getInfoRes.body.players).toStrictEqual(['Peter Griffin', 'Glen Quagmire']);
+    });
+
+    test('when number of player is reach auto start number, state become QUESTION_COUNTDOWN', () => {
+      const peter = playerJoinSession(quizSessionId, 'Peter Griffin');
+      const quagmire = playerJoinSession(quizSessionId, 'Glen Quagmire');
+      const meg = playerJoinSession(quizSessionId, 'Meg Griffin');
+      const chris = playerJoinSession(quizSessionId, 'Chris Griffin');
+      const brian = playerJoinSession(quizSessionId, 'Brian Griffin');
+      expect(peter.statusCode).toBe(200);
+      expect(quagmire.statusCode).toBe(200);
+      expect(meg.statusCode).toBe(200);
+      expect(chris.statusCode).toBe(200);
+      expect(brian.statusCode).toBe(200);
+      const stateRes = quizSessionGetStatus(token, quizId, quizSessionId);
+      expect(stateRes.statusCode).toBe(200);
+      expect(stateRes.body.state).toStrictEqual('QUESTION_COUNTDOWN');
     });
   });
 });
@@ -221,23 +237,17 @@ describe('PUT /v1/player/{playerid}/question/{questionposition}/answer', () => {
     });
 
     test('answer IDs are not valid for this particular question', () => {
-      const invalidAnswerIds = [999999, 1000000];
-      const res = playerSubmitAnswer(invalidAnswerIds, playerId, 1);
-      expect(res.statusCode).toBe(400);
-      expect(res.body).toStrictEqual(ERROR);
+      err(playerSubmitAnswer([-1, -999], playerId, 1), 400);
+      err(playerSubmitAnswer([answerIds[0], -1], playerId, 1), 400);
+      err(playerSubmitAnswer([...answerIds, -1], playerId, 1), 400);
     });
 
     test('duplicate answer IDs provided', () => {
-      const duplicateAnswerIds = [answerIds[0], answerIds[0]];
-      const res = playerSubmitAnswer(duplicateAnswerIds, playerId, 1);
-      expect(res.statusCode).toBe(400);
-      expect(res.body).toStrictEqual(ERROR);
+      err(playerSubmitAnswer([answerIds[0], answerIds[0]], playerId, 1), 400);
     });
 
     test('less than 1 answer ID submitted', () => {
-      const res = playerSubmitAnswer([], playerId, 1);
-      expect(res.statusCode).toBe(400);
-      expect(res.body).toStrictEqual(ERROR);
+      err(playerSubmitAnswer([], playerId, 1), 400);
     });
   });
 });
@@ -252,7 +262,7 @@ describe('GET /v1/player/:playerId/question/:questionposition', () => {
 
   describe('invalid cases', () => {
     test('playerId does not refer to a valid player', () => {
-      const errorRes = playerGetQuestionInfo(playerId + 1, 0);
+      const errorRes = playerGetQuestionInfo(playerId + 1, 1);
       expect(errorRes.statusCode).toBe(400);
       expect(errorRes.body).toStrictEqual(ERROR);
     });
@@ -273,9 +283,20 @@ describe('GET /v1/player/:playerId/question/:questionposition', () => {
     test('player is not in PLAYING state', () => {
       const res = quizSessionUpdateState(token, quizId, quizSessionId, 'END');
       expect(res.statusCode).toBe(200);
-      const errorRes = playerGetQuestionInfo(playerId, 1);
+      const errorRes = playerGetQuestionInfo(playerId, 0);
       expect(errorRes.statusCode).toBe(400);
       expect(errorRes.body).toStrictEqual(ERROR);
+    });
+
+    // test for session is not currently on this question
+    test('session is not currently on this question', () => {
+      quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+      quizSessionUpdateState(token, quizId, quizSessionId, 'SKIP_COUNTDOWN');
+      quizSessionUpdateState(token, quizId, quizSessionId, 'GO_TO_ANSWER');
+      quizSessionUpdateState(token, quizId, quizSessionId, 'NEXT_QUESTION');
+      const res = playerGetQuestionInfo(playerId, 1);
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toStrictEqual(ERROR);
     });
   });
 
@@ -693,7 +714,7 @@ describe('GET /v1/player/:playerId', () => {
       res = playerGetStatusInSession(playerId);
       expect(res.statusCode).toBe(200);
       expect(res.body.state).toBe('FINAL_RESULTS');
-      expect(res.body.atQuestion).toBe(2);
+      expect(res.body.atQuestion).toBe(0);
 
       // Step 8: End the session
       quizSessionUpdateState(token, quizId, quizSessionId, 'END');
@@ -830,7 +851,7 @@ describe('GET /v1/player/:playerid/results', () => {
       // player4: 0 points
 
       // Create a new quizSession
-      const createQuizSessionRes = quizSessionCreate(token, quizId, 2);
+      const createQuizSessionRes = quizSessionCreate(token, quizId, 5);
       expect(createQuizSessionRes.statusCode).toBe(200);
       const sessionId = createQuizSessionRes.body.sessionId;
 

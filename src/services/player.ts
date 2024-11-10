@@ -1,11 +1,12 @@
 import { getData, setData } from '@/dataStore';
 import { QuizSession, Player, Message } from '@/models/Classes';
-import { QuizSessionState } from '@/models/Enums';
+import { QuizSessionState, PlayerAction } from '@/models/Enums';
 import {
   EmptyObject,
   QuizSessionResultReturned,
   MessagesReturned,
   QuestionResultReturned,
+  MessageParam,
 } from '@/models/Types';
 import { ERROR_MESSAGES } from '@/utils/errors';
 import {
@@ -30,7 +31,7 @@ export function PlayerJoinSession(sessionId: number, name: string): { playerId: 
     throw new HttpError(400, ERROR_MESSAGES.INVALID_SESSION_ID);
   }
 
-  if (quizSession.state() !== QuizSessionState.LOBBY) {
+  if (quizSession.state !== QuizSessionState.LOBBY) {
     throw new HttpError(400, ERROR_MESSAGES.SESSION_NOT_IN_LOBBY_STATE);
   }
 
@@ -44,6 +45,10 @@ export function PlayerJoinSession(sessionId: number, name: string): { playerId: 
   const player: Player = new Player(playerId, sessionId, name);
 
   getData().players.push(player);
+
+  if (find.players(sessionId).length >= quizSession.autoStartNum) {
+    quizSession.dispatch(PlayerAction.NEXT_QUESTION);
+  }
 
   setData();
 
@@ -67,7 +72,7 @@ export function adminPlayerSubmitAnswers(
     throw new HttpError(400, errMessages.quizSession.notFound(player.quizSessionId));
   }
 
-  if (quizSession.state() !== QuizSessionState.QUESTION_OPEN) {
+  if (quizSession.state !== QuizSessionState.QUESTION_OPEN) {
     throw new HttpError(400, errMessages.quizSession.questionNotOpen);
   }
 
@@ -91,17 +96,19 @@ export function adminPlayerSubmitAnswers(
     );
   }
 
-  // Answer IDs are not valid for this particular question
-  const questionIndex = questionPosition - 1;
-  const question = quizSession.metadata.questions[questionIndex];
-  if (!question.getAnswersSlice().some(a => answerIds.includes(a.answerId))) {
-    throw new HttpError(400, errMessages.question.answerIdsInvalid);
-  }
-
   // There are duplicate answer IDs provided
   const answerIdsSet = new Set(answerIds);
   if (answerIds.length !== answerIdsSet.size) {
     throw new HttpError(400, errMessages.question.duplicateAnswerIds);
+  }
+
+  // Answer IDs are not valid for this particular question
+  const questionIndex = questionPosition - 1;
+  const question = quizSession.metadata.questions[questionIndex];
+  const validIdSet = new Set(question.answers.map(a => a.answerId));
+
+  if (!answerIds.every(id => validIdSet.has(id))) {
+    throw new HttpError(400, errMessages.question.answerIdsInvalid);
   }
 
   // Less than 1 answer ID was submitted
@@ -114,9 +121,7 @@ export function adminPlayerSubmitAnswers(
   const timeSpent = now - quizSession.timeCurrentQuestionStarted;
 
   // Check if user is wrong, if user submit any answer that is not correct
-  const userIsWrong = question
-    .getAnswersSlice()
-    .some(a => answerIdsSet.has(a.answerId) && !a.correct);
+  const userIsWrong = question.answers.some(a => answerIdsSet.has(a.answerId) && !a.correct);
 
   const submit = player.submits.find(s => s.questionId === question.questionId);
 
@@ -161,9 +166,8 @@ export function playerGetQuestionInfo(
   }
   // If question position is not valid for the session this player is in
   const quizSession = find.quizSession(player.quizSessionId);
-  const quizId = quizSession.quizId;
-  const quiz = find.quiz(quizId);
-  if (questionPosition < 0 || questionPosition > quiz.questions.length) {
+  const metadata = quizSession.metadata;
+  if (questionPosition < 0 || questionPosition > metadata.questions.length) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_POSITION);
   }
 
@@ -172,7 +176,7 @@ export function playerGetQuestionInfo(
   }
 
   // Session is in LOBBY, QUESTION_COUNTDOWN, FINAL_RESULTS or END state
-  const quizSessionState = quizSession.state();
+  const quizSessionState = quizSession.state;
   if (
     quizSessionState === QuizSessionState.LOBBY ||
     quizSessionState === QuizSessionState.QUESTION_COUNTDOWN ||
@@ -182,12 +186,10 @@ export function playerGetQuestionInfo(
     throw new HttpError(400, ERROR_MESSAGES.SESSION_STATE_INVALID);
   }
 
-  const returnedQuestions = quiz.questions[questionPosition - 1];
-  const returnedAnswers = returnedQuestions.getAnswersSlice();
+  const returnedQuestions = metadata.questions[questionPosition - 1];
+  const returnedAnswers = returnedQuestions.answers.map(({ correct, ...rest }) => rest);
   // we don't want to return the correct key
-  returnedAnswers.forEach(answer => {
-    delete answer.correct;
-  });
+  // however we shouldn't delete it
 
   return {
     questionId: returnedQuestions.questionId,
@@ -199,19 +201,19 @@ export function playerGetQuestionInfo(
   };
 }
 
-export function playerPostMessage(playerId: number, message: string): EmptyObject {
+export function playerPostMessage(playerId: number, message: MessageParam): EmptyObject {
   const player = find.player(playerId);
   if (!player) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_PLAYER_ID);
   }
 
-  if (!isValidMessageBody(message)) {
+  if (!isValidMessageBody(message.messageBody)) {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_MESSAGE_BODY);
   }
 
   const quizSession = find.quizSession(player.quizSessionId);
 
-  const msg = new Message(playerId, player.name, message);
+  const msg = new Message(playerId, player.name, message.messageBody);
 
   quizSession.messages.push(msg);
 
@@ -249,7 +251,7 @@ export function playerGetSessionStatus(playerId: number): {
     throw new HttpError(400, ERROR_MESSAGES.INVALID_PLAYER_ID);
   }
   const quizSession = find.quizSession(player.quizSessionId);
-  const sessionState = quizSession.state();
+  const sessionState = quizSession.state;
   const numQuestions = quizSession.metadata.questions.length;
   const atQuestion = quizSession.atQuestion;
   return {
@@ -274,7 +276,7 @@ export function playerGetQuestionResult(
     throw new HttpError(400, ERROR_MESSAGES.INVALID_POSITION);
   }
   // Session is not in ANSWER_SHOW state
-  if (quizSession.state() !== QuizSessionState.ANSWER_SHOW) {
+  if (quizSession.state !== QuizSessionState.ANSWER_SHOW) {
     throw new HttpError(400, ERROR_MESSAGES.SESSION_STATE_INVALID);
   }
   // If session is not currently on this question
@@ -294,7 +296,7 @@ export function playerGetSessionResult(playerId: number): QuizSessionResultRetur
 
   // if session is not in FINAL_RESULTS state
   const quizSession = find.quizSession(player.quizSessionId);
-  if (quizSession.state() !== QuizSessionState.FINAL_RESULTS) {
+  if (quizSession.state !== QuizSessionState.FINAL_RESULTS) {
     throw new HttpError(400, ERROR_MESSAGES.SESSION_STATE_INVALID);
   }
 

@@ -151,7 +151,7 @@ describe('POST /v2/admin/quiz/:quizid/transfer', () => {
     quizId = createQuizRes.body.quizId; // Store quizId for reuse
   });
 
-  describe('invalid cases', () => {
+  describe('valid cases', () => {
     test('successfully transfer quiz to another user', () => {
       // Register another user to transfer the quiz to
       const newUserRes = userRegister('newuser@example.com', 'ValidPass123', 'Jane', 'Smith');
@@ -167,6 +167,34 @@ describe('POST /v2/admin/quiz/:quizid/transfer', () => {
       const quizDetails = quizGetDetails(newToken, quizId);
       expect(quizDetails.statusCode).toBe(200);
       expect(quizDetails.body.authUserId).toBe(newUserRes.body.userId);
+    });
+  });
+
+  describe('invalid cases', () => {
+    test('quiz is not in END state', () => {
+      // create a session for quiz that is not in END state
+      const createQuestionRes = questionCreate(token, quizId, {
+        question: 'Are you my master?',
+        duration: 60,
+        points: 6,
+        answers: [
+          { answer: 'Yes', correct: true },
+          { answer: 'No', correct: false },
+          { answer: 'Maybe', correct: false },
+        ],
+        thumbnailUrl: 'http://google.com/some/image/path.jpg',
+      });
+      expect(createQuestionRes.statusCode).toBe(200);
+      const res2 = quizSessionCreate(token, quizId, 2);
+      expect(res2.statusCode).toBe(200);
+
+      const newUserRes = userRegister('newuser@example.com', 'ValidPass123', 'Jane', 'Smith');
+      expect(newUserRes.statusCode).toBe(200);
+
+      // Transfer the quiz to the new user
+      const transferRes = quizTransfer(token, quizId, 'newuser@example.com');
+      expect(transferRes.statusCode).toBe(400);
+      expect(transferRes.body).toStrictEqual(ERROR);
     });
   });
 });

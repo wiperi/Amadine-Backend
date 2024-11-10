@@ -9,6 +9,8 @@ import {
   quizGetDetails,
   quizCreate,
   questionCreate,
+  succ,
+  err,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -193,17 +195,30 @@ describe('POST /v1/admin/auth/logout', () => {
 
   describe('valid cases', () => {
     test('successful logout', async () => {
-      const res = userLogout(token);
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toEqual({});
+      const res = succ(userLogout(token));
+      expect(res).toEqual({});
 
-      // Verify that the token is no longer valid
-      // - Since jet generation is based on time, we need to wait for a second to ensure the new token is different to old one
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      err(userGetDetails(token), 401);
+
       const loginRes = userLogin('test@example.com', 'ValidPass123');
       expect(loginRes.statusCode).toBe(200);
       expect(loginRes.body).toHaveProperty('token');
       expect(loginRes.body.token).not.toBe(token);
+    });
+
+    test('one user logout does not affect other users', () => {
+      const newTokens = new Array(10).fill(0).map((_, i) => {
+        const { token } = succ(userRegister(`test${i}@example.com`, 'ValidPass123', 'John', 'Doe'));
+        return token;
+      });
+
+      succ(userLogout(token));
+
+      newTokens.forEach(token => {
+        succ(userGetDetails(token));
+      });
+
+      err(userGetDetails(token), 401);
     });
   });
 
@@ -307,6 +322,18 @@ describe('POST /v1/admin/auth/login', () => {
   });
 
   describe('invalid cases', () => {
+    test('missing email', () => {
+      const res = userLogin('', 'GlenPassword123');
+      expect(res.body).toStrictEqual(ERROR);
+      expect(res.statusCode).toStrictEqual(400);
+    });
+
+    test('missing password', () => {
+      const res = userLogin('goodemail@gmail.com', '');
+      expect(res.body).toStrictEqual(ERROR);
+      expect(res.statusCode).toStrictEqual(400);
+    });
+
     test('Email does not exist', () => {
       const res = userLogin('petergriffin@gmail.com', 'PumpkinEater123');
       expect(res.body).toStrictEqual(ERROR);

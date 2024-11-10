@@ -1,4 +1,4 @@
-import { getData, setData } from '@/dataStore';
+import { getData, quizSessionTimers, setData } from '@/dataStore';
 import config from '@/_config';
 import fs from 'fs';
 import path from 'path';
@@ -12,6 +12,9 @@ export function clear(): Record<string, never> {
   data.userSessions = [];
   data.quizSessions = [];
   data.players = [];
+
+  quizSessionTimers.forEach(timer => clearTimeout(timer));
+  quizSessionTimers.clear();
 
   // Remove all files in results path
   const resultsPath = config.resultsPath;

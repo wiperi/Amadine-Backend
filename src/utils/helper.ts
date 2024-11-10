@@ -92,11 +92,6 @@ export function getNewID(
   let dataSet: any[] = [];
 
   switch (type) {
-    case undefined:
-      console.log(
-        'This Id type is deprecated, you should use a specific type like user, quiz, question, etc.'
-      );
-      return numberInRange(1, 1000000000);
     case 'user':
       idGenerator = () => numberInRange(1 * Math.pow(10, 9), 10 * Math.pow(10, 9) - 1);
       return getUniqueID(idGenerator, data.users);
@@ -117,7 +112,7 @@ export function getNewID(
       dataSet = [];
       for (const quiz of data.quizzes) {
         for (const question of quiz.questions) {
-          for (const answer of question.getAnswersSlice()) {
+          for (const answer of question.answers) {
             dataSet.push(answer);
           }
         }
@@ -248,17 +243,6 @@ export function isValidQuizDescription(quizDescription: string): boolean {
   return quizDescription.length <= 100;
 }
 
-/**
- * Checks if the given user ID is valid by verifying its presence in the user list.
- *
- * @param id
- * @returns Returns true if the user ID is found in the user list, otherwise false.
- */
-export function isValidUserId(id: number): boolean {
-  const userList = getData().users;
-  return userList.some(user => user.userId === id);
-}
-
 export const find = {
   user: (userId: number): User | undefined => getData().users.find(user => user.userId === userId),
   quiz: (quizId: number): Quiz | undefined =>
@@ -269,6 +253,8 @@ export const find = {
     getData().userSessions.find(session => session.sessionId === sessionId),
   player: (playerId: number): Player | undefined =>
     getData().players.find(player => player.playerId === playerId),
+  players: (sessionId: number): Player[] =>
+    getData().players.filter(player => player.quizSessionId === sessionId),
 };
 
 /**
@@ -302,7 +288,7 @@ export function getActiveQuizSession(quizId: number): number[] {
   const quizSessions = data.quizSessions.filter(session => session.quizId === quizId);
 
   return quizSessions
-    .filter(session => session.state() !== QuizSessionState.END)
+    .filter(session => session.state !== QuizSessionState.END)
     .map(session => session.sessionId)
     .sort((a, b) => a - b);
 }
@@ -313,7 +299,7 @@ export function getInactiveQuizSession(quizId: number): number[] {
   const quizSessions = data.quizSessions.filter(session => session.quizId === quizId);
 
   return quizSessions
-    .filter(session => session.state() === QuizSessionState.END)
+    .filter(session => session.state === QuizSessionState.END)
     .map(session => session.sessionId)
     .sort((a, b) => a - b);
 }
@@ -332,7 +318,7 @@ export function isValidImgUrl(imgUrl: string): boolean {
 
 export function isQuizHasOngoingSessions(quizId: number): boolean {
   return (
-    getData().quizSessions.filter(s => s.quizId === quizId && s.state() !== QuizSessionState.END)
+    getData().quizSessions.filter(s => s.quizId === quizId && s.state !== QuizSessionState.END)
       .length > 0
   );
 }

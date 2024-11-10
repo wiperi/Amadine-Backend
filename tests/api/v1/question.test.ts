@@ -8,6 +8,7 @@ import {
   questionDuplicate,
   questionDelete,
   questionUpdate,
+  err,
 } from './helpers';
 
 const ERROR = { error: expect.any(String) };
@@ -247,6 +248,22 @@ describe('POST /v1/admin/quiz/:quizId/question', () => {
 
       const res = questionCreate('', quizId, questionBody);
       expect(res.statusCode).toBe(401);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
+    test('invalid quizId', () => {
+      const questionBody = {
+        question: 'What is the capital of Germany?',
+        duration: 60,
+        points: 5,
+        answers: [
+          { answer: 'Berlin', correct: true },
+          { answer: 'Munich', correct: false },
+        ],
+      };
+
+      const res = questionCreate(token, 0, questionBody);
+      expect(res.statusCode).toBe(403);
       expect(res.body).toStrictEqual(ERROR);
     });
 
@@ -784,6 +801,21 @@ describe('PUT /v1/admin/quiz/:quizid/question/:questionid', () => {
   });
 
   describe('Error Cases', () => {
+    test('invalid quizId', () => {
+      const updatedQuestionBody = {
+        question: 'What is the largest country in the world?',
+        duration: 120,
+        points: 7,
+        answers: [
+          { answer: 'Russia', correct: true },
+          { answer: 'Canada', correct: false },
+        ],
+      };
+      const res = questionUpdate(token, 0, questionId, updatedQuestionBody);
+      expect(res.statusCode).toBe(403);
+      expect(res.body).toStrictEqual(ERROR);
+    });
+
     test('Invalid questionId does not refer to a valid question within this quiz', () => {
       const updatedQuestionBody = {
         question: 'What is the largest country in the world?',
@@ -861,6 +893,13 @@ describe('PUT /v1/admin/quiz/:quizid/question/:questionid', () => {
       };
       const res = questionUpdate(token, quizId, questionId, updatedQuestionBody);
       expect(res.statusCode).toBe(400);
+
+      Array(10)
+        .fill(0)
+        .forEach((_, i) => {
+          updatedQuestionBody.answers.push({ answer: `Answer${i}`, correct: i > 5 ? true : false });
+        });
+      err(questionUpdate(token, quizId, questionId, updatedQuestionBody), 400);
     });
 
     test('Invalid question duration (not a positive number)', () => {
