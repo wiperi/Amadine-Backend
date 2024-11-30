@@ -122,7 +122,7 @@ export function getNewID(
       idGenerator = () => numberInRange(5 * Math.pow(10, 11), 10 * Math.pow(10, 11) - 1);
       return getUniqueID(idGenerator, data.userSessions);
     case 'quiz session':
-      idGenerator = () => numberInRange(1 * Math.pow(10, 12), 5 * Math.pow(10, 12) - 1);
+      idGenerator = () => numberInRange(10 ** 4, 10 ** 5 - 1);
       return getUniqueID(idGenerator, data.quizSessions);
     case 'player':
       idGenerator = () => numberInRange(5 * Math.pow(10, 12), 10 * Math.pow(10, 12) - 1);
