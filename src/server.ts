@@ -66,7 +66,7 @@ app.use(
 );
 
 const PORT: number = parseInt(process.env.PORT || config.port);
-const HOST: string = process.env.IP || '127.0.0.1';
+const HOST: string = process.env.IP || '0.0.0.0';
 
 // ====================================================================
 //  ================= WORK IS DONE BELOW THIS LINE ===================
